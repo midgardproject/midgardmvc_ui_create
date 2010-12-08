@@ -1,0 +1,16 @@
+version: 10.12.0devel
+process_injector: midgardmvc_ui_create_injector
+authors:
+    bergie:
+        name: Henri Bergius
+        email: henri.bergius@iki.fi
+        url: http://bergie.iki.fi/
+routes:
+    midgardmvc_create_save:
+        controller: midgardmvc_ui_create_controllers_crud
+        action: save
+        path: '/mgd:create/save/{$type}/{$guid}'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json
