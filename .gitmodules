@@ -1,0 +1,3 @@
+[submodule "static/Aloha-Editor"]
+	path = static/Aloha-Editor
+	url = https://bergie@github.com/nemein/Aloha-Editor.git
