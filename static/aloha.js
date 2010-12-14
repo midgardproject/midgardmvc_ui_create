@@ -6,12 +6,17 @@ document.write('<script type="text/javascript" src="' + GENTICS_Aloha_base + 'co
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Format/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.List/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/org.midgardproject.aloha.plugins.Save/plugin.js"></script>');
+document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.HighlightEditables/plugin.js"></script>');
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/containers.js"></script>');
 
 // Start up Aloha
 jQuery(document).ready(function() {
+    
     GENTICS.Aloha.settings = {
         "ribbon": true,
         "language": "en"
     };
+
+    midgardproject.ContainersPlugin.find();
 });
 
