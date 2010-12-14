@@ -29,12 +29,17 @@ midgardproject.ContainersPlugin.find = function() {
                 rdfPropertyInstance.html('<span class="placeholder">&lt' + rdfPropertyInstance.attr('property') + '&gt;</span>');
             });
 
-            // Clear any RDF identifiers
+            // Go through identified objects in the first child
             var rdfIdentifiers = jQuery('*', newChild).filter(function() {
                 return jQuery(this).attr('about'); 
             });
             rdfIdentifiers.each(function(index, rdfIdentifierInstance) {
-                var rdfIdentifierInstance = jQuery(rdfIdentifierInstance).attr('about', '');
+                // Clear any RDF identifiers
+                var rdfIdentifierInstance = jQuery(rdfIdentifierInstance);
+                rdfIdentifierInstance.attr('about', '');
+
+                // Add container base URL
+                rdfIdentifierInstance.attr('mgd:baseurl', container.attr('mgd:baseurl'));
             });
 
             newChild.prependTo(container);
