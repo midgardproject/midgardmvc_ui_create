@@ -46,11 +46,29 @@ class midgardmvc_ui_create_controllers_aloha
             }
         }
 
+        $baseurl = null;
+        if (isset($_POST['baseurl']))
+        {
+            if (strpos($_POST['baseurl'], '/') !== false)
+            {
+                $baseurl = $_POST['baseurl'];
+            }
+            unset($_POST['baseurl']);
+        }
+
         // Process with form
         $this->form = midgardmvc_helper_forms::create($mgdschema);
         try
         {
             $this->process_form($mgdschema);
+
+            if ($baseurl)
+            {
+                // BaseURL set, create appropriate context so injectors can function properly
+                $request = midgardmvc_core_request::get_for_intent($baseurl);
+                midgardmvc_core::get_instance()->context->create($request);
+                midgardmvc_core::get_instance()->component->inject($request, 'process');
+            }
 
             if ($this->object->guid)
             {
@@ -59,6 +77,11 @@ class midgardmvc_ui_create_controllers_aloha
             else
             {
                 $this->object->create();
+            }
+
+            if ($baseurl)
+            {
+                midgardmvc_core::get_instance()->context->delete();
             }
 
             $this->data['status'] = array
@@ -70,6 +93,11 @@ class midgardmvc_ui_create_controllers_aloha
         }
         catch (midgardmvc_helper_forms_exception_validation $e)
         {
+            if ($baseurl)
+            {
+                midgardmvc_core::get_instance()->context->delete();
+            }
+
             midgardmvc_core::get_instance()->dispatcher->header("HTTP/1.0 500 Internal Server Error");
             $this->data['status'] = array
             (

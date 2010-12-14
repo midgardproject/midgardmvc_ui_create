@@ -15,7 +15,7 @@ class midgardmvc_ui_create_injector
 {
     public function inject_process(midgardmvc_core_request $request)
     {
-        // We inject the process only to register our own URL handlers
+        // Register URL handlers
         $request->add_component_to_chain(midgardmvc_core::get_instance()->component->get('midgardmvc_ui_create'));
 
         if (!midgardmvc_core::get_instance()->authentication->is_user())
