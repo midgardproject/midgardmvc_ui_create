@@ -16,7 +16,5 @@ jQuery(document).ready(function() {
         "ribbon": true,
         "language": "en"
     };
-
-    midgardproject.ContainersPlugin.find();
 });
 

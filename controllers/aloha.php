@@ -51,6 +51,7 @@ class midgardmvc_ui_create_controllers_aloha
         try
         {
             $this->process_form($mgdschema);
+
             if ($this->object->guid)
             {
                 $this->object->update();
@@ -59,10 +60,12 @@ class midgardmvc_ui_create_controllers_aloha
             {
                 $this->object->create();
             }
+
             $this->data['status'] = array
             (
                 'status' => 'ok',
                 'message' => midgardmvc_core::get_instance()->dispatcher->get_midgard_connection()->get_error_string(),
+                'identifier' => "urn:uuid:{$this->object->guid}",
             );
         }
         catch (midgardmvc_helper_forms_exception_validation $e)
