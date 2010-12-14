@@ -57,6 +57,9 @@ class midgardmvc_ui_create_tests_rdfmapper extends midgardmvc_core_tests_testcas
         $property = midgardmvc_ui_create_rdfmapper::map_property($person_class, 'foaf:lastName');
         $this->assertEquals('lastname', $property);
 
+        $property = midgardmvc_ui_create_rdfmapper::map_property($person_class, 'http://xmlns.com/foaf/0.1/lastName');
+        $this->assertEquals('lastname', $property);
+
         $property = midgardmvc_ui_create_rdfmapper::map_property($person_class, 'mgd:id');
         $this->assertEquals('id', $property);
     }
