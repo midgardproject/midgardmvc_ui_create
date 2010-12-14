@@ -57,7 +57,7 @@ class midgardmvc_ui_create_controllers_aloha
         }
 
         // Process with form
-        $this->form = midgardmvc_helper_forms::create($mgdschema);
+        $this->form = midgardmvc_helper_forms::create("{$mgdschema}_{$this->object->guid}");
         try
         {
             $this->process_form($mgdschema);
