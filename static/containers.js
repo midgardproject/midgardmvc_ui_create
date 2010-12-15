@@ -42,7 +42,14 @@ midgardproject.ContainersPlugin.find = function() {
                 rdfIdentifierInstance.attr('mgd:baseurl', container.attr('mgd:baseurl'));
             });
 
-            newChild.prependTo(container);
+            if (order == 'desc')
+            {
+                newChild.prependTo(container);
+            }
+            else
+            {
+                newChild.appendTo(container);
+            }
             midgardproject.SavePlugin.enableEditable(newChild.children('[typeof]'));
         });
 
