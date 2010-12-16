@@ -3,8 +3,6 @@ class midgardmvc_ui_create_rdfmapper
 {
     private static function get_mgdschemas()
     {
-        // FIXME: pending on https://github.com/midgardproject/midgard-php5/issues/issue/17
-        return array('midgard_person', 'org_midgardproject_news_article');
         return midgardmvc_core::get_instance()->dispatcher->get_mgdschema_classes();
     }
 
