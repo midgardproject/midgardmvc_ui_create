@@ -6,7 +6,6 @@ document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plu
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Paste/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Table/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Link/plugin.js"></script>');
-document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.HighlightEditables/plugin.js"></script>');
 
 if (typeof midgardCreate == 'undefined') {
     midgardCreate = {};
@@ -31,7 +30,7 @@ midgardCreate.Editable.init = function() {
     midgardCreate.Editable.saveButton.button();
 
     // Add Edit toggle to the toolbar
-    midgardCreate.Editable.editButton = jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="edit">Edit</label></input>');
+    midgardCreate.Editable.editButton = jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label></input>');
     midgardCreate.toolbar.append(midgardCreate.Editable.editButton);
     midgardCreate.Editable.editButton.button();
 
@@ -45,7 +44,7 @@ midgardCreate.Editable.init = function() {
         }
     }
 
-    midgardCreate.Editable.editButton.bind('change', function() { 
+    midgardCreate.Editable.editButton.bind('change', function() {
         if (midgardCreate.Editable.editButton.attr('checked')) {
             midgardCreate.Editable.enableEditables();
             return;
@@ -80,6 +79,7 @@ midgardCreate.Editable.enableEditable = function(objectContainer) {
             element: objectProperty,
             aloha: new GENTICS.Aloha.Editable(objectProperty)
         };
+        objectProperty.effect('highlight');
     });
 
     midgardCreate.Editable.objects[midgardCreate.Editable.objects.length] = editableObject;

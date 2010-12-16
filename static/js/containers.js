@@ -10,10 +10,10 @@ midgardCreate.Containers.init = function() {
 
 midgardCreate.Containers.enableContainers = function() {
     var objectcontainers = jQuery('[mgd\\:type="container"]');
-    jQuery.each(objectcontainers, function(index, container)
+    jQuery.each(objectcontainers, function(index, containerElement)
     {
         var container = {};
-        container.element = jQuery(container);
+        container.element = jQuery(containerElement);
 
         var order = container.element.attr('mgd:order');
         if (typeof order == 'undefined') {
@@ -65,12 +65,13 @@ midgardCreate.Containers.enableContainers = function() {
             container.element.after(container.button);
         }
 
+        container.button.effect('highlight');
         midgardCreate.Containers.containers[midgardCreate.Containers.containers.length] = container;
     });
 };
 
 midgardCreate.Containers.disableContainers = function() {
-    jQuery.each(midgardCreate.Containers.containers function(index, containerObject) {
-        containerObject.button.remove();
-    });
+    for (i=0; i < midgardCreate.Containers.containers.length; i++) {
+        midgardCreate.Containers.containers[i].button.remove();
+    }
 }

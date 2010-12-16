@@ -22,10 +22,10 @@ jQuery(document).ready(function() {
 
     midgardCreate.toolbar.jixedbar();
 
-    // Enable the Editables functionality
-    midgardCreate.Editable.init();
-
     // Enable the Containers functionality
     midgardCreate.Containers.init();
+
+    // Enable the Editables functionality
+    midgardCreate.Editable.init();
 });
 
