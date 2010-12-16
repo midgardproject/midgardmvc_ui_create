@@ -39,14 +39,15 @@ midgardCreate.Editable.init = function() {
         var editorState = sessionStorage.getItem('midgardmvc_ui_create_state');
         if (editorState == 'edit')
         {
-            midgardCreate.Editable.enableEditables();
+            // Don't transfer when enabled from session
+            midgardCreate.Editable.enableEditables(false);
             midgardCreate.Editable.editButton.attr('checked', true);
         }
     }
 
     midgardCreate.Editable.editButton.bind('change', function() {
         if (midgardCreate.Editable.editButton.attr('checked')) {
-            midgardCreate.Editable.enableEditables();
+            midgardCreate.Editable.enableEditables(true);
             return;
         }
         midgardCreate.Editable.disableEditables();
@@ -57,13 +58,18 @@ midgardCreate.Editable.init = function() {
     });
 }
 
-midgardCreate.Editable.enableEditable = function(objectContainer) {
+midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
 
     var editableObject = {};
     editableObject.identifier = objectContainer.attr('about');
     editableObject.type = objectContainer.attr('typeof');
     editableObject.baseurl = objectContainer.attr('mgd:baseurl');
     editableObject.container = objectContainer;
+
+    if (transfer) {
+        // First element, show transfer to signify what is going on
+        midgardCreate.Editable.editButton.effect('transfer', { to: jQuery(objectContainer) }, 1000);
+    }
 
     // Seek editable properties
     editableObject.properties = {};
@@ -79,13 +85,13 @@ midgardCreate.Editable.enableEditable = function(objectContainer) {
             element: objectProperty,
             aloha: new GENTICS.Aloha.Editable(objectProperty)
         };
-        objectProperty.effect('highlight');
+        objectProperty.effect('highlight', { color: midgardCreate.highlightcolor }, 3000);
     });
 
     midgardCreate.Editable.objects[midgardCreate.Editable.objects.length] = editableObject;
 };
 
-midgardCreate.Editable.enableEditables = function() {
+midgardCreate.Editable.enableEditables = function(transfer) {
     var objectContainers = jQuery('[typeof]');
     jQuery.each(objectContainers, function(index, objectContainer)
     {
@@ -94,7 +100,12 @@ midgardCreate.Editable.enableEditables = function() {
             // No identifier set, therefore not editable
             return true;
         }
-        midgardCreate.Editable.enableEditable(objectContainer);
+        midgardCreate.Editable.enableEditable(objectContainer, transfer);
+
+        if (transfer) {
+            // Transfer only first element
+            transfer = false;
+        }
     });
 
     if (Modernizr.sessionstorage) {
@@ -124,6 +135,7 @@ midgardCreate.Editable.disableEditables = function() {
 };
 
 midgardCreate.Editable.save = function () {
+    var transfered = false;
 
     // iterate all Midgard objects which have been made editable
     jQuery.each(midgardCreate.Editable.objects, function(objectIndex, editableObject) {
@@ -140,6 +152,11 @@ midgardCreate.Editable.save = function () {
             {
                 saveObject[index] = editableProperty.aloha.getContents();
                 objectModified = true;
+
+                if (!transfered) {
+                    editableProperty.element.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
+                    transfered = true;
+                }
             }
         });
 

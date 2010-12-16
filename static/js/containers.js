@@ -53,7 +53,8 @@ midgardCreate.Containers.enableContainers = function() {
             {
                 newChild.appendTo(container.element);
             }
-            midgardCreate.Editable.enableEditable(newChild.children('[typeof]'));
+            newChild.effect('slide');
+            midgardCreate.Editable.enableEditable(newChild.children('[typeof]'), false);
         });
 
         if (order == 'desc')
@@ -65,7 +66,7 @@ midgardCreate.Containers.enableContainers = function() {
             container.element.after(container.button);
         }
 
-        container.button.effect('highlight');
+        container.button.effect('highlight', { color: midgardCreate.highlightcolor }, 3000);
         midgardCreate.Containers.containers[midgardCreate.Containers.containers.length] = container;
     });
 };

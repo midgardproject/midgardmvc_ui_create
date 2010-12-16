@@ -211,3 +211,10 @@
 		width:16px;
 	}
 
+.ui-effects-transfer
+{
+    /* style the transfer element */
+    border: #AAA 2px solid;
+    border-radius: 6px;
+}
+

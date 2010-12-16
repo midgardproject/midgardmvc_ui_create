@@ -22,6 +22,8 @@ jQuery(document).ready(function() {
 
     midgardCreate.toolbar.jixedbar();
 
+    midgardCreate.highlightcolor = '#67cc08';
+
     // Enable the Containers functionality
     midgardCreate.Containers.init();
 
