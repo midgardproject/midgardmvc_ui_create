@@ -114,6 +114,7 @@ midgardCreate.Editable.enableEditables = function(transfer) {
     }
 
     midgardCreate.Containers.enableContainers();
+    midgardCreate.ImagePlaceholders.enablePlaceholders();
 };
 
 midgardCreate.Editable.disableEditables = function() {
@@ -124,6 +125,7 @@ midgardCreate.Editable.disableEditables = function() {
     }
 
     midgardCreate.Containers.disableContainers();
+    midgardCreate.ImagePlaceholders.disablePlaceholders();
 
     jQuery.each(midgardCreate.Editable.objects, function(index, editableObject) {
         jQuery.each(editableObject.properties, function(propertyName, editableProperty) {

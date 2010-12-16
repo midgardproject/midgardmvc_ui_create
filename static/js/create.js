@@ -3,6 +3,8 @@ document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmv
 
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/containers.js"></script>');
 
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplaceholders.js"></script>');
+
 // Include toolbar dependencies
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
@@ -29,5 +31,8 @@ jQuery(document).ready(function() {
 
     // Enable the Editables functionality
     midgardCreate.Editable.init();
+
+    // Enable the Image Placeholders functionality
+    midgardCreate.ImagePlaceholders.init();
 });
 
