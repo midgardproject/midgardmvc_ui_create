@@ -28,9 +28,11 @@ class midgardmvc_ui_create_injector
             return;
         }
 
-        // TODO: Check that Aloha is enabled in session
+        // TODO: Check that user is permitted to use the CMS UI
+
         midgardmvc_core::get_instance()->head->enable_jquery();
-        midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/aloha.js');
+        midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js');
+        midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
     }
 }
 ?>

@@ -1,25 +1,28 @@
-if (typeof midgardproject == 'undefined') {
-    midgardproject = {};
+if (typeof midgardCreate == 'undefined') {
+    midgardCreate = {};
 }
 
-midgardproject.ContainersPlugin = {};
+midgardCreate.Containers = {};
 
-midgardproject.ContainersPlugin.containers = [];
+midgardCreate.Containers.init = function() {
+    midgardCreate.Containers.containers = [];
+};
 
-midgardproject.ContainersPlugin.find = function() {
+midgardCreate.Containers.enableContainers = function() {
     var objectcontainers = jQuery('[mgd\\:type="container"]');
     jQuery.each(objectcontainers, function(index, container)
     {
-        var container = jQuery(container);
+        var container = {};
+        container.element = jQuery(container);
 
-        var order = container.attr('mgd:order');
+        var order = container.element.attr('mgd:order');
         if (typeof order == 'undefined') {
             order = 'asc';
         }
 
-        var button = jQuery('<button>Add</button>').click(function() {
+        container.button = jQuery('<button>Add</button>').button().click(function() {
             // Clone the first child of the container
-            var newChild = container.children(':first-child').clone(false);
+            var newChild = container.element.children(':first-child').clone(false);
             // Empty contents of all editable RDF properties
             var rdfProperties = jQuery('*', newChild).filter(function() {
                 return jQuery(this).attr('property'); 
@@ -39,29 +42,35 @@ midgardproject.ContainersPlugin.find = function() {
                 rdfIdentifierInstance.attr('about', '');
 
                 // Add container base URL
-                rdfIdentifierInstance.attr('mgd:baseurl', container.attr('mgd:baseurl'));
+                rdfIdentifierInstance.attr('mgd:baseurl', container.element.attr('mgd:baseurl'));
             });
 
             if (order == 'desc')
             {
-                newChild.prependTo(container);
+                newChild.prependTo(container.element);
             }
             else
             {
-                newChild.appendTo(container);
+                newChild.appendTo(container.element);
             }
-            midgardproject.SavePlugin.enableEditable(newChild.children('[typeof]'));
+            midgardCreate.Editable.enableEditable(newChild.children('[typeof]'));
         });
 
         if (order == 'desc')
         {
-            container.before(button);
+            container.element.before(container.button);
         }
         else
         {
-            container.after(button);
+            container.element.after(container.button);
         }
 
-        midgardproject.ContainersPlugin.containers[midgardproject.ContainersPlugin.containers.length] = container;
+        midgardCreate.Containers.containers[midgardCreate.Containers.containers.length] = container;
     });
 };
+
+midgardCreate.Containers.disableContainers = function() {
+    jQuery.each(midgardCreate.Containers.containers function(index, containerObject) {
+        containerObject.button.remove();
+    });
+}
