@@ -29,7 +29,7 @@ midgardCreate.Containers.enableContainers = function() {
             });
             rdfProperties.each(function(index, rdfPropertyInstance) {
                 var rdfPropertyInstance = jQuery(rdfPropertyInstance);
-                rdfPropertyInstance.html('<span class="placeholder">&lt' + rdfPropertyInstance.attr('property') + '&gt;</span>');
+                rdfPropertyInstance.html('&lt' + rdfPropertyInstance.attr('property') + '&gt;');
             });
 
             // Go through identified objects in the first child
