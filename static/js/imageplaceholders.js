@@ -35,7 +35,7 @@ midgardCreate.ImagePlaceholders.showForm = function(placeholderElement) {
     jQuery('<input name="locationname" type="hidden" value="' + locationName + '" />').appendTo(uploadForm);
     jQuery('<input name="variant" type="hidden" value="' + variant + '" />').appendTo(uploadForm);
     jQuery('<input name="file" type="file" />').appendTo(uploadForm);
-    jQuery('<input name="submit" value="Upload" type="submit" />').appendTo(uploadForm);
+    jQuery('<input name="submit" value="Upload" type="submit" />').button().appendTo(uploadForm);
 
     var uploadDialog = jQuery('<div id="midgardmvc-upload" title="Add an image"></div>').dialog();
     uploadDialog.append(uploadForm);

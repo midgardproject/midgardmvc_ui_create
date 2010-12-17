@@ -19,7 +19,7 @@ jQuery(document).ready(function() {
         midgardCreate = {};
     }
 
-    midgardCreate.toolbar = jQuery('<div id="midgard-bar"><div class="demo"><img src="/midgardmvc-static/midgardmvc_ui_create/themes/midgard/midgard_logo.gif" alt=""/></div></div>');
+    midgardCreate.toolbar = jQuery('<div id="midgard-bar"><div id="midgard-bar-contents"><img src="/midgardmvc-static/midgardmvc_ui_create/themes/midgard/midgard_logo.gif" alt=""/></div></div>');
     jQuery('body').append(midgardCreate.toolbar);
 
     midgardCreate.toolbar.jixedbar();
