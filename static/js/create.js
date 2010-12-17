@@ -33,6 +33,6 @@ jQuery(document).ready(function() {
     // Enable the Image Placeholders functionality
     midgardCreate.ImagePlaceholders.init();
 
-    midgardCreate.toolbar.jixedbar();
+    midgardCreate.toolbar.jixedbar({ showOnTop: true });
 });
 
