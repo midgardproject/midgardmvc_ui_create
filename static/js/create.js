@@ -9,7 +9,7 @@ document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmv
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/jquery.jixedbar.min.js"></script>');
-document.write('<link type="text/css" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard/jx.stylesheet.css" rel="stylesheet" />');
+document.write('<link type="text/css" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard/jx.bar.css" rel="stylesheet" />');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
 
 // Start up Aloha
@@ -22,8 +22,6 @@ jQuery(document).ready(function() {
     midgardCreate.toolbar = jQuery('<div id="midgard-bar"><div id="midgard-bar-contents"><img src="/midgardmvc-static/midgardmvc_ui_create/themes/midgard/midgard_logo.gif" alt=""/></div></div>');
     jQuery('body').append(midgardCreate.toolbar);
 
-    midgardCreate.toolbar.jixedbar();
-
     midgardCreate.highlightcolor = '#67cc08';
 
     // Enable the Containers functionality
@@ -34,5 +32,7 @@ jQuery(document).ready(function() {
 
     // Enable the Image Placeholders functionality
     midgardCreate.ImagePlaceholders.init();
+
+    midgardCreate.toolbar.jixedbar();
 });
 
