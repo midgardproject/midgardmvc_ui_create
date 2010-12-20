@@ -32,18 +32,21 @@ midgardCreate.Containers.enableContainers = function() {
                 rdfPropertyInstance.html('&lt' + rdfPropertyInstance.attr('property') + '&gt;');
             });
 
-            // Go through identified objects in the first child
-            var rdfIdentifiers = jQuery('*', newChild).filter(function() {
-                return jQuery(this).attr('about'); 
-            });
-            rdfIdentifiers.each(function(index, rdfIdentifierInstance) {
-                // Clear any RDF identifiers
-                var rdfIdentifierInstance = jQuery(rdfIdentifierInstance);
-                rdfIdentifierInstance.attr('about', '');
-
-                // Add container base URL
-                rdfIdentifierInstance.attr('mgd:baseurl', container.element.attr('mgd:baseurl'));
-            });
+            if (newChild.attr('about'))
+            {
+                // The primary container has the identifier
+                midgardCreate.Containers.prepareNewChild(newChild, container.element);
+            }
+            else
+            {
+                // Go through identified objects in the first child
+                var rdfIdentifiers = jQuery('*', newChild).filter(function() {
+                    return jQuery(this).attr('about'); 
+                });
+                rdfIdentifiers.each(function(index, rdfIdentifierInstance) {
+                    midgardCreate.Containers.prepareNewChild(rdfIdentifierInstance, container.element);
+                });
+            }
 
             if (order == 'desc')
             {
@@ -54,7 +57,15 @@ midgardCreate.Containers.enableContainers = function() {
                 newChild.appendTo(container.element);
             }
             newChild.effect('slide');
-            midgardCreate.Editable.enableEditable(newChild.children('[typeof]'), false);
+
+            if (newChild.attr('typeof'))
+            {
+                midgardCreate.Editable.enableEditable(newChild, false);
+            }
+            else
+            {
+                midgardCreate.Editable.enableEditable(newChild.children('[typeof]'), false);
+            }
         });
 
         if (order == 'desc')
@@ -70,6 +81,15 @@ midgardCreate.Containers.enableContainers = function() {
         midgardCreate.Containers.containers[midgardCreate.Containers.containers.length] = container;
     });
 };
+
+midgardCreate.Containers.prepareNewChild = function(childElement, containerElement) {
+    // Clear any RDF identifiers
+    var childElement = jQuery(childElement);
+    childElement.attr('about', '');
+
+    // Add container base URL
+    childElement.attr('mgd:baseurl', containerElement.attr('mgd:baseurl'));
+}
 
 midgardCreate.Containers.disableContainers = function() {
     for (i=0; i < midgardCreate.Containers.containers.length; i++) {
