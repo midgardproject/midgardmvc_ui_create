@@ -62,6 +62,9 @@ midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
 
     var editableObject = {};
     editableObject.identifier = objectContainer.attr('about');
+    if (editableObject.identifier == 'urn:uuid:') {
+        editableObject.identifier = '';
+    }
     editableObject.type = objectContainer.attr('typeof');
     editableObject.baseurl = objectContainer.attr('mgd:baseurl');
     editableObject.container = objectContainer;
