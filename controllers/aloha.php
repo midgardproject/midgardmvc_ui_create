@@ -23,7 +23,7 @@ class midgardmvc_ui_create_controllers_aloha
         {
             throw new midgardmvc_exception_notfound("No type provided");
         }
-        $mgdschema = midgardmvc_ui_create_rdfmapper::map_class($_POST['type']);
+        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class($_POST['type']);
         unset($_POST['type']);
 
         if (isset($_POST['identifier']))
@@ -109,15 +109,16 @@ class midgardmvc_ui_create_controllers_aloha
 
     public function process_form($mgdschema)
     {
+        $mapper = new midgardmvc_ui_create_rdfmapper($mgdschema);
         foreach ($_POST as $property => $value)
         {
-            $mgd_property = midgardmvc_ui_create_rdfmapper::map_property($mgdschema, $property);
+            $mgd_property = $mapper->__get($property);
             midgardmvc_helper_forms_mgdschema::property_to_form($mgdschema, $mgd_property, $this->object->$mgd_property, $this->form, $property);
         }
         $this->form->process_post();
         foreach ($_POST as $property => $value)
         {
-            $mgd_property = midgardmvc_ui_create_rdfmapper::map_property($mgdschema, $property);
+            $mgd_property = $mapper->__get($property);
             $this->object->$mgd_property = $this->form->items[$property]->get_value();
         }
     }

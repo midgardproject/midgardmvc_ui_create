@@ -1,68 +1,98 @@
 <?php
 class midgardmvc_ui_create_rdfmapper
 {
-    private static function get_mgdschemas()
+    public $typeof = '';
+    public $about = '';
+    public $mgdschema = '';
+
+    public function __construct($mgdschema)
     {
-        return midgardmvc_core::get_instance()->dispatcher->get_mgdschema_classes();
+        if (is_object($mgdschema))
+        {
+            $this->about = "urn:uuid:{$mgdschema->guid}";
+            $mgdschema = get_class($mgdschema);
+        }
+
+        $this->mgdschema = $mgdschema;
+        $this->typeof = self::class_to_typeof($mgdschema);
     }
 
-    private static function expand_prefix($value, array $namespaces)
+    public function __get($key)
     {
-        foreach ($namespaces as $prefix => $url)
+        return $this->map_property($key);
+    }
+
+    private function map_property($property)
+    {
+        static $property_map = array();
+        if (!isset($property_map[$this->mgdschema]))
         {
-            if (substr($value, 0, strlen($prefix)) == $prefix)
+            $property_map[$this->mgdschema] = array();
+        }
+
+        if (isset($property_map[$this->mgdschema][$property]))
+        {
+            return $property_map[$this->mgdschema][$property];
+        }
+
+        $namespaces = self::get_namespace_map($this->mgdschema);
+        $namespaced_property = self::expand_prefix($property, $namespaces);
+        
+        $dummy = new $this->mgdschema();
+        $props = get_object_vars($dummy);
+        $reflector = new midgard_reflection_property($this->mgdschema);
+        foreach ($props as $prop => $value)
+        {
+            $rdfprop = $reflector->get_user_value($prop, 'property');
+            if (!$rdfprop)
             {
-                // Expand to prefix to URL
-                return str_replace("{$prefix}:", $url, $value);
+                $rdfprop = "mgd:{$prop}";
             }
 
-            if (substr($value, 0, strlen($url)) == $url)
+            if ($property == $prop)
             {
-                // Full URL match
-                return $value;
+                // Straight, un-namespaced match
+                $property_map[$this->mgdschema][$property] = $rdfprop;
+                return $property_map[$this->mgdschema][$property];
+            }
+
+            $nsprop = self::expand_prefix($rdfprop, $namespaces);
+            if ($namespaced_property == $nsprop)
+            {
+                
+                $property_map[$this->mgdschema][$property] = $prop;
+                return $property_map[$this->mgdschema][$property];
             }
         }
-        return "{$namespaces['mgd']}{$value}";
+
+        throw new midgardmvc_exception_notfound("Unable to map {$property} to a property of {$this->mgdschema}");
     }
 
-    public static function get_namespace_map($type)
+    public static function class_to_typeof($mgdschema)
     {
-        static $nsmap = array();
-        if (isset($nsmap[$type]))
+        static $typeofs = array();
+        if (isset($typeofs[$mgdschema]))
         {
-            return $nsmap[$type];
+            return $typeofs[$mgdschema];
         }
 
         $mgdschemas = self::get_mgdschemas();
-        if (!in_array($type, $mgdschemas))
+        if (!in_array($mgdschema, $mgdschemas))
         {
-            throw new midgardmvc_exception_notfound("Type {$type} is not a registered MgdSchema");
+            throw new midgardmvc_exception_notfound("Unrecognized MgdSchema type {$mgdschema}");
         }
 
-        $nsmap[$type] = array
-        (
-            'mgd' => 'http://www.midgard-project.org/midgard2/9.03/',
-        );
-
-        $reflector = new midgard_reflection_class($type);
-        $namespaces = $reflector->get_user_value('namespaces');
-        if (empty($namespaces))
+        $namespaces = self::get_namespace_map($mgdschema);
+        $reflector = new midgard_reflection_class($mgdschema);
+        $typeofs[$mgdschema] = $reflector->get_user_value('typeof');
+        if (!$typeofs[$mgdschema])
         {
-            // Type didn't register additional namespaces
-            return $nsmap[$type];
+            $typeofs[$mgdschema] = "{$namespaces['mgd']}{$mgdschema}";
         }
-
-        $namespaces = explode(',', $namespaces);
-        foreach ($namespaces as $namespace)
-        {
-            $namespace_parts = explode(':', $namespace, 2);
-            $nsmap[$type][$namespace_parts[0]] = $namespace_parts[1];
-        }
-
-        return $nsmap[$type];
+        return $typeofs[$mgdschema];
     }
 
-    public static function map_class($type)
+    public static function typeof_to_class($type)
     {
         static $mapped_classes = array();
         if (isset($mapped_classes[$type]))
@@ -109,41 +139,64 @@ class midgardmvc_ui_create_rdfmapper
         throw new midgardmvc_exception_notfound("Unrecognized MgdSchema type {$type}");
     }
 
-    public static function map_property($mgdschema, $property)
+    private static function get_mgdschemas()
     {
-        static $property_map = array();
-        if (!isset($property_map[$mgdschema]))
-        {
-            $property_map[$mgdschema] = array();
-        }
+        return midgardmvc_core::get_instance()->dispatcher->get_mgdschema_classes();
+    }
 
-        if (isset($property_map[$mgdschema][$property]))
+    private static function expand_prefix($value, array $namespaces)
+    {
+        foreach ($namespaces as $prefix => $url)
         {
-            return $property_map[$mgdschema][$property];
-        }
-
-        $namespaces = self::get_namespace_map($mgdschema);
-        $namespaced_property = self::expand_prefix($property, $namespaces);
-        
-        $dummy = new $mgdschema();
-        $props = get_object_vars($dummy);
-        $reflector = new midgard_reflection_property($mgdschema);
-
-        foreach ($props as $prop => $value)
-        {
-            $rdfprop = $reflector->get_user_value($prop, 'property');
-            if (!$rdfprop)
+            if (substr($value, 0, strlen($prefix)) == $prefix)
             {
-                $rdfprop = $prop;
+                // Expand to prefix to URL
+                return str_replace("{$prefix}:", $url, $value);
             }
-            $nsprop = self::expand_prefix($rdfprop, $namespaces);
-            if ($namespaced_property == $nsprop)
+
+            if (substr($value, 0, strlen($url)) == $url)
             {
-                $property_map[$mgdschema][$property] = $prop;
-                return $property_map[$mgdschema][$property];
+                // Full URL match
+                return $value;
             }
         }
+        return "{$namespaces['mgd']}{$value}";
+    }
 
-        throw new midgardmvc_exception_notfound("Unable to map {$property} to a property of {$mgdschema}");
+    private static function get_namespace_map($type)
+    {
+        static $nsmap = array();
+        if (isset($nsmap[$type]))
+        {
+            return $nsmap[$type];
+        }
+
+        $mgdschemas = self::get_mgdschemas();
+        if (!in_array($type, $mgdschemas))
+        {
+            throw new midgardmvc_exception_notfound("Type {$type} is not a registered MgdSchema");
+        }
+
+        $nsmap[$type] = array
+        (
+            'mgd' => 'http://www.midgard-project.org/midgard2/9.03/',
+        );
+
+        $reflector = new midgard_reflection_class($type);
+        $namespaces = $reflector->get_user_value('namespaces');
+        if (empty($namespaces))
+        {
+            // Type didn't register additional namespaces
+            return $nsmap[$type];
+        }
+
+        $namespaces = explode(',', $namespaces);
+        foreach ($namespaces as $namespace)
+        {
+            $namespace_parts = explode(':', $namespace, 2);
+            $nsmap[$type][$namespace_parts[0]] = $namespace_parts[1];
+        }
+
+        return $nsmap[$type];
     }
 }
