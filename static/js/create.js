@@ -8,9 +8,8 @@ document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmv
 // Include toolbar dependencies
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/jquery.jixedbar.min.js"></script>');
-document.write('<link type="text/css" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard/jx.bar.css" rel="stylesheet" />');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/toolbar.css">');
 
 // Start up Aloha
 jQuery(document).ready(function() {
@@ -19,7 +18,7 @@ jQuery(document).ready(function() {
         midgardCreate = {};
     }
 
-    midgardCreate.toolbar = jQuery('<div id="midgard-bar"><div id="midgard-bar-contents"><img src="/midgardmvc-static/midgardmvc_ui_create/themes/midgard/midgard_logo.gif" alt=""/></div></div>');
+    midgardCreate.toolbar = jQuery('<div id="midgard-bar"><div id="midgard-bar-effect" class="ui-widget-content"><div class="toolbarcontent"><div class="midgard-logo-button"><a href="#" id="hideshowbutton" class="ui-widget-hidebut"></a></div><div class="toolbarcontent-left"></div><div class="toolbarcontent-right"></div></div></div>');
     jQuery('body').append(midgardCreate.toolbar);
 
     midgardCreate.highlightcolor = '#67cc08';
@@ -33,6 +32,11 @@ jQuery(document).ready(function() {
     // Enable the Image Placeholders functionality
     midgardCreate.ImagePlaceholders.init();
 
-    midgardCreate.toolbar.jixedbar({ showOnTop: true });
+    // set effect from select menu value
+    $( "#hideshowbutton" ).click(function() {
+        $( "#midgard-bar-effect" ).toggle('blind', {}, 500 );
+        return false;
+    });
+
 });
 

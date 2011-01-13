@@ -1,0 +1,60 @@
+div#midgard-bar
+{
+    overflow: hidden;
+    width: 100%;
+    //height: 0px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #000;
+    font-family:Arial;
+    font-weight:bold;
+    background-image:url('toolbar_bg.png');
+}
+
+@media screen
+{
+    body>div#midgard-bar
+    {
+        position: fixed;
+    }
+}
+
+#midgard-bar-effect
+{
+    width: 100%;
+    height: 48px;
+    padding: 0.0em; 
+    position: relative;
+}
+
+#midgard-bar div.toolbarcontent
+{
+    font-size: 10px;
+    padding:0px 0px 0px 0px;
+    margin:0px 0px 0px 0px;
+    font-family: "Trebuchet MS", "Arial", "Helvetica", "Verdana", "sans-serif";
+    text-decoration: none;
+}
+
+#midgard-bar div.midgard-logo-button
+{ 
+    line-height:4em;
+    width: 40px;
+    float: left;
+}
+
+
+#midgard-bar div.toolbarcontent-left
+{
+    line-height:4.3em; 
+    width: 30px;
+    float: left; 
+}
+
+#midgard-bar div.toolbarcontent-right
+{ 
+    line-height:4em; 
+    width: 120px;
+    float: right; 
+}

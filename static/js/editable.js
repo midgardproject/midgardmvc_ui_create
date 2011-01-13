@@ -25,14 +25,14 @@ midgardCreate.Editable.init = function() {
     // Add Save button to the toolbar
     midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button();
     //midgardCreate.toolbar.append(midgardCreate.Editable.saveButton);
-    jQuery('#midgard-bar-contents').append(midgardCreate.Editable.saveButton);
+    jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.saveButton);
     // TODO: Enable saving only after edits
     // midgardCreate.Editable.saveButton.button({disabled: true});
 
     // Add Edit toggle to the toolbar
     midgardCreate.Editable.editButton = jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>').button();
     //midgardCreate.toolbar.append(midgardCreate.Editable.editButton);
-    jQuery('#midgard-bar-contents').append(midgardCreate.Editable.editButton);
+    jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.editButton);
 
     if (Modernizr.sessionstorage) {
         // Check if user is in editing state
