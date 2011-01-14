@@ -13,7 +13,18 @@
  */
 interface midgardmvc_ui_create_workflow
 {
+    /**
+     * Check if the workflow can handle a particular object instance
+     */
     public function can_handle(midgard_object $object);
 
+    /**
+     * Get the workflow definition
+     */
+    public function get();
+
+    /**
+     * Run the workflow with a particular object instance
+     */
     public function run(midgard_object $object, array $args = null);
 }

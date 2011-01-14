@@ -22,7 +22,7 @@ class midgardmvc_ui_create_workflow_delete implements midgardmvc_ui_create_workf
         return false;
     }
 
-    public function run(midgard_object $object, array $args = null)
+    public function get()
     {
         $workflow = new ezcWorkflow('delete');
 
@@ -46,6 +46,13 @@ class midgardmvc_ui_create_workflow_delete implements midgardmvc_ui_create_workf
         $workflow->startNode->addoutNode($getObject);
         $getObject->addOutNode($deleteObject);
         $deleteObject->addoutNode($workflow->endNode);
+
+        return $workflow;
+    }
+
+    public function run(midgard_object $object, array $args = null)
+    {
+        $workflow = $this->get();
 
         $execution = new midgardmvc_ui_create_workflow_execution($workflow);
         $execution->setVariable('object', $object);
