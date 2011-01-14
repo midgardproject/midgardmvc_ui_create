@@ -5,7 +5,34 @@ authors:
         name: Henri Bergius
         email: henri.bergius@iki.fi
         url: http://bergie.iki.fi/
+requires_pear:
+    Workflow:
+        channel: components.ez.no
 routes:
+    midgardmvc_create_state_new:
+        controller: midgardmvc_ui_create_controllers_aloha
+        action: state_new
+        path: '/mgd:create/state/{$type}'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json
+    midgardmvc_create_state:
+        controller: midgardmvc_ui_create_controllers_aloha
+        action: state
+        path: '/mgd:create/state/{$type}/{$identifier}'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json
+    midgardmvc_create_run:
+        controller: midgardmvc_ui_create_controllers_aloha
+        action: run
+        path: '/mgd:create/run/{$type}/{$identifier}/{$workflow}'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json
     midgardmvc_create_save:
         controller: midgardmvc_ui_create_controllers_aloha
         action: save

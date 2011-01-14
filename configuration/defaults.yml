@@ -1,0 +1,4 @@
+workflows:
+    delete:
+        label: delete
+        provider: midgardmvc_ui_create_workflow_delete

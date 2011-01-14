@@ -17,6 +17,66 @@ class midgardmvc_ui_create_controllers_aloha
     private $parent = null;
     private $form = null;
 
+    public function get_state_new(array $args)
+    {
+        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class(rawurldecode($args['type']));
+        $object = $this->prepare_new_object($mgdschema);
+
+        $this->data['object'] = array();
+        $this->data['object']['type'] = $this->get_type_label($mgdschema);
+        $this->data['state'] = array();
+        $this->data['state']['current'] = 'new';
+        $this->data['state']['history'] = array();
+        $this->data['state']['actions'] = array();
+    }
+
+    public function get_state(array $args)
+    {
+        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class(rawurldecode($args['type']));
+        $this->load_object($mgdschema, rawurldecode($args['identifier']));
+
+        $this->data['object'] = array();
+        $this->data['object']['type'] = $this->get_type_label($mgdschema);
+        $this->data['state'] = array();
+        // TODO: Read state from workflow system
+        $this->data['state']['current'] = 'live';
+        $this->data['state']['history'] = array();
+        $this->data['state']['actions'] = array();
+
+        $actions = $this->get_workflows_for_object($this->object);
+        foreach ($actions as $name => $workflow)
+        {
+            $this->data['state']['actions'][$name] = $workflow['label'];
+        }
+    }
+
+    public function post_run(array $args)
+    {
+        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class(rawurldecode($args['type']));
+        $this->load_object($mgdschema, rawurldecode($args['identifier']));
+
+        $workflows = $this->get_workflows_for_object($this->object);
+        if (!isset($workflows[$args['workflow']]))
+        {
+            throw new midgardmvc_exception_notfound("Workflow {$args['workflow']} not defined");
+        }
+
+        midgardmvc_core::get_instance()->component->load_library('Workflow');
+
+        $workflow_class = $workflows[$args['workflow']]['provider'];
+        $workflow = new $workflow_class();
+        if (!$workflow->can_handle($this->object))
+        {
+            throw new midgardmvc_exception_notfound("Workflow {$args['workflow']} cannot handle this object");
+        }
+
+        $values = $workflow->run($this->object);
+        foreach ($values as $key => $value)
+        {
+            $this->data[$key] = $value;
+        }
+    }
+
     public function post_save(array $args)
     {
         if (!isset($_POST['type']))
@@ -107,7 +167,41 @@ class midgardmvc_ui_create_controllers_aloha
         }
     }
 
-    public function process_form($mgdschema)
+    private function get_workflows_for_object(midgard_object $object)
+    {
+        $workflows = midgardmvc_core::get_instance()->configuration->workflows;
+        $object_workflows = array();
+        foreach ($workflows as $workflow_name => $workflow)
+        {
+            $wf_class = $workflow['provider'];
+            $wf = new $wf_class();
+
+            if (!$wf instanceof midgardmvc_ui_create_workflow)
+            {
+                throw new Exception("Invalid workflow definition {$workflow_name}: {$wf_class} doesn't implement midgardmvc_ui_create_workflow");
+            }
+
+            if (!$wf->can_handle($object))
+            {
+                continue;
+            }
+
+            $object_workflows[$workflow_name] = array
+            (
+                'label' => $workflow['label'],
+                'provider' => $wf_class,
+            );
+        }
+        return $object_workflows;
+    }
+
+    private function get_type_label($mgdschema)
+    {
+        $parts = explode('_', $mgdschema);
+        return $parts[count($parts) - 1];
+    }
+
+    private function process_form($mgdschema)
     {
         $mapper = new midgardmvc_ui_create_rdfmapper($mgdschema);
         foreach ($_POST as $property => $value)
@@ -139,7 +233,15 @@ class midgardmvc_ui_create_controllers_aloha
     public function load_object($mgdschema, $guid)
     {
         $guid = $this->clean_namespace($guid);
-        $this->object = new $mgdschema($guid);
+
+        try
+        {
+            $this->object = new $mgdschema($guid);
+        }
+        catch (midgard_error_exception $e)
+        {
+            throw new midgardmvc_exception_notfound("Object {$guid}: " . $e->getMessage());
+        }
     }
     
     public function prepare_new_object($mgdschema)

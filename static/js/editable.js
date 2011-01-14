@@ -22,6 +22,8 @@ midgardCreate.Editable.init = function() {
 
     midgardCreate.Editable.objects = [];
 
+    midgardCreate.Editable.currentObject = null;
+
     // Add Save button to the toolbar
     midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button();
     //midgardCreate.toolbar.append(midgardCreate.Editable.saveButton);
@@ -33,6 +35,10 @@ midgardCreate.Editable.init = function() {
     midgardCreate.Editable.editButton = jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>').button();
     //midgardCreate.toolbar.append(midgardCreate.Editable.editButton);
     jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.editButton);
+
+    // Add an area for object actions
+    midgardCreate.Editable.objectActions = jQuery('<div id="midgardcreate-objectactions"></div>').hide();
+    jQuery('#midgard-bar .toolbarcontent-left').append(midgardCreate.Editable.objectActions);
 
     if (Modernizr.sessionstorage) {
         // Check if user is in editing state
@@ -55,6 +61,51 @@ midgardCreate.Editable.init = function() {
 
     midgardCreate.Editable.saveButton.bind('click', function() {
         midgardCreate.Editable.save();
+    });
+}
+
+midgardCreate.Editable.activateEditable = function(editableObject, propertyName) {
+    if (midgardCreate.Editable.currentObject == editableObject.identifier) {
+        return;
+    }
+    midgardCreate.Editable.currentObject = editableObject.identifier;
+
+    midgardCreate.Editable.objectActions.fadeOut().empty();
+    var url = '/mgd:create/state/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.identifier);
+    jQuery.ajax({
+        url: url,
+        dataType: 'json',
+        success: function(data) {
+            var objectLabel = jQuery('<button>' + data.object.type + '</button>').button();
+            midgardCreate.Editable.objectActions.append(objectLabel);
+
+            jQuery.each(data.state.actions, function(action, actionLabel) {
+                var actionButton = jQuery('<button>' + actionLabel + '</button>').button();
+                midgardCreate.Editable.objectActions.append(actionButton);
+                actionButton.bind('click', function() {
+                    midgardCreate.Editable.runWorkflow(editableObject, action);
+                });
+            });
+            midgardCreate.Editable.objectActions.fadeIn();
+        }
+    });
+}
+
+midgardCreate.Editable.deactivateEditable = function(editableObject, propertyName) {
+}
+
+midgardCreate.Editable.runWorkflow = function(editableObject, workflow) {
+    var url = '/mgd:create/run/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.identifier) + '/' + workflow;
+    jQuery.ajax({
+        url: url,
+        dataType: 'json',
+        type: 'POST',
+        success: function (response) {
+            if (response.object == 'remove') {
+                jQuery(editableObject.container).hide('drop');
+                return;
+            }
+        }
     });
 }
 
@@ -88,6 +139,11 @@ midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
             element: objectProperty,
             aloha: new GENTICS.Aloha.Editable(objectProperty)
         };
+
+        // Subscribe to activation and deactivation events
+        GENTICS.Aloha.EventRegistry.subscribe(editableObject.properties[propertyName].aloha, 'editableActivated', function() { midgardCreate.Editable.activateEditable(editableObject, propertyName); });
+        GENTICS.Aloha.EventRegistry.subscribe(editableObject.properties[propertyName].aloha, 'editableDeactivated', function() { midgardCreate.Editable.deactivateEditable(editableObject, propertyName); });
+
         objectProperty.effect('highlight', { color: midgardCreate.highlightcolor }, 3000);
     });
 
