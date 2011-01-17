@@ -41,3 +41,19 @@ routes:
         mimetype: application/json
         template_aliases: 
             root: midgardmvc-show-json
+    midgardmvc_create_image_search:
+        controller: midgardmvc_ui_create_controllers_image
+        action: search
+        path: '/mgd:create/image/search'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json
+    midgardmvc_create_image_upload:
+        controller: midgardmvc_ui_create_controllers_image
+        action: upload
+        path: '/mgd:create/image/upload'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json

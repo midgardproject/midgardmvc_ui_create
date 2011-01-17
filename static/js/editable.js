@@ -24,6 +24,8 @@ midgardCreate.Editable.init = function() {
 
     midgardCreate.Editable.currentObject = null;
 
+    midgardCreate.Editable.imageButtons = false;
+
     // Add Save button to the toolbar
     midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button();
     //midgardCreate.toolbar.append(midgardCreate.Editable.saveButton);
@@ -62,6 +64,12 @@ midgardCreate.Editable.init = function() {
     midgardCreate.Editable.saveButton.bind('click', function() {
         midgardCreate.Editable.save();
     });
+}
+
+midgardCreate.Editable.insertImage = function(imageInfo) {
+    var rangeObject = GENTICS.Aloha.Selection.rangeObject;
+    var markUp = jQuery('<img src="' + imageInfo.url + '" title="' + imageInfo.title + '" />');
+    GENTICS.Utils.Dom.insertIntoDOM(markUp, rangeObject);
 }
 
 midgardCreate.Editable.activateEditable = function(editableObject, propertyName) {
@@ -148,6 +156,25 @@ midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
     });
 
     midgardCreate.Editable.objects[midgardCreate.Editable.objects.length] = editableObject;
+
+    if (!midgardCreate.Editable.imageButtons) {
+        // Insert image button
+        var insertLinkButton = new GENTICS.Aloha.ui.Button({
+            'iconClass' : 'GENTICS_button midgardCreate_button_img',
+            'size' : 'small',
+            'onclick' : function (element, event) { 
+                midgardCreate.Image.showSelectDialog(midgardCreate.Editable.currentObject, midgardCreate.Editable.insertImage);
+            },
+            'toggle' : false
+        });
+        GENTICS.Aloha.FloatingMenu.addButton(
+            'GENTICS.Aloha.continuoustext',
+            insertLinkButton,
+            'Insert',
+            1
+        );
+        midgardCreate.Editable.imageButtons = true;
+    }
 };
 
 midgardCreate.Editable.enableEditables = function(transfer) {

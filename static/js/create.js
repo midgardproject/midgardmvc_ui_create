@@ -1,8 +1,7 @@
 // Midgard Create plugins
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/editable.js"></script>');
-
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/containers.js"></script>');
-
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/image.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplaceholders.js"></script>');
 
 // Include toolbar dependencies
@@ -10,8 +9,9 @@ document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmv
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/toolbar.css">');
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/insertimage.css">');
 
-// Start up Aloha
+// Start up Midgard Create
 jQuery(document).ready(function() {
 
     if (typeof midgardCreate == 'undefined') {
@@ -29,10 +29,13 @@ jQuery(document).ready(function() {
     // Enable the Editables functionality
     midgardCreate.Editable.init();
 
+    // Enable the Image functionality
+    midgardCreate.Image.init();
+
     // Enable the Image Placeholders functionality
     midgardCreate.ImagePlaceholders.init();
 
-    // set effect from select menu value
+    // Set effect from select menu value
     $( "#hideshowbutton" ).click(function() {
         $( "#midgard-bar-effect" ).toggle('blind', {}, 500 );
         return false;

@@ -1,0 +1,15 @@
+button.midgardCreate_button_img {
+    background: url('../images/insert-image.gif') no-repeat !important;
+    background-position: 0px 0px;
+}
+
+#midgardmvc-image-list .midgardmvc-image-list {
+    padding: 0px;
+    margin: 0px;
+}
+
+#midgardmvc-image-list .midgardmvc-image-list li {
+    list-style: none;
+    display: inline;
+    margin: 2px;
+}
