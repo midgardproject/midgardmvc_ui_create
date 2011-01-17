@@ -26,14 +26,14 @@ jQuery(document).ready(function() {
     // Enable the Containers functionality
     midgardCreate.Containers.init();
 
-    // Enable the Editables functionality
-    midgardCreate.Editable.init();
-
     // Enable the Image functionality
     midgardCreate.Image.init();
 
     // Enable the Image Placeholders functionality
     midgardCreate.ImagePlaceholders.init();
+
+    // Enable the Editables functionality
+    midgardCreate.Editable.init();
 
     // Set effect from select menu value
     $( "#hideshowbutton" ).click(function() {

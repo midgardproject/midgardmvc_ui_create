@@ -30,7 +30,8 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
         foreach ($attachments as $attachment)
         {
             $parent = midgard_object_class::get_object_by_guid($attachment->parentguid);
-            if ($parent instanceof midgard_attachment)
+            if (  $parent instanceof midgard_attachment
+                || $parent instanceof midgardmvc_helper_attachmentserver_attachment)
             {
                 continue;
             }
@@ -51,6 +52,7 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
         $data = array
         (
             'guid' => $attachment->guid,
+            'parentguid' => $attachment->parentguid,
             'name' => $attachment->name,
             'title' => $attachment->title,
             'size' => $attachment->metadata->size,

@@ -5,24 +5,48 @@ if (typeof midgardCreate == 'undefined') {
 midgardCreate.ImagePlaceholders = {};
 
 midgardCreate.ImagePlaceholders.init = function() {
-    midgardCreate.ImagePlaceholders.placeholders = [];
+    midgardCreate.ImagePlaceholders.placeHolders = [];
 };
 
 midgardCreate.ImagePlaceholders.enablePlaceholders = function() {
-    var placeholders = jQuery('[mgd\\:placeholder="true"]');
+    var placeholders = jQuery('img[mgd\\:locationname]');
     jQuery.each(placeholders, function(index, placeholderElement)
     {
-        jQuery(placeholderElement).bind('click', function() { midgardCreate.ImagePlaceholders.showForm(this); });
+        var placeHolder = {};
+        placeHolder.element = jQuery(placeholderElement);
+        placeHolder.parentGuid = placeHolder.element.attr('mgd:parentguid');
+        placeHolder.locationName = placeHolder.element.attr('mgd:locationname');
+        placeHolder.variant = placeHolder.element.attr('mgd:variant');
+
+        midgardCreate.ImagePlaceholders.placeHolders[midgardCreate.ImagePlaceholders.placeHolders.length] = placeHolder;
+
+        jQuery(placeHolder.element).bind('click', function() {
+             midgardCreate.Image.showSelectDialog(placeHolder.parentGuid, placeHolder.locationName, midgardCreate.ImagePlaceholders.insertImage);
+        });
     });
-}
+};
 
 midgardCreate.ImagePlaceholders.disablePlaceholders = function() {
-    var placeholders = jQuery('[mgd\\:placeholder="true"]');
-    jQuery.each(placeholders, function(index, placeholderElement)
+    jQuery.each(midgardCreate.ImagePlaceholders.placeHolders, function(index, placeHolder)
     {
-        jQuery(placeholderElement).unbind('click');
+        jQuery(placeHolder.element).unbind('click');
     });
-}
+};
+
+midgardCreate.ImagePlaceholders.insertImage = function(imageInfo) {
+    console.log(imageInfo);
+    jQuery.each(midgardCreate.ImagePlaceholders.placeHolders, function(index, placeHolder) {
+        console.log(placeHolder);
+        if (placeHolder.parentGuid != imageInfo.parentguid) {
+            return;
+        }
+        if (placeHolder.locationName != imageInfo.locationName) {
+            return;
+        }
+        placeHolderElement = jQuery(placeHolder.element);
+        placeHolderElement.attr('src', imageInfo.url);
+    });
+};
 
 midgardCreate.ImagePlaceholders.showForm = function(placeholderElement) {
     var placeholderElement = jQuery(placeholderElement);
@@ -40,4 +64,4 @@ midgardCreate.ImagePlaceholders.showForm = function(placeholderElement) {
     var uploadDialog = jQuery('<div id="midgardmvc-upload" title="Add an image"></div>').dialog();
     uploadDialog.append(uploadForm);
     uploadDialog.dialog('open');
-}
+};

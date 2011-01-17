@@ -42,7 +42,7 @@ midgardCreate.Image.searchImages = function(searchTerm, callback) {
     });
 };
 
-midgardCreate.Image.prepareSelectDialog = function(identifier, callback) {
+midgardCreate.Image.prepareSelectDialog = function(identifier, locationName, callback) {
     var dialogOptions = {
         show: 'drop',
         hide: 'drop',
@@ -68,17 +68,17 @@ midgardCreate.Image.prepareSelectDialog = function(identifier, callback) {
     midgardCreate.Image.imageSelectDialog.dialog(dialogOptions);
 
     if (midgardCreate.Image.canUpload()) {
-        midgardCreate.Image.prepareUploadTarget(identifier, callback);
+        midgardCreate.Image.prepareUploadTarget(identifier, locationName, callback);
     }
 };
 
-midgardCreate.Image.showSelectDialog = function(identifier, callback) {
-    midgardCreate.Image.prepareSelectDialog(identifier, callback);
+midgardCreate.Image.showSelectDialog = function(identifier, locationName, callback) {
+    midgardCreate.Image.prepareSelectDialog(identifier, locationName, callback);
     midgardCreate.Image.imageSelectDialog.dialog('open');
     midgardCreate.Image.searchImages('', callback);
 };
 
-midgardCreate.Image.prepareUploadTarget = function(identifier, callback) {
+midgardCreate.Image.prepareUploadTarget = function(identifier, locationName, callback) {
     var uploadPlaceholder = jQuery('<div id="midgardmvc-image-upload"><h2>Add new image</h2><img id="midgardmvc-image-upload-target" src="/midgardmvc-static/midgardmvc_helper_attachmentserver/placeholder.png" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" /></div>');
     midgardCreate.Image.imageSelectDialog.prepend(uploadPlaceholder);
     var placeholderElement = document.getElementById('midgardmvc-image-upload');
@@ -97,6 +97,12 @@ midgardCreate.Image.prepareUploadTarget = function(identifier, callback) {
                 var form = new FormData();
                 form.append('file', event.target.file);
                 form.append('parentguid', identifier);
+
+                if (locationName)
+                {
+                    form.append('locationname', locationName);
+                }
+
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/mgd:create/image/upload/', false);
                 xhr.onreadystatechange = function(event) {
@@ -111,7 +117,8 @@ midgardCreate.Image.prepareUploadTarget = function(identifier, callback) {
                         url: data.image.url,
                         title: data.image.title,
                         name: data.image.name,
-                        guid: data.image.guid
+                        guid: data.image.guid,
+                        parentguid: data.image.parentguid
                     };
 
                     midgardCreate.Image.imageList.prepend(midgardCreate.Image.getImageListElement(imageInfo, callback));

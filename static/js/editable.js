@@ -42,6 +42,25 @@ midgardCreate.Editable.init = function() {
     midgardCreate.Editable.objectActions = jQuery('<div id="midgardcreate-objectactions"></div>').hide();
     jQuery('#midgard-bar .toolbarcontent-left').append(midgardCreate.Editable.objectActions);
 
+    if (!midgardCreate.Editable.imageButtons) {
+        // Insert image button
+        var insertLinkButton = new GENTICS.Aloha.ui.Button({
+            'iconClass' : 'GENTICS_button midgardCreate_button_img',
+            'size' : 'small',
+            'onclick' : function (element, event) { 
+                midgardCreate.Image.showSelectDialog(midgardCreate.Editable.currentObject, midgardCreate.Editable.insertImage);
+            },
+            'toggle' : false
+        });
+        GENTICS.Aloha.FloatingMenu.addButton(
+            'GENTICS.Aloha.continuoustext',
+            insertLinkButton,
+            'Insert',
+            1
+        );
+        midgardCreate.Editable.imageButtons = true;
+    }
+
     if (Modernizr.sessionstorage) {
         // Check if user is in editing state
         var editorState = sessionStorage.getItem('midgardmvc_ui_create_state');
@@ -156,25 +175,6 @@ midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
     });
 
     midgardCreate.Editable.objects[midgardCreate.Editable.objects.length] = editableObject;
-
-    if (!midgardCreate.Editable.imageButtons) {
-        // Insert image button
-        var insertLinkButton = new GENTICS.Aloha.ui.Button({
-            'iconClass' : 'GENTICS_button midgardCreate_button_img',
-            'size' : 'small',
-            'onclick' : function (element, event) { 
-                midgardCreate.Image.showSelectDialog(midgardCreate.Editable.currentObject, midgardCreate.Editable.insertImage);
-            },
-            'toggle' : false
-        });
-        GENTICS.Aloha.FloatingMenu.addButton(
-            'GENTICS.Aloha.continuoustext',
-            insertLinkButton,
-            'Insert',
-            1
-        );
-        midgardCreate.Editable.imageButtons = true;
-    }
 };
 
 midgardCreate.Editable.enableEditables = function(transfer) {
