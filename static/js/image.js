@@ -36,7 +36,9 @@ midgardCreate.Image.searchImages = function(searchTerm, callback) {
         success: function(data) {
             midgardCreate.Image.variants = data.variants;
             jQuery.each(data.images, function(imageId, imageInfo) {
-                midgardCreate.Image.imageList.append(midgardCreate.Image.getImageListElement(imageInfo, callback));
+                var imageElement = midgardCreate.Image.getImageListElement(imageInfo, callback);
+                imageElement.hide().fadeIn();
+                midgardCreate.Image.imageList.append(imageElement);
             });
         }
     });
@@ -44,11 +46,12 @@ midgardCreate.Image.searchImages = function(searchTerm, callback) {
 
 midgardCreate.Image.prepareSelectDialog = function(identifier, locationName, callback) {
     var dialogOptions = {
-        show: 'drop',
-        hide: 'drop',
+        show: 'fade',
+        hide: 'fade',
         title: 'Choose an image',
         height: 300,
-        width: 400
+        width: 400,
+        zIndex: 12000
     };
     midgardCreate.Image.imageSelectDialog = jQuery('<div id="midgardmvc-image"></div>');
 
@@ -134,16 +137,21 @@ midgardCreate.Image.prepareUploadTarget = function(identifier, locationName, cal
     placeholderElement.addEventListener('dragenter', function(event) {
         event.stopPropagation();
         event.preventDefault();
+        console.log("Enter");
+        jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
     }, true);
 
     placeholderElement.addEventListener('dragleave', function(event) {
         event.stopPropagation();
         event.preventDefault();
+        console.log("Leave");
+        jQuery('#midgardmvc-image-upload').removeClass('midgardmvc-image-hover');
     }, true);
 
     placeholderElement.addEventListener('dragover', function(event) {
         event.stopPropagation();
         event.preventDefault();
+        jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
     }, true);
 };
 
@@ -156,11 +164,12 @@ midgardCreate.Image.showImageDialog = function(imageInfo, imageVariants, callbac
     }
 
     var dialogOptions = {
-        show: 'drop',
-        hide: 'drop',
+        show: 'fade',
+        hide: 'fade',
         title: 'Image: ' + imageInfo.title,
         height: 300,
         width: 400,
+        zIndex: 12000
     };
     midgardCreate.Image.imageDialog = jQuery('<div id="midgardmvc-image-details"></div>');
 

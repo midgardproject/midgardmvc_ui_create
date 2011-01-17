@@ -34,13 +34,12 @@ midgardCreate.Editable.init = function() {
     // midgardCreate.Editable.saveButton.button({disabled: true});
 
     // Add Edit toggle to the toolbar
-    midgardCreate.Editable.editButton = jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>').button();
-    //midgardCreate.toolbar.append(midgardCreate.Editable.editButton);
-    jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.editButton);
+    jQuery('#midgard-bar .toolbarcontent-right').append(jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>'))
+    midgardCreate.Editable.editButton = jQuery('#midgardcreate-edit').button();
 
     // Add an area for object actions
     midgardCreate.Editable.objectActions = jQuery('<div id="midgardcreate-objectactions"></div>').hide();
-    jQuery('#midgard-bar .toolbarcontent-left').append(midgardCreate.Editable.objectActions);
+    jQuery('#midgard-bar .toolbarcontent-center').append(midgardCreate.Editable.objectActions);
 
     if (!midgardCreate.Editable.imageButtons) {
         // Insert image button
@@ -69,6 +68,7 @@ midgardCreate.Editable.init = function() {
             // Don't transfer when enabled from session
             midgardCreate.Editable.enableEditables(false);
             midgardCreate.Editable.editButton.attr('checked', true);
+            midgardCreate.Editable.editButton.button('refresh');
         }
     }
 
@@ -103,7 +103,7 @@ midgardCreate.Editable.activateEditable = function(editableObject, propertyName)
         url: url,
         dataType: 'json',
         success: function(data) {
-            var objectLabel = jQuery('<button>' + data.object.type + '</button>').button();
+            var objectLabel = jQuery('<a>' + data.object.type + '</a>');
             midgardCreate.Editable.objectActions.append(objectLabel);
 
             jQuery.each(data.state.actions, function(action, actionLabel) {
