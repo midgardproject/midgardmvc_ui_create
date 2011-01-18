@@ -111,8 +111,9 @@ Initialization of Midgard Create is handled inside a jQuery callback that is run
 
 <<midgard create initialization>>=
 jQuery(document).ready(function() {
+    <<define midgardCreate>>
     <<define toolbar>>
-}
+});
 @
 
 For the toolbar we also need jQuery UI:
@@ -254,6 +255,9 @@ if (Modernizr.sessionstorage) {
 To put things together, the toolbar defitions are called from a JavaScript file that is included into page when Midgard Create loads:
 
 <<static/js/createNew.js>>=
+/**
+ * Midgard Create initialization
+ */
 <<notice about literate programming>>
 
 // Include dependencies of Midgard Create
