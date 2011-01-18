@@ -219,6 +219,14 @@ if (Modernizr.sessionstorage) {
 }
 @
 
+If SessionStorage is not available we will default on the full toolbar being shown:
+
+<<define toolbar>>=
+else {
+    midgardCreate.toolbar.minimized.hide();
+}
+@
+
 As SessionStorage is not available in all browsers we use the Modernizr library for checking whether to use it or now:
 
 <<midgard create dependencies>>=
@@ -239,4 +247,45 @@ When showing the full toolbar, we store the state to HTML5 SessionStorage:
 if (Modernizr.sessionstorage) {
     sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'full');
 }
+@
+
+#### The full toolbar
+
+To put things together, the toolbar defitions are called from a JavaScript file that is included into page when Midgard Create loads:
+
+<<static/js/createNew.js>>=
+<<notice about literate programming>>
+
+// Include dependencies of Midgard Create
+<<midgard create dependencies>>
+
+// Initialize Midgard Create
+<<midgard create initialization>>
+@
+
+## Development and contributing
+
+Midgard Create is a free software library written in JavaScript and PHP5. It is managed in the Git distributed version control system.
+
+### Reporting issues
+
+Issues about Midgard Create can be reported to the GitHub interface in <https://github.com/bergie/midgardmvc_ui_create/issues>
+
+### Literate programming
+
+The library is developed using a hybrid model of [literate programming](http://en.wikipedia.org/wiki/Literate_programming) and regular coding. The parts that have been programmed using the literate model are managed in this document, and the code from them is extracted using the [noweb.php](https://github.com/bergie/noweb.php) tool. The resulting files will carry the following notice:
+
+<<notice about literate programming>>=
+/**
+ * This file is generated automatically from Literate Programming code
+ * stored in the README.txt documentation file in this repository.
+ * Instead of modifying this file directly, modify the corresponding
+ * code chunks in README.txt and regenerate it using the tangle command
+ * of noweb.php:
+ *
+ *    $ noweb.php tangle README.txt
+ *
+ * Read more about the concept in:
+ * @link http://bergie.iki.fi/blog/literate_programming_with_php/
+ */
 @
