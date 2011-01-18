@@ -7,6 +7,8 @@ Midgard Create is a web editing tool (commonly known as [Content Management Syst
 
 The user interaction concept implemented by Midgard Create is based on easy discoverability, and the ability to manage all content shown on a web page.
 
+Midgard Create user interface is constructed dynamically based on introspecting the HTML5 content of a page. The actual Midgard Create is loaded via a JavaScript include, after which all other interaction components appear as needed.
+
 ### Edit mode
 
 When accessing a website running Midgard Create, users can either interact with the site in _Browse Mode_ or _Edit Mode_. In Browse Mode the website behaves exactly in the same way as it does for regular users, meaning that no content is editable. However, there is a Midgard Create Toolbar available.
@@ -36,7 +38,7 @@ Individual properties of the content item that are being displayed need also to 
 
 * `property`: The property being displayed, either `mgd:<property name>` or the RDF property name
 
-Simple article example:
+Simple article example in HTML5 and RDFa:
 
     <article about="urn:uuid:b22842f81e3511e08dcec7b8cfa942754275" typeof="http://rdfs.org/sioc/ns#Post"> 
         <h1 property="dcterms:title">Article title</h1>
@@ -49,7 +51,7 @@ Simple article example:
 
 In addition to individual content items, Midgard Create can also be used to manage Collections of them. With Collections the user interface provides functionality for adding new items of the type managed by a Collection.
 
-Article listing example:
+Article listing example in HTML5 and RDFa:
 
     <ol mgd:type="container" mgd:order="desc" mgd:baseurl="/news/"> 
         <li>
@@ -61,7 +63,23 @@ Article listing example:
 
 ### Placed images
 
+In addition to regular content items, web pages commonly have specific places for images to be displayed. If an image is missing, users in Edit mode will see a placeholder image displayed. Clicking it allows them to associate an existing Image asset from the system to that place, or to drag-and-drop a new image from their computer.
+
+Placed images require the identifier of a content item holding them ("a parent GUID"), and a location name to distinquish them from regular images on a page.
+
+Example of a placed image in HTML5 and RDFa:
+
+    <img src='/midgardmvc-static/midgardmvc_helper_attachmentserver/placeholder.png' width='142' height='142' mgd:variant="thumbnail"  mgd:parentguid='2fad3ae4226411e0a12b755061092eea2eea' mgd:locationname='lift_image' typeof='http://purl.org/dc/dcmitype/Image' mgd:placeholder='true' /> 
+
 ### Workflows
+
+Every content item may have multiple Workflows associated with it. The Workflows are defined globally for the Midgard Create system. When a content item is activated in editing mode (by clicking one of its content areas), the Workflows available for that item appear as buttons in the Toolbar.
+
+Typical workflows include:
+
+* Deleting content items
+* Publishing content items
+* Unpublishing content items
 
 ## System architecture
 
@@ -74,3 +92,151 @@ Midgard Create builds on a robust basis of web system components to keep the cod
 * User interface: the [jQuery UI](http://jqueryui.com/) library is used for rendering the Midgard Create user interfaces
 * HTML5 editor: [Aloha Editor](http://aloha-editor.org/) is used for content editing
 * Workflow system: [Zeta Components Workflow](http://incubator.apache.org/zetacomponents/documentation/trunk/Workflow/tutorial.html) is used for server-side workflow definitions
+
+## Implementation of the user interaction
+
+User interaction is implemented in JavaScript with jQuery and jQuery UI.
+
+All Midgard Create JavaScript functionality resides under a `midgardCreate` object. When Midgard Create is loaded we define it:
+
+<<define midgardCreate>>=
+if (typeof midgardCreate == 'undefined') {
+    midgardCreate = {};
+}
+@
+
+### Loading Midgard Create
+
+Initialization of Midgard Create is handled inside a jQuery callback that is run when the page load is completed:
+
+<<midgard create initialization>>=
+jQuery(document).ready(function() {
+    <<define toolbar>>
+}
+@
+
+For the toolbar we also need jQuery UI:
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
+@
+
+The toolbar relies on a Midgard jQuery UI theme and its own additional CSS rules:
+
+<<midgard create dependencies>>=
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/midgardbar.css">');
+@
+
+### Toolbar
+
+The toolbar is dynamically populated to the DOM of the current page. First we define a toolbar object to hold our Toolbar functionality:
+
+<<define toolbar>>=
+midgardCreate.toolbar = {};
+@
+
+There are two versions of toolbar, a minimized version that stays out of the way of regular page content:
+
+<<define toolbar>>=
+midgardCreate.toolbar.minimized = jQuery('<a id="midgard-bar-minimized" class="ui-widget-showbut"></a>');
+jQuery('body').append(midgardCreate.toolbar.minimized);
+@
+
+And a full version that provides all buttons needed for user interaction:
+
+<<define toolbar>>=
+midgardCreate.toolbar.full = jQuery('<div id="midgard-bar"><div class="ui-widget-content"><div class="toolbarcontent"><div class="midgard-logo-button"><a id="midgard-bar-hidebutton" class="ui-widget-hidebut"></a></div><div class="toolbarcontent-left"></div><div class="toolbarcontent-center"></div><div class="toolbarcontent-right"></div></div></div>');
+jQuery('body').append(midgardCreate.toolbar.full);
+@
+
+#### Hiding and displaying the toolbar
+
+When the minimized toolbar is clicked we will display the full toolbar:
+
+<<define toolbar>>=
+midgardCreate.toolbar.minimized.bind('click', function() {
+    midgardCreate.toolbar.show();
+    return false;
+});
+@
+
+And when the Midgard Create logo in the full toolbar is clicked we switch to the minimized toolbar:
+
+<<define toolbar>>=
+var hideButton = jQuery('#midgard-bar-hidebutton');
+hideButton.bind('click', function() {
+    midgardCreate.toolbar.hide();
+    return false;
+});
+@
+
+The toolbar showing method is wrapped into a function:
+
+<<define toolbar>>=
+midgardCreate.toolbar.show = function() {
+   <<define toolbar show>>
+}
+@
+
+And similarly the hiding method:
+
+<<define toolbar>>=
+midgardCreate.toolbar.hide = function() {
+    <<define toolbar hide>>
+}
+@
+
+Hiding the toolbar slides the full toolbar up outside of the screen and slides the minimized toolbar in, providing a smooth transition:
+
+<<define toolbar hide>>=
+midgardCreate.toolbar.full.slideToggle();
+midgardCreate.toolbar.minimized.slideToggle();
+@
+
+Showing the toolbar slides the minimized toolbar up and the full toolbar down into the top of the screen:
+
+<<define toolbar show>>=
+midgardCreate.toolbar.minimized.slideToggle();
+midgardCreate.toolbar.full.slideToggle();
+@
+
+#### Toolbar sessioning
+
+When toolbar loads we will check from HTML5 SessionStorage whether the user had the toolbar minimized or shown fully. This way the toolbar will stay in same state between page loads:
+
+<<define toolbar>>=
+if (Modernizr.sessionstorage) {
+    var toolbarState = sessionStorage.getItem('midgardmvc_ui_create_toolbar');
+    if (toolbarState == 'minimized')
+    {
+        midgardCreate.toolbar.full.hide();
+    }
+    else
+    {
+        midgardCreate.toolbar.minimized.hide();
+    }
+}
+@
+
+As SessionStorage is not available in all browsers we use the Modernizr library for checking whether to use it or now:
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
+@
+
+When hiding the toolbar, we store the minimized state to HTML5 SessionStorage
+
+<<define toolbar hide>>=
+if (Modernizr.sessionstorage) {
+    sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'minimized');
+}
+@
+
+When showing the full toolbar, we store the state to HTML5 SessionStorage:
+
+<<define toolbar show>>=
+if (Modernizr.sessionstorage) {
+    sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'full');
+}
+@
