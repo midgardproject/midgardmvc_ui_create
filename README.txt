@@ -93,6 +93,65 @@ Midgard Create builds on a robust basis of web system components to keep the cod
 * HTML5 editor: [Aloha Editor](http://aloha-editor.org/) is used for content editing
 * Workflow system: [Zeta Components Workflow](http://incubator.apache.org/zetacomponents/documentation/trunk/Workflow/tutorial.html) is used for server-side workflow definitions
 
+## Site building
+
+Websites managed with Midgard Create are built in the same way as regular Midgard MVC applications. This means that they consist of a tree of folders, each managed by a component. A component is a piece of software that provides the URL handling and corresponding templates for an area of a website. Examples of components include news listings, event calendars and product catalogues.
+
+A typical Midgard Create website is run from a _Website component_ that provides the application manifest and default display templates for that website. Here we will describe such a component.
+
+### Application manifest
+
+Application manifest (usually called `application.yml`) is a configuration file driving a Midgard MVC web application. In the case of a Midgard Create -powered website, the application.yml provides the list of components to be enabled for that site, the base folder hierarchy, and default configurations for the Midgard MVC environment, like the authentication system used with that website.
+
+#### Website node hierarchy
+
+Websites are built by defining a hierarchy of folders that provide the content and functionality of the site. In a simple website or web application, the hierarchy would consist of just one folder providing all the functionality, but more complex websites can be built with hundreds of folders.
+
+With Midgard MVC, folders can be stored in either configuration or the content repository. When they're stored in configuration they cannot be modified by the user, whereas folders stored in the repository can be changed and added to. This serves to distinquish websites where the hierarchy will stay static and will only be changed by site developers from sites where the folder structure itself is considered content.
+
+Running the folder hierarchy from configuration (and so not modifiable by the user) can be accomplished by using the `configuration` hierarchy provider. User-modifiable folder structure can be handled by the `midgard2` hierarchy provider, enabled in the following way:
+
+<<website application configuration>>=
+providers_hierarchy: midgard2
+@
+
+The folders defined in application.yml should provide all the necessary functionality for running the website. This makes it easy for developers working on the website to deploy a functional copy on their own machines, and for testing purposes. It also makes it possible to define websites as distributable applications that new users can easily install.
+
+Folder configuration begins by defining a _Root node_, the folder running the main directory of the website, for example _http://example.net/_. In our example we'll leave the root node to be managed by the Midgard MVC core component that only serves a single content page from that node:
+
+<<website root node>>=
+title: Example Corporation
+component: midgardmvc_core
+content: <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortut laoreet dolore magna aliquam er volutpat. Ut wisi enim ad minim veniam, quis nostrud my nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl u.</p>
+@
+
+All folders under the root node as configured as _children_ of that node:
+
+<<website root node>>=
+children:
+    <<website subnodes>>
+@
+
+In this case we'll show a news listing in a folder `/news`:
+
+<<website subnodes>>=
+title: News
+component: net_example_news
+content: ''
+@
+
+#### Component installation
+
+<<website application configuration>>=
+providers_component: midgardmvc
+@
+
+#### Running the website
+
+<<website application configuration>>=
+services_dispatcher: appserv
+@
+
 ## Implementation of the user interaction
 
 User interaction is implemented in JavaScript with jQuery and jQuery UI.
@@ -112,13 +171,18 @@ Initialization of Midgard Create is handled inside a jQuery callback that is run
 <<midgard create initialization>>=
 jQuery(document).ready(function() {
     <<define midgardCreate>>
+    <<define effects>>
     <<define toolbar>>
+    <<initialize collections>>
+    <<initialize images>>
+    <<initialize image placeholders>>
+    <<initialize editables>>
 });
 @
 
 For the toolbar we also need jQuery UI:
 
-<<midgard create dependencies>>=
+<<midgard create dependencies ui>>=
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
 @
 
@@ -127,6 +191,16 @@ The toolbar relies on a Midgard jQuery UI theme and its own additional CSS rules
 <<midgard create dependencies>>=
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/midgardbar.css">');
+@
+
+### Effects
+
+Midgard Create uses jQuery effects for making all transitions between stages and new elements appearing clearer to the user.
+
+The system highlights elements that change based on user interaction. The highlight is used for example when an item becomes editable by the user when entering the Edit mode:
+
+<<define effects>>=
+midgardCreate.highlightcolor = '#67cc08';
 @
 
 ### Toolbar
@@ -254,7 +328,7 @@ if (Modernizr.sessionstorage) {
 
 To put things together, the toolbar defitions are called from a JavaScript file that is included into page when Midgard Create loads:
 
-<<static/js/createNew.js>>=
+<<static/js/create.js>>=
 /**
  * Midgard Create initialization
  */
@@ -262,9 +336,54 @@ To put things together, the toolbar defitions are called from a JavaScript file 
 
 // Include dependencies of Midgard Create
 <<midgard create dependencies>>
+<<midgard create dependencies ui>>
 
 // Initialize Midgard Create
 <<midgard create initialization>>
+@
+
+### Editables
+
+To make content marked with appropriate RDFa mark-up editable, we need to include the Editables tool:
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/editable.js"></script>');
+@
+
+The Editables tool needs to be initialized to locate the editable areas:
+
+<<initialize editables>>=
+midgardCreate.Editable.init();
+@
+
+### Collections
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/containers.js"></script>');
+@
+
+<<initialize collections>>=
+midgardCreate.Containers.init();
+@
+
+### Image handling
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/image.js"></script>');
+@
+
+<<initialize images>>=
+midgardCreate.Image.init();
+@
+
+### Placed images
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplaceholders.js"></script>');
+@
+
+<<initialize image placeholders>>=
+midgardCreate.ImagePlaceholders.init();
 @
 
 ## Development and contributing
