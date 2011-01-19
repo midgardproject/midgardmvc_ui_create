@@ -14,7 +14,6 @@ midgardCreate.Containers.hideContainerPlaceholders = function() {
     var placeHolders = jQuery('[about="mgd:containerPlaceholder"]');
     jQuery.each(placeHolders, function(index, placeHolderElement)
     {
-        console.log(placeHolderElement);
         jQuery(placeHolderElement).hide();
     });
 };
