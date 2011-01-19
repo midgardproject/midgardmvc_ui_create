@@ -154,7 +154,28 @@ services_dispatcher: appserv
 
 ## Implementation of the user interaction
 
-Midgard Create ships as a Midgard MVC _injector_, meaning that websites where it is enabled will run it automatically.
+Midgard Create consists of two sides: server-side functionality implemented in PHP5 using the Midgard MVC framework, and client-side functionality implemented in JavaScript and jQuery.
+
+### Server-side initialization of Midgard Create
+
+On the server side, Midgard Create is implemented as a Midgard MVC injector, meaning that it will be automatically loaded on every page:
+
+<<injector.php>>=
+<?php
+<<notice about literate programming>>
+class midgardmvc_ui_create_injector
+{
+    public function inject_process(midgardmvc_core_request $request)
+    {
+        <<midgard create injector>>
+    }
+
+    public function can_use()
+    {
+        <<midgard create permissions check>>
+    }
+}
+@
 
 When loaded, Midgard Create will add itself to the component chain in order to be able to intercept requests to its own routes and to load some additional configurations:
 
@@ -188,11 +209,9 @@ midgardmvc_core::get_instance()->head->enable_jquery();
 midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
 @
 
-The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. First we load jQuery UI:
+### Client-side initialization of Midgard Create
 
-<<midgard create dependencies ui>>=
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
-@
+### Loading Midgard Create
 
 All Midgard Create JavaScript functionality resides under a `midgardCreate` object. When Midgard Create is loaded we define it:
 
@@ -202,13 +221,34 @@ if (typeof midgardCreate == 'undefined') {
 }
 @
 
+Client-side initialization of Midgard Create is handled inside a jQuery callback that is run when the page load is completed:
+
+<<midgard create initialization>>=
+jQuery(document).ready(function() {
+    <<define midgardCreate>>
+    <<define capability check>>
+    <<define effects>>
+    <<define toolbar>>
+    <<initialize collections>>
+    <<initialize images>>
+    <<initialize image placeholders>>
+    <<initialize editables>>
+});
+@
+
+The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. First we load jQuery UI:
+
+<<midgard create dependencies ui>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
+@
+
 ### Permissions and browser capabilities
 
 There are two levels of enabling Midgard Create for users: permissions and browser capabilities. Permissions is a mechanism for checking whether a user is allowed to use Midgard Create at all, and browser capabilities determine what Midgard Create features are available to the user.
 
 #### Midgard Create usage permissions
 
-The first check with Midgard Create permissions is whether the current user has a valid session. Only authenticated users are allowed to use Midgard Create:
+The first check with Midgard Create permissions is whether the current user has a valid session. Only authenticated users are allowed to use Midgard Create. These permission checks are run on the server side:
 
 <<midgard create permissions check>>=
 if (!midgardmvc_core::get_instance()->authentication->is_user())
@@ -220,7 +260,7 @@ if (!midgardmvc_core::get_instance()->authentication->is_user())
 The other check is about user levels. Midgard Content Repository users can be either _end users_ or _admins_. End users are generally registered users of a site that don't have access to content management features.
 
 <<midgard create permissions check>>=
-if (midgardmvc_core::get_instance()->authentication->get_user()->usertype != MIDGARD_USER_TYPE_USER)
+if (midgardmvc_core::get_instance()->authentication->get_user()->usertype == MIDGARD_USER_TYPE_USER)
 {
     // We distinquish between CMS users and end-users by ADMIN vs. USER level
     return false;
@@ -310,32 +350,6 @@ if (typeof FormData == 'undefined') {
 return Modernizr.draganddrop;
 @
 
-### Loading Midgard Create
-
-Initialization of Midgard Create is handled inside a jQuery callback that is run when the page load is completed:
-
-<<midgard create initialization>>=
-jQuery(document).ready(function() {
-    <<define midgardCreate>>
-    <<define capability check>>
-    <<define effects>>
-    <<define toolbar>>
-    <<initialize collections>>
-    <<initialize images>>
-    <<initialize image placeholders>>
-    <<initialize editables>>
-});
-@
-
-
-
-The toolbar relies on a Midgard jQuery UI theme and its own additional CSS rules:
-
-<<midgard create dependencies>>=
-document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
-document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/midgardbar.css">');
-@
-
 ### Effects
 
 Midgard Create uses jQuery effects for making all transitions between stages and new elements appearing clearer to the user.
@@ -366,6 +380,13 @@ And a full version that provides all buttons needed for user interaction:
 <<define toolbar>>=
 midgardCreate.toolbar.full = jQuery('<div id="midgard-bar"><div class="ui-widget-content"><div class="toolbarcontent"><div class="midgard-logo-button"><a id="midgard-bar-hidebutton" class="ui-widget-hidebut"></a></div><div class="toolbarcontent-left"></div><div class="toolbarcontent-center"></div><div class="toolbarcontent-right"></div></div></div>');
 jQuery('body').append(midgardCreate.toolbar.full);
+@
+
+The toolbar relies on a Midgard jQuery UI theme and its own additional CSS rules:
+
+<<midgard create dependencies>>=
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/midgardbar.css">');
 @
 
 #### Hiding and displaying the toolbar
