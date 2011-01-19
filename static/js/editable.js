@@ -43,7 +43,7 @@ midgardCreate.Editable.init = function() {
     midgardCreate.Editable.objectActions = jQuery('<div id="midgardcreate-objectactions"></div>').hide();
     jQuery('#midgard-bar .toolbarcontent-center').append(midgardCreate.Editable.objectActions);
 
-    if (Modernizr.sessionstorage) {
+    if (midgardCreate.checkCapability('sessionstorage')) {
         // Check if user is in editing state
         var editorState = sessionStorage.getItem('midgardmvc_ui_create_state');
         if (editorState == 'edit')
@@ -175,7 +175,7 @@ midgardCreate.Editable.enableEditables = function(transfer) {
         }
     });
 
-    if (Modernizr.sessionstorage) {
+    if (midgardCreate.checkCapability('sessionstorage')) {
         // Set session to editing state
         sessionStorage.setItem('midgardmvc_ui_create_state', 'edit');
     }
@@ -186,10 +186,12 @@ midgardCreate.Editable.enableEditables = function(transfer) {
 
 midgardCreate.Editable.disableEditables = function() {
 
-    if (Modernizr.sessionstorage) {
+    if (midgardCreate.checkCapability('sessionstorage')) {
         // Remove editing state
         sessionStorage.removeItem('midgardmvc_ui_create_state');
     }
+
+    midgardCreate.Editable.objectActions.empty();
 
     midgardCreate.Containers.disableContainers();
     midgardCreate.ImagePlaceholders.disablePlaceholders();
