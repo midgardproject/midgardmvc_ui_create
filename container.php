@@ -18,14 +18,22 @@ class midgardmvc_ui_create_container extends SplObjectStorage
     public function attach(midgard_object $object, $data = null)
     {
         // We're attaching real objects to container, forget about placeholder
-        if ($this->placeholder)
+        if ($object == $this->placeholder)
         {
-            $this->detach($this->placeholder);
-            $this->placeholder = null;
+            $identifier = 'mgd:containerPlaceholder';
+        }
+        else
+        {
+            $identifier = null;
+            if ($this->placeholder)
+            {
+                $this->detach($this->placeholder);
+                $this->placeholder = null;
+            }
         }
 
         // Add RDFmapper to the object
-        $object->rdfmapper = new midgardmvc_ui_create_rdfmapper($object);
+        $object->rdfmapper = new midgardmvc_ui_create_rdfmapper($object, $identifier);
 
         parent::attach($object, $data);
     }
@@ -47,7 +55,9 @@ class midgardmvc_ui_create_container extends SplObjectStorage
             return;
         }
 
-        $this->attach($object);
+        $object->guid = 'placeholder';
+
         $this->placeholder = $object;
+        $this->attach($object);
     }
 }

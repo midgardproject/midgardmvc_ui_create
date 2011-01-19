@@ -5,12 +5,17 @@ class midgardmvc_ui_create_rdfmapper
     public $about = '';
     public $mgdschema = '';
 
-    public function __construct($mgdschema)
+    public function __construct($mgdschema, $identifier = null)
     {
         if (is_object($mgdschema))
         {
             $this->about = "urn:uuid:{$mgdschema->guid}";
             $mgdschema = get_class($mgdschema);
+        }
+
+        if ($identifier)
+        {
+            $this->about = $identifier;
         }
 
         $this->mgdschema = $mgdschema;

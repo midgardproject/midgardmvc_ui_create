@@ -6,6 +6,17 @@ midgardCreate.Containers = {};
 
 midgardCreate.Containers.init = function() {
     midgardCreate.Containers.containers = [];
+
+    midgardCreate.Containers.hideContainerPlaceholders();
+};
+
+midgardCreate.Containers.hideContainerPlaceholders = function() {
+    var placeHolders = jQuery('[about="mgd:containerPlaceholder"]');
+    jQuery.each(placeHolders, function(index, placeHolderElement)
+    {
+        console.log(placeHolderElement);
+        jQuery(placeHolderElement).hide();
+    });
 };
 
 midgardCreate.Containers.enableContainers = function() {
@@ -85,6 +96,7 @@ midgardCreate.Containers.enableContainers = function() {
 midgardCreate.Containers.prepareNewChild = function(childElement, containerElement) {
     // Clear any RDF identifiers
     var childElement = jQuery(childElement);
+    childElement.show();
     childElement.attr('about', '');
 
     // Add container base URL
