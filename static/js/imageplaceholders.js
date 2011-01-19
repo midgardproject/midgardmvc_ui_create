@@ -21,7 +21,7 @@ midgardCreate.ImagePlaceholders.enablePlaceholders = function() {
         midgardCreate.ImagePlaceholders.placeHolders[midgardCreate.ImagePlaceholders.placeHolders.length] = placeHolder;
 
         jQuery(placeHolder.element).bind('click', function() {
-             midgardCreate.Image.showSelectDialog(placeHolder.parentGuid, placeHolder.locationName, midgardCreate.ImagePlaceholders.insertImage);
+             midgardCreate.Image.showSelectDialog(placeHolder.parentGuid, placeHolder.locationName, midgardCreate.ImagePlaceholders.insertImage, false);
         });
     });
 };
@@ -34,9 +34,7 @@ midgardCreate.ImagePlaceholders.disablePlaceholders = function() {
 };
 
 midgardCreate.ImagePlaceholders.insertImage = function(imageInfo) {
-    console.log(imageInfo);
     jQuery.each(midgardCreate.ImagePlaceholders.placeHolders, function(index, placeHolder) {
-        console.log(placeHolder);
         if (placeHolder.parentGuid != imageInfo.parentguid) {
             return;
         }
@@ -46,22 +44,4 @@ midgardCreate.ImagePlaceholders.insertImage = function(imageInfo) {
         placeHolderElement = jQuery(placeHolder.element);
         placeHolderElement.attr('src', imageInfo.url);
     });
-};
-
-midgardCreate.ImagePlaceholders.showForm = function(placeholderElement) {
-    var placeholderElement = jQuery(placeholderElement);
-    var objectGuid = placeholderElement.attr('mgd:parentguid');
-    var locationName = placeholderElement.attr('mgd:locationname');
-    var variant = placeholderElement.attr('mgd:variant');
-
-    var uploadForm = jQuery('<form action="/mgd:attachment/upload/" method="post" enctype="multipart/form-data"></form>');
-    jQuery('<input name="parentguid" type="hidden" value="' + objectGuid + '" />').appendTo(uploadForm);
-    jQuery('<input name="locationname" type="hidden" value="' + locationName + '" />').appendTo(uploadForm);
-    jQuery('<input name="variant" type="hidden" value="' + variant + '" />').appendTo(uploadForm);
-    jQuery('<input name="file" type="file" />').appendTo(uploadForm);
-    jQuery('<input name="submit" value="Upload" type="submit" />').button().appendTo(uploadForm);
-
-    var uploadDialog = jQuery('<div id="midgardmvc-upload" title="Add an image"></div>').dialog();
-    uploadDialog.append(uploadForm);
-    uploadDialog.dialog('open');
 };
