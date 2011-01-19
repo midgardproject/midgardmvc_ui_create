@@ -211,8 +211,6 @@ midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midg
 
 ### Client-side initialization of Midgard Create
 
-### Loading Midgard Create
-
 All Midgard Create JavaScript functionality resides under a `midgardCreate` object. When Midgard Create is loaded we define it:
 
 <<define midgardCreate>>=
@@ -236,7 +234,7 @@ jQuery(document).ready(function() {
 });
 @
 
-The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. First we load jQuery UI:
+The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. For this, we load jQuery UI:
 
 <<midgard create dependencies ui>>=
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
@@ -501,6 +499,8 @@ To put things together, the toolbar defitions are called from a JavaScript file 
 @
 
 ### Editables
+
+The Editable functionality in Midgard Create is implemented using [Aloha Editor](http://aloha-editor.com).
 
 To make content marked with appropriate RDFa mark-up editable, we need to include the Editables tool:
 

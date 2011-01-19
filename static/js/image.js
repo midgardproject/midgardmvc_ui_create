@@ -1,4 +1,4 @@
-//document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/jquery.filedrop.js"></script>');
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/insertimage.css">');
 
 if (typeof midgardCreate == 'undefined') {
     midgardCreate = {};
