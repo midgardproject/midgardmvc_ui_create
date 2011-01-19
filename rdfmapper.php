@@ -9,7 +9,10 @@ class midgardmvc_ui_create_rdfmapper
     {
         if (is_object($mgdschema))
         {
-            $this->about = "urn:uuid:{$mgdschema->guid}";
+            if ($mgdschema->guid)
+            {
+                $this->about = "urn:uuid:{$mgdschema->guid}";
+            }
             $mgdschema = get_class($mgdschema);
         }
 

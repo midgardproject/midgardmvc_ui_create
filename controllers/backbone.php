@@ -30,7 +30,7 @@ class midgardmvc_ui_create_controllers_backbone
             $form_identifier .= $identifier;
         }
         $this->object = midgardmvc_ui_create_rdfmapper::load_object($mgdschema, $identifier);
-        $this->rdfmapper = new midgardmvc_ui_create_rdfmapper(get_class($this->object));
+        $this->rdfmapper = new midgardmvc_ui_create_rdfmapper($this->object);
     }
 
     public function get_object(array $args)
@@ -42,6 +42,7 @@ class midgardmvc_ui_create_controllers_backbone
     public function post_object(array $args)
     {
         $this->load_object($args);
+        $data = $this->read_input();
         if ($this->object->guid)
         {
             throw new midgardmvc_exception_notfound("POST is only used for creating new objects");
@@ -53,6 +54,10 @@ class midgardmvc_ui_create_controllers_backbone
         $this->object->create();
         $this->leave_context();
 
+        // Refresh object
+        $this->object = midgard_object_class::get_object_by_guid($this->object->guid);
+        $this->rdfmapper = new midgardmvc_ui_create_rdfmapper($this->object);
+
         $this->object_to_json();
     }
 
@@ -62,12 +67,14 @@ class midgardmvc_ui_create_controllers_backbone
         $data = $this->read_input();
         if (!$this->object->guid)
         {
-            throw new midgardmvc_exception_notfound("POST is only used for updating existing objects");
+            throw new midgardmvc_exception_notfound("PUT is only used for updating existing objects");
         }
         $this->populate_object($data);
+
         $this->enter_context();
         $this->object->update();
         $this->leave_context();
+
         $this->object_to_json();
     }
 
@@ -82,6 +89,7 @@ class midgardmvc_ui_create_controllers_backbone
                 continue;
             }
             $form->$mgd_property->set_value($value);
+            $this->object->$mgd_property = $form->$mgd_property->get_value();
         }
     }
 

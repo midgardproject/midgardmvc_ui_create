@@ -7,6 +7,7 @@ document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plu
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Table/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Link/plugin.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplugin.js"></script>');
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/objectmanager.js"></script>');
 
 if (typeof midgardCreate == 'undefined') {
     midgardCreate = {};
@@ -114,12 +115,9 @@ midgardCreate.Editable.runWorkflow = function(editableObject, workflow) {
 }
 
 midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
-
     var editableObject = {};
-    editableObject.identifier = objectContainer.attr('about');
-    if (editableObject.identifier == 'urn:uuid:') {
-        editableObject.identifier = '';
-    }
+    editableObject.model = midgardCreate.objectManager.getInstanceForContainer(objectContainer);
+
     editableObject.type = objectContainer.attr('typeof');
     editableObject.baseurl = objectContainer.attr('mgd:baseurl');
     editableObject.container = objectContainer;
@@ -131,10 +129,7 @@ midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
 
     // Seek editable properties
     editableObject.properties = {};
-    var objectProperties = jQuery('*', objectContainer).filter(function() {
-        return jQuery(this).attr('property'); 
-    });
-    jQuery.each(objectProperties, function(index, objectProperty)
+    jQuery.each(jQuery('[property]', objectContainer), function(index, objectProperty)
     {
         var objectProperty = jQuery(objectProperty);
         var propertyName = objectProperty.attr('property');
@@ -144,12 +139,9 @@ midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
             aloha: new GENTICS.Aloha.Editable(objectProperty)
         };
 
-        // Subscribe to activation and deactivation events
+        // Subscribe to activation event
         GENTICS.Aloha.EventRegistry.subscribe(editableObject.properties[propertyName].aloha, 'editableActivated', function() {
             midgardCreate.Editable.activateEditable(editableObject, propertyName); 
-        });
-        GENTICS.Aloha.EventRegistry.subscribe(editableObject.properties[propertyName].aloha, 'editableDeactivated', function() {
-            midgardCreate.Editable.deactivateEditable(editableObject, propertyName);
         });
 
         objectProperty.effect('highlight', { color: midgardCreate.highlightcolor }, 3000);
@@ -212,24 +204,24 @@ midgardCreate.Editable.save = function () {
 
     // iterate all Midgard objects which have been made editable
     jQuery.each(midgardCreate.Editable.objects, function(objectIndex, editableObject) {
-
-        var saveObject = {
-            type: editableObject.type,
-            identifier: editableObject.identifier,
-            baseurl: editableObject.baseurl
-        };
-
         var objectModified = false;
-        jQuery.each(editableObject.properties, function(index, editableProperty) {
-            if (editableProperty.aloha.isModified())
-            {
-                saveObject[index] = editableProperty.aloha.getContents();
-                objectModified = true;
+        var modifiedProperties = {};
 
-                if (!transfered) {
-                    editableProperty.element.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
-                    transfered = true;
-                }
+        if (editableObject.baseurl) {
+            modifiedProperties.baseurl = editableObject.baseurl;
+        }
+
+        jQuery.each(editableObject.properties, function(index, editableProperty) {
+            if (!editableProperty.aloha.isModified())
+            {
+                return;
+            }
+            modifiedProperties[index] = editableProperty.aloha.getContents();
+            objectModified = true;
+
+            if (!transfered) {
+                editableProperty.element.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
+                transfered = true;
             }
         });
 
@@ -238,36 +230,11 @@ midgardCreate.Editable.save = function () {
             return true;
         }
 
-        // Send the edited fields to the form handler backend
-        var url = '/mgd:create/save/json';
-        jQuery.ajax({
-            url: url,
-            dataType: 'json',
-            data: saveObject,
-            type: 'POST',
-            success: function (response) {
-                if (!response) {
-                    return;
-                }
-                jQuery.each(editableObject.properties, function(index, editableProperty) {
-                    editableProperty.aloha.setUnmodified();
-                    editableObject.identifier = response.status.identifier;
-                    editableObject.container.attr('about', response.status.identifier);
-                });
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                try
-                {
-                    response = jQuery.parseJSON(xhr.responseText);
-                    message = response.status.message;
-                }
-                catch (e)
-                {
-                    message = xhr.statusText;
-                }
-                GENTICS.Aloha.Log.error("Midgard saving plugin", message);
-            },
-        });
+        editableObject.model.set(modifiedProperties);
+        Backbone.emulateHTTP = true;
+        Backbone.emulateJSON = true;
+        editableObject.model.save();
+        editableObject.container.attr('about', editableObject.model.id);
     });
 
     midgardCreate.Editable.saveButton.button('option', 'label', 'Save');
