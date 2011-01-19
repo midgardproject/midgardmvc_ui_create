@@ -9,6 +9,14 @@ requires_pear:
     Workflow:
         channel: components.ez.no
 routes:
+    midgardmvc_create_object:
+        controller: midgardmvc_ui_create_controllers_backbone
+        action: object
+        path: '/mgd:create/object/{$type}/{$identifier}'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json
     midgardmvc_create_state_new:
         controller: midgardmvc_ui_create_controllers_aloha
         action: state_new

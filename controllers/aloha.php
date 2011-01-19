@@ -19,11 +19,10 @@ class midgardmvc_ui_create_controllers_aloha
 
     public function get_state_new(array $args)
     {
-        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class(rawurldecode($args['type']));
-        $object = $this->prepare_new_object($mgdschema);
+        $this->object = midgardmvc_ui_create_rdfmapper::load_object(rawurldecode($args['type']));
 
         $this->data['object'] = array();
-        $this->data['object']['type'] = $this->get_type_label($mgdschema);
+        $this->data['object']['type'] = $this->get_type_label(get_class($this->object));
         $this->data['state'] = array();
         $this->data['state']['current'] = 'new';
         $this->data['state']['history'] = array();
@@ -32,11 +31,10 @@ class midgardmvc_ui_create_controllers_aloha
 
     public function get_state(array $args)
     {
-        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class(rawurldecode($args['type']));
-        $this->load_object($mgdschema, rawurldecode($args['identifier']));
+        $this->object = midgardmvc_ui_create_rdfmapper::load_object(rawurldecode($args['type']), rawurldecode($args['identifier']));
 
         $this->data['object'] = array();
-        $this->data['object']['type'] = $this->get_type_label($mgdschema);
+        $this->data['object']['type'] = $this->get_type_label(get_class($this->object));
         $this->data['state'] = array();
         // TODO: Read state from workflow system
         $this->data['state']['current'] = 'live';
@@ -52,8 +50,7 @@ class midgardmvc_ui_create_controllers_aloha
 
     public function post_run(array $args)
     {
-        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class(rawurldecode($args['type']));
-        $this->load_object($mgdschema, rawurldecode($args['identifier']));
+        $this->object = midgardmvc_ui_create_rdfmapper::load_object(rawurldecode($args['type']), rawurldecode($args['identifier']));
 
         $workflows = $this->get_workflows_for_object($this->object);
         if (!isset($workflows[$args['workflow']]))
@@ -83,18 +80,18 @@ class midgardmvc_ui_create_controllers_aloha
         {
             throw new midgardmvc_exception_notfound("No type provided");
         }
-        $mgdschema = midgardmvc_ui_create_rdfmapper::typeof_to_class($_POST['type']);
-        unset($_POST['type']);
 
         if (isset($_POST['identifier']))
         {
-            $this->load_object($mgdschema, $_POST['identifier']);
+            $this->object = midgardmvc_ui_create_rdfmapper::load_object($_POST['type'], $_POST['identifier']);
             unset($_POST['identifier']);
+            unset($_POST['type']);
             midgardmvc_core::get_instance()->authorization->require_do('midgard:update', $this->object);
         }
         else
         {
-            $this->prepare_new_object($mgdschema);
+            $this->object = midgardmvc_ui_create_rdfmapper::load_object($_POST['type'], $_POST['identifier']);
+            unset($_POST['type']);
             if (isset($this->parent))
             {
                 midgardmvc_core::get_instance()->authorization->require_do('midgard:create', $this->parent);
@@ -117,6 +114,7 @@ class midgardmvc_ui_create_controllers_aloha
         }
 
         // Process with form
+        $mgdschema = get_class($this->object);
         $this->form = midgardmvc_helper_forms::create("{$mgdschema}_{$this->object->guid}");
         try
         {
@@ -215,38 +213,6 @@ class midgardmvc_ui_create_controllers_aloha
             $mgd_property = $mapper->__get($property);
             $this->object->$mgd_property = $this->form->items[$property]->get_value();
         }
-    }
-
-    private function clean_namespace($identifier)
-    {
-        if (substr($identifier, 0, 4) == 'mgd:')
-        {
-            return substr($identifier, 4);
-        }
-        if (substr($identifier, 0, 9) == 'urn:uuid:')
-        {
-            return substr($identifier, 9);
-        }
-        return $identifier;
-    }
-
-    public function load_object($mgdschema, $guid)
-    {
-        $guid = $this->clean_namespace($guid);
-
-        try
-        {
-            $this->object = new $mgdschema($guid);
-        }
-        catch (midgard_error_exception $e)
-        {
-            throw new midgardmvc_exception_notfound("Object {$guid}: " . $e->getMessage());
-        }
-    }
-    
-    public function prepare_new_object($mgdschema)
-    {
-        $this->object = new $mgdschema();
     }
 }
 ?>

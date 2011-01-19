@@ -204,4 +204,32 @@ class midgardmvc_ui_create_rdfmapper
 
         return $nsmap[$type];
     }
+
+    public static function load_object($type, $identifier = null)
+    {
+        $mgdschema = self::typeof_to_class($type);
+
+        if (is_null($identifier))
+        {
+            return new $mgdschema;
+        }
+
+        if (substr($identifier, 0, 4) == 'mgd:')
+        {
+            $identifier = substr($identifier, 4);
+        }
+        elseif (substr($identifier, 0, 9) == 'urn:uuid:')
+        {
+            $identifier = substr($identifier, 9);
+        }
+
+        try
+        {
+            return new $mgdschema($identifier);
+        }
+        catch (midgard_error_exception $e)
+        {
+            throw new midgardmvc_exception_notfound("Object {$guid}: " . $e->getMessage());
+        }
+    }
 }
