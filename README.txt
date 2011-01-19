@@ -154,7 +154,45 @@ services_dispatcher: appserv
 
 ## Implementation of the user interaction
 
-User interaction is implemented in JavaScript with jQuery and jQuery UI.
+Midgard Create ships as a Midgard MVC _injector_, meaning that websites where it is enabled will run it automatically.
+
+When loaded, Midgard Create will add itself to the component chain in order to be able to intercept requests to its own routes and to load some additional configurations:
+
+<<midgard create injector>>=
+// Register URL handlers
+$request->add_component_to_chain(midgardmvc_core::get_instance()->component->get('midgardmvc_ui_create'));
+@
+
+Then we check whether the request being injected is the main request (i.e. the request sent by a browser):
+
+<<midgard create injector>>=
+if (midgardmvc_core::get_instance()->context->get_current_context() != 0)
+{
+    return;
+}
+@
+
+If this is accepted we check whether user is allowed to use the Midgard Create UI:
+
+<<midgard create injector>>=
+if (!self::can_use())
+{
+    return;
+}
+@
+
+Then we include the necessary JavaScript:
+
+<<midgard create injector>>=
+midgardmvc_core::get_instance()->head->enable_jquery();
+midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
+@
+
+The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. First we load jQuery UI:
+
+<<midgard create dependencies ui>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
+@
 
 All Midgard Create JavaScript functionality resides under a `midgardCreate` object. When Midgard Create is loaded we define it:
 
@@ -164,6 +202,114 @@ if (typeof midgardCreate == 'undefined') {
 }
 @
 
+### Permissions and browser capabilities
+
+There are two levels of enabling Midgard Create for users: permissions and browser capabilities. Permissions is a mechanism for checking whether a user is allowed to use Midgard Create at all, and browser capabilities determine what Midgard Create features are available to the user.
+
+#### Midgard Create usage permissions
+
+The first check with Midgard Create permissions is whether the current user has a valid session. Only authenticated users are allowed to use Midgard Create:
+
+<<midgard create permissions check>>=
+if (!midgardmvc_core::get_instance()->authentication->is_user())
+{
+    return false;
+}
+@
+
+The other check is about user levels. Midgard Content Repository users can be either _end users_ or _admins_. End users are generally registered users of a site that don't have access to content management features.
+
+<<midgard create permissions check>>=
+if (midgardmvc_core::get_instance()->authentication->get_user()->usertype != MIDGARD_USER_TYPE_USER)
+{
+    // We distinquish between CMS users and end-users by ADMIN vs. USER level
+    return false;
+}
+@
+
+If both of these checks pass, then we have a valid login session for an Admin-level user. This means Midgard Create can be enabled:
+
+<<midgard create permissions check>>=
+return true;
+@
+
+#### Browser capabilities
+
+In addition to permissions of the user, also the capabilities of the browser being used matter. Some mobile or legacy browsers do not support Rich Text Editing, for instance, and in these situations we should not enable the editing functionality at all.
+
+Capabilities checks are handled via the Midgard Create capability check method:
+
+<<define capability check>>=
+midgardCreate.checkCapability = function(capability) {
+    if (capability == 'contentEditable') {
+        <<capability check for editables>>
+    }
+    if (capability == 'fileUploads') {
+        <<capability check for uploads>>
+    }
+    <<capability checks with modernizr>>
+};
+@
+
+For most HTML5 capabilities we use the [Modernizr](http://www.modernizr.com/) library. This needs to be included into Midgard Create:
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
+@
+
+The actual Modernizr checks are quite simple:
+
+<<capability checks with modernizr>>=
+return Modernizr[capability];
+@
+
+There are however some HTML5 capabilities not covered by Modernizr. For these we have our own custom checks.
+
+##### Rich Text Editing
+
+Mobile WebKit as implemented on iOS devices like iPhones and iPads, and most Android phones doesn't support Rich Text Editing. See the [Apple TechNote about this](http://developer.apple.com/library/safari/#technotes/tn2010/tn2262/#//apple_ref/doc/uid/DTS40009577-CH1-DontLinkElementID_7). Therefore we disable contentEditable for these devices:
+
+<<capability check for editables>>=
+if (navigator.userAgent.match(/iPhone/i)) {
+    return false;
+}
+if (navigator.userAgent.match(/iPod/i)) {
+    return false;
+}
+if (navigator.userAgent.match(/iPad/i)) {
+    return false;
+}
+return true;
+@
+
+##### File uploads
+
+Most desktop browsers are able to upload files to a website. On mobile devices the picture is a bit more varied, with iOS devices for example unable to access locally stored files because of application sandboxing. This means file uploads should be disabled for those devices:
+
+<<capability check for uploads>>=
+if (navigator.userAgent.match(/iPhone/i)) {
+    return false;
+}
+if (navigator.userAgent.match(/iPod/i)) {
+    return false;
+}
+if (navigator.userAgent.match(/iPad/i)) {
+    return false;
+}
+@
+
+With other browsers we simply check for whether the necessary HTML5 features are enabled:
+
+<<capability check for uploads>>=
+if (typeof FileReader == 'undefined') {
+    return false;
+}
+if (typeof FormData == 'undefined') {
+    return false;
+}
+return Modernizr.draganddrop;
+@
+
 ### Loading Midgard Create
 
 Initialization of Midgard Create is handled inside a jQuery callback that is run when the page load is completed:
@@ -171,6 +317,7 @@ Initialization of Midgard Create is handled inside a jQuery callback that is run
 <<midgard create initialization>>=
 jQuery(document).ready(function() {
     <<define midgardCreate>>
+    <<define capability check>>
     <<define effects>>
     <<define toolbar>>
     <<initialize collections>>
@@ -180,11 +327,7 @@ jQuery(document).ready(function() {
 });
 @
 
-For the toolbar we also need jQuery UI:
 
-<<midgard create dependencies ui>>=
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
-@
 
 The toolbar relies on a Midgard jQuery UI theme and its own additional CSS rules:
 
@@ -281,7 +424,7 @@ midgardCreate.toolbar.full.slideToggle();
 When toolbar loads we will check from HTML5 SessionStorage whether the user had the toolbar minimized or shown fully. This way the toolbar will stay in same state between page loads:
 
 <<define toolbar>>=
-if (Modernizr.sessionstorage) {
+if (midgardCreate.checkCapability('sessionstorage')) {
     var toolbarState = sessionStorage.getItem('midgardmvc_ui_create_toolbar');
     if (toolbarState == 'minimized')
     {
@@ -302,16 +445,10 @@ else {
 }
 @
 
-As SessionStorage is not available in all browsers we use the Modernizr library for checking whether to use it or now:
-
-<<midgard create dependencies>>=
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
-@
-
 When hiding the toolbar, we store the minimized state to HTML5 SessionStorage
 
 <<define toolbar hide>>=
-if (Modernizr.sessionstorage) {
+if (midgardCreate.checkCapability('sessionstorage')) {
     sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'minimized');
 }
 @
@@ -319,7 +456,7 @@ if (Modernizr.sessionstorage) {
 When showing the full toolbar, we store the state to HTML5 SessionStorage:
 
 <<define toolbar show>>=
-if (Modernizr.sessionstorage) {
+if (midgardCreate.checkCapability('sessionstorage')) {
     sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'full');
 }
 @

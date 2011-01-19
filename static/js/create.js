@@ -15,9 +15,9 @@
  */
 
 // Include dependencies of Midgard Create
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/midgardbar.css">');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/editable.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/containers.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/image.js"></script>');
@@ -29,6 +29,39 @@ jQuery(document).ready(function() {
     if (typeof midgardCreate == 'undefined') {
         midgardCreate = {};
     }
+    midgardCreate.checkCapability = function(capability) {
+        if (capability == 'contentEditable') {
+            if (navigator.userAgent.match(/iPhone/i)) {
+                return false;
+            }
+            if (navigator.userAgent.match(/iPod/i)) {
+                return false;
+            }
+            if (navigator.userAgent.match(/iPad/i)) {
+                return false;
+            }
+            return true;
+        }
+        if (capability == 'fileUploads') {
+            if (navigator.userAgent.match(/iPhone/i)) {
+                return false;
+            }
+            if (navigator.userAgent.match(/iPod/i)) {
+                return false;
+            }
+            if (navigator.userAgent.match(/iPad/i)) {
+                return false;
+            }
+            if (typeof FileReader == 'undefined') {
+                return false;
+            }
+            if (typeof FormData == 'undefined') {
+                return false;
+            }
+            return Modernizr.draganddrop;
+        }
+        return Modernizr[capability];
+    };
     midgardCreate.highlightcolor = '#67cc08';
     midgardCreate.toolbar = {};
     midgardCreate.toolbar.minimized = jQuery('<a id="midgard-bar-minimized" class="ui-widget-showbut"></a>');
@@ -47,18 +80,18 @@ jQuery(document).ready(function() {
     midgardCreate.toolbar.show = function() {
        midgardCreate.toolbar.minimized.slideToggle();
        midgardCreate.toolbar.full.slideToggle();
-       if (Modernizr.sessionstorage) {
+       if (midgardCreate.checkCapability('sessionstorage')) {
            sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'full');
        }
     }
     midgardCreate.toolbar.hide = function() {
         midgardCreate.toolbar.full.slideToggle();
         midgardCreate.toolbar.minimized.slideToggle();
-        if (Modernizr.sessionstorage) {
+        if (midgardCreate.checkCapability('sessionstorage')) {
             sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'minimized');
         }
     }
-    if (Modernizr.sessionstorage) {
+    if (midgardCreate.checkCapability('sessionstorage')) {
         var toolbarState = sessionStorage.getItem('midgardmvc_ui_create_toolbar');
         if (toolbarState == 'minimized')
         {

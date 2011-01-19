@@ -12,17 +12,6 @@ midgardCreate.Image.init = function() {
     midgardCreate.Image.variants = {};
 };
 
-midgardCreate.Image.canUpload = function()
-{
-    if (typeof FileReader == 'undefined') {
-        return false;
-    }
-    if (typeof FormData == 'undefined') {
-        return false;
-    }
-    return true;
-}
-
 midgardCreate.Image.searchImages = function(searchTerm, callback) {
     midgardCreate.Image.clearSelectDialog();
 
@@ -70,7 +59,7 @@ midgardCreate.Image.prepareSelectDialog = function(identifier, locationName, cal
 
     midgardCreate.Image.imageSelectDialog.dialog(dialogOptions);
 
-    if (midgardCreate.Image.canUpload()) {
+    if (midgardCreate.checkCapability('fileUploads')) {
         midgardCreate.Image.prepareUploadTarget(identifier, locationName, callback);
     }
 };
@@ -137,14 +126,12 @@ midgardCreate.Image.prepareUploadTarget = function(identifier, locationName, cal
     placeholderElement.addEventListener('dragenter', function(event) {
         event.stopPropagation();
         event.preventDefault();
-        console.log("Enter");
         jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
     }, true);
 
     placeholderElement.addEventListener('dragleave', function(event) {
         event.stopPropagation();
         event.preventDefault();
-        console.log("Leave");
         jQuery('#midgardmvc-image-upload').removeClass('midgardmvc-image-hover');
     }, true);
 

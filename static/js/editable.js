@@ -14,6 +14,11 @@ if (typeof midgardCreate == 'undefined') {
 midgardCreate.Editable = {};
 
 midgardCreate.Editable.init = function() {
+
+    if (!midgardCreate.checkCapability('contentEditable')) {
+        return;
+    }
+
     // Configure Aloha
     GENTICS.Aloha.settings = {
         "ribbon": false,
