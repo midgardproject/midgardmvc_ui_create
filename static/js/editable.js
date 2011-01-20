@@ -70,13 +70,13 @@ midgardCreate.Editable.init = function() {
 }
 
 midgardCreate.Editable.activateEditable = function(editableObject, propertyName) {
-    if (midgardCreate.Editable.currentObject == editableObject.identifier) {
+    if (midgardCreate.Editable.currentObject == editableObject.model) {
         return;
     }
-    midgardCreate.Editable.currentObject = editableObject.identifier;
+    midgardCreate.Editable.currentObject = editableObject.model;
 
     midgardCreate.Editable.objectActions.fadeOut().empty();
-    var url = '/mgd:create/state/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.identifier);
+    var url = '/mgd:create/state/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.model.id);
     jQuery.ajax({
         url: url,
         dataType: 'json',
@@ -100,7 +100,7 @@ midgardCreate.Editable.deactivateEditable = function(editableObject, propertyNam
 }
 
 midgardCreate.Editable.runWorkflow = function(editableObject, workflow) {
-    var url = '/mgd:create/run/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.identifier) + '/' + workflow;
+    var url = '/mgd:create/run/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.model.id) + '/' + workflow;
     jQuery.ajax({
         url: url,
         dataType: 'json',
