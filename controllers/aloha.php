@@ -74,97 +74,6 @@ class midgardmvc_ui_create_controllers_aloha
         }
     }
 
-    public function post_save(array $args)
-    {
-        if (!isset($_POST['type']))
-        {
-            throw new midgardmvc_exception_notfound("No type provided");
-        }
-
-        if (isset($_POST['identifier']))
-        {
-            $this->object = midgardmvc_ui_create_rdfmapper::load_object($_POST['type'], $_POST['identifier']);
-            unset($_POST['identifier']);
-            unset($_POST['type']);
-            midgardmvc_core::get_instance()->authorization->require_do('midgard:update', $this->object);
-        }
-        else
-        {
-            $this->object = midgardmvc_ui_create_rdfmapper::load_object($_POST['type'], $_POST['identifier']);
-            unset($_POST['type']);
-            if (isset($this->parent))
-            {
-                midgardmvc_core::get_instance()->authorization->require_do('midgard:create', $this->parent);
-            }
-            else
-            {
-                // Independent object, check permissions directly
-                midgardmvc_core::get_instance()->authorization->require_do('midgard:create', $this->object);
-            }
-        }
-
-        $baseurl = null;
-        if (isset($_POST['baseurl']))
-        {
-            if (strpos($_POST['baseurl'], '/') !== false)
-            {
-                $baseurl = $_POST['baseurl'];
-            }
-            unset($_POST['baseurl']);
-        }
-
-        // Process with form
-        $mgdschema = get_class($this->object);
-        $this->form = midgardmvc_helper_forms::create("{$mgdschema}_{$this->object->guid}");
-        try
-        {
-            $this->process_form($mgdschema);
-
-            if ($baseurl)
-            {
-                // BaseURL set, create appropriate context so injectors can function properly
-                $request = midgardmvc_core_request::get_for_intent($baseurl);
-                midgardmvc_core::get_instance()->context->create($request);
-                midgardmvc_core::get_instance()->component->inject($request, 'process');
-            }
-
-            if ($this->object->guid)
-            {
-                $this->object->update();
-            }
-            else
-            {
-                $this->object->create();
-            }
-
-            if ($baseurl)
-            {
-                midgardmvc_core::get_instance()->context->delete();
-            }
-
-            $this->data['status'] = array
-            (
-                'status' => 'ok',
-                'message' => midgardmvc_core::get_instance()->dispatcher->get_midgard_connection()->get_error_string(),
-                'identifier' => "urn:uuid:{$this->object->guid}",
-            );
-        }
-        catch (midgardmvc_helper_forms_exception_validation $e)
-        {
-            if ($baseurl)
-            {
-                midgardmvc_core::get_instance()->context->delete();
-            }
-
-            midgardmvc_core::get_instance()->dispatcher->header("HTTP/1.0 500 Internal Server Error");
-            $this->data['status'] = array
-            (
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            );
-        }
-    }
-
     private function get_workflows_for_object(midgard_object $object)
     {
         $workflows = midgardmvc_core::get_instance()->configuration->workflows;
@@ -197,22 +106,6 @@ class midgardmvc_ui_create_controllers_aloha
     {
         $parts = explode('_', $mgdschema);
         return $parts[count($parts) - 1];
-    }
-
-    private function process_form($mgdschema)
-    {
-        $mapper = new midgardmvc_ui_create_rdfmapper($mgdschema);
-        foreach ($_POST as $property => $value)
-        {
-            $mgd_property = $mapper->__get($property);
-            midgardmvc_helper_forms_mgdschema::property_to_form($mgdschema, $mgd_property, $this->object->$mgd_property, $this->form, $property);
-        }
-        $this->form->process_post();
-        foreach ($_POST as $property => $value)
-        {
-            $mgd_property = $mapper->__get($property);
-            $this->object->$mgd_property = $this->form->items[$property]->get_value();
-        }
     }
 }
 ?>

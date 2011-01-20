@@ -49,14 +49,6 @@ routes:
         mimetype: application/json
         template_aliases: 
             root: midgardmvc-show-json
-    midgardmvc_create_save:
-        controller: midgardmvc_ui_create_controllers_aloha
-        action: save
-        path: '/mgd:create/save/json'
-        root_only: true
-        mimetype: application/json
-        template_aliases: 
-            root: midgardmvc-show-json
     midgardmvc_create_image_search:
         controller: midgardmvc_ui_create_controllers_image
         action: search

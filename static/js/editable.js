@@ -96,9 +96,6 @@ midgardCreate.Editable.activateEditable = function(editableObject, propertyName)
     });
 }
 
-midgardCreate.Editable.deactivateEditable = function(editableObject, propertyName) {
-}
-
 midgardCreate.Editable.runWorkflow = function(editableObject, workflow) {
     var url = '/mgd:create/run/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.model.id) + '/' + workflow;
     jQuery.ajax({
