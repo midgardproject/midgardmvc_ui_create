@@ -50,6 +50,9 @@ class midgardmvc_ui_create_controllers_backbone
 
         $this->populate_object($data);
 
+        $transaction = new midgard_transaction();
+        $transaction->begin();
+
         $this->enter_context();
         $this->object->create();
         $this->leave_context();
@@ -57,6 +60,9 @@ class midgardmvc_ui_create_controllers_backbone
         // Refresh object
         $this->object = midgard_object_class::get_object_by_guid($this->object->guid);
         $this->rdfmapper = new midgardmvc_ui_create_rdfmapper($this->object);
+
+        $this->log_activity('http://activitystrea.ms/schema/1.0/post');
+        $transaction->commit();
 
         $this->object_to_json();
     }
@@ -71,11 +77,32 @@ class midgardmvc_ui_create_controllers_backbone
         }
         $this->populate_object($data);
 
+        $transaction = new midgard_transaction();
+        $transaction->begin();
+
         $this->enter_context();
         $this->object->update();
         $this->leave_context();
 
+        $this->log_activity('http://activitystrea.ms/schema/1.0/post');
+        $transaction->commit();
+
         $this->object_to_json();
+    }
+
+    private function log_activity($verb)
+    {
+        if (!midgardmvc_core::get_instance()->authentication->is_user())
+        {
+            return;
+        }
+
+        $activity = new midgard_activity();
+        $activity->actor = midgardmvc_core::get_instance()->authentication->get_person()->id;
+        $activity->verb = $verb;
+        $activity->target = $this->object->guid;
+        $activity->application = 'midgardmvc_ui_create';
+        $activity->create();
     }
 
     private function populate_object(stdClass $data)
