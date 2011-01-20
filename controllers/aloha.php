@@ -29,6 +29,17 @@ class midgardmvc_ui_create_controllers_aloha
         $this->data['state']['actions'] = array();
     }
 
+    private function get_actor($person_id)
+    {
+        static $actors = array();
+        if (!isset($actors[$person_id]))
+        {
+            $actors[$person_id] = new midgard_person();
+            $actors[$person_id]->get_by_id($person_id);
+        }
+        return $actors[$person_id];
+    }
+
     public function get_state(array $args)
     {
         $this->object = midgardmvc_ui_create_rdfmapper::load_object(rawurldecode($args['type']), rawurldecode($args['identifier']));
@@ -38,7 +49,28 @@ class midgardmvc_ui_create_controllers_aloha
         $this->data['state'] = array();
         // TODO: Read state from workflow system
         $this->data['state']['current'] = 'live';
+
         $this->data['state']['history'] = array();
+        $qb = new midgard_query_builder('midgard_activity');
+        $qb->add_constraint('target', '=', $this->object->guid);
+        $qb->add_order('metadata.revised', 'DESC');
+        $logs = $qb->execute();
+        foreach ($logs as $log)
+        {
+            $actor = $this->get_actor($log->actor);
+            $this->data['state']['history'][] = array
+            (
+                'actor' => array
+                (
+                    'firstname' => $actor->firstname,
+                    'lastname' => $actor->lastname,
+                    'guid' => $actor->guid,
+                ),
+                'verb' => $log->verb,
+                'time' => $log->metadata->created->format(DateTime::ISO8601),
+            );
+        }
+
         $this->data['state']['actions'] = array();
 
         $actions = $this->get_workflows_for_object($this->object);
