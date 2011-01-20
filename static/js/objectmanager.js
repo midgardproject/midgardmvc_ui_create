@@ -57,6 +57,48 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
         return url;
     }
 
+    modelProperties.runWorkflow = function(workflow, callback) {
+        var url = '/mgd:create/run/' + encodeURIComponent(type) + '/' + encodeURIComponent(this.id) + '/' + workflow;
+        that = this;
+        jQuery.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'POST',
+            success: function (data) {
+                if (typeof data == 'null') {
+                    return;
+                }
+                callback(data);
+            }
+        });
+    }
+
+    modelProperties.getWorkflowState = function(callback) {
+        var workflowState = {
+            label: 'item',
+            history: [],
+            actions: {},
+        };
+
+        var url = '/mgd:create/state/' + encodeURIComponent(type) + '/' + encodeURIComponent(this.id);
+        jQuery.ajax({
+            url: url,
+            async: false,
+            dataType: 'json',
+            success: function(data) {
+                if (typeof data == 'null') {
+                    return;
+                }
+                workflowState.label = data.object.type;
+                workflowState.actions = data.state.actions;
+                workflowState.history = data.state.history;
+                callback(workflowState);
+            },
+            error: function() {
+            }
+        });
+    }
+
     midgardCreate.objectManager.models[type] = Backbone.Model.extend(modelProperties);
 
     return midgardCreate.objectManager.models[type];

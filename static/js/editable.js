@@ -74,40 +74,45 @@ midgardCreate.Editable.activateEditable = function(editableObject, propertyName)
         return;
     }
     midgardCreate.Editable.currentObject = editableObject.model;
+    midgardCreate.Editable.showCurrentObject();
+}
 
-    midgardCreate.Editable.objectActions.fadeOut().empty();
-    var url = '/mgd:create/state/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.model.id);
-    jQuery.ajax({
-        url: url,
-        dataType: 'json',
-        success: function(data) {
-            var objectLabel = jQuery('<a>' + data.object.type + '</a>');
-            midgardCreate.Editable.objectActions.append(objectLabel);
+midgardCreate.Editable.showCurrentObject = function() {
+    midgardCreate.Editable.objectActions.fadeOut();
 
-            jQuery.each(data.state.actions, function(action, actionLabel) {
-                var actionButton = jQuery('<button>' + actionLabel + '</button>').button();
-                midgardCreate.Editable.objectActions.append(actionButton);
-                actionButton.bind('click', function() {
-                    midgardCreate.Editable.runWorkflow(editableObject, action);
-                });
+    if (midgardCreate.Editable.currentObject == null) {
+        return;
+    }
+
+    midgardCreate.Editable.currentObject.getWorkflowState(function(stateData) {
+        midgardCreate.Editable.objectActions.empty();
+
+        var objectLabel = jQuery('<a>' + stateData.label + '</a>');
+        midgardCreate.Editable.objectActions.append(objectLabel);
+        jQuery.each(stateData.actions, function(action, actionLabel) {
+            var actionButton = jQuery('<button>' + actionLabel + '</button>').button();
+            midgardCreate.Editable.objectActions.append(actionButton);
+            actionButton.bind('click', function() {
+                midgardCreate.Editable.runWorkflow(midgardCreate.Editable.currentObject, action);
             });
-            midgardCreate.Editable.objectActions.fadeIn();
-        }
+        });
+
+        midgardCreate.Editable.objectActions.fadeIn();
     });
 }
 
-midgardCreate.Editable.runWorkflow = function(editableObject, workflow) {
-    var url = '/mgd:create/run/' + encodeURIComponent(editableObject.type) + '/' + encodeURIComponent(editableObject.model.id) + '/' + workflow;
-    jQuery.ajax({
-        url: url,
-        dataType: 'json',
-        type: 'POST',
-        success: function (response) {
-            if (response.object == 'remove') {
-                jQuery(editableObject.container).hide('drop');
-                return;
-            }
+midgardCreate.Editable.runWorkflow = function(targetObject, workflow) {
+    targetObject.runWorkflow(workflow, function(data) {
+        if (data.object == 'remove')
+        {
+            jQuery.each(midgardCreate.Editable.objects, function(index, editableObject) {
+                if (editableObject.model.id == targetObject.id) {
+                    jQuery(editableObject.container).hide('drop');
+                }
+            });
+            midgardCreate.Editable.currentObject = null;
         }
+        midgardCreate.Editable.showCurrentObject();
     });
 }
 
@@ -200,7 +205,7 @@ midgardCreate.Editable.save = function () {
     midgardCreate.Editable.saveButton.button('option', 'label', 'Saving');
 
     // iterate all Midgard objects which have been made editable
-    jQuery.each(midgardCreate.Editable.objects, function(objectIndex, editableObject) {
+    jQuery.each(midgardCreate.Editable.objects, function(index, editableObject) {
         var objectModified = false;
         var modifiedProperties = {};
 
@@ -230,8 +235,14 @@ midgardCreate.Editable.save = function () {
         editableObject.model.set(modifiedProperties);
         Backbone.emulateHTTP = true;
         Backbone.emulateJSON = true;
-        editableObject.model.save();
-        editableObject.container.attr('about', editableObject.model.id);
+        editableObject.model.save(null, {
+            success: function(model, response) {
+                editableObject.container.attr('about', model.id);
+                if (midgardCreate.Editable.currentObject == model) {
+                    midgardCreate.Editable.showCurrentObject();
+                }
+            }
+        });
     });
 
     midgardCreate.Editable.saveButton.button('option', 'label', 'Save');
