@@ -202,10 +202,11 @@ if (!self::can_use())
 }
 @
 
-Then we include the necessary JavaScript:
+The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. For this, we load jQuery UI and our own initialization file:
 
 <<midgard create injector>>=
 midgardmvc_core::get_instance()->head->enable_jquery();
+midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js');
 midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
 @
 
@@ -232,12 +233,6 @@ jQuery(document).ready(function() {
     <<initialize image placeholders>>
     <<initialize editables>>
 });
-@
-
-The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. For this, we load jQuery UI:
-
-<<midgard create dependencies ui>>=
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js"></script>');
 @
 
 ### Permissions and browser capabilities
@@ -492,7 +487,6 @@ To put things together, the toolbar defitions are called from a JavaScript file 
 
 // Include dependencies of Midgard Create
 <<midgard create dependencies>>
-<<midgard create dependencies ui>>
 
 // Initialize Midgard Create
 <<midgard create initialization>>
