@@ -1,1 +1,1 @@
-Disallow: static/js/deps
+Disallow: /static/js/deps
