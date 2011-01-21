@@ -129,6 +129,7 @@ class midgardmvc_ui_create_controllers_backbone
 
         // BaseURL set, create appropriate context so injectors can function properly
         $request = midgardmvc_core_request::get_for_intent($this->baseurl);
+        $request->add_component_to_chain(midgardmvc_core::get_instance()->component->get('midgardmvc_core'));
         midgardmvc_core::get_instance()->context->create($request);
         midgardmvc_core::get_instance()->component->inject($request, 'process');
         $this->context_switched = true;
