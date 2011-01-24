@@ -46,6 +46,10 @@ class midgardmvc_ui_create_workflow_action_delete implements ezcWorkflowServiceO
         {
             return false;
         }
+
+        $object->delete_attachments(array());
+        $object->delete_parameters(array());
+
         $child_classes = $this->get_child_types(get_class($object));
         foreach ($child_classes as $child_class)
         {
@@ -67,6 +71,12 @@ class midgardmvc_ui_create_workflow_action_delete implements ezcWorkflowServiceO
         $child_types = array();
         foreach ($mgdschemas as $mgdschema)
         {
+            if (   $mgdschema == 'midgard_attachment'
+                || $mgdschema == 'midgard_parameter')
+            {
+                continue;
+            }
+
             $link_properties = array
             (
                 'parent' => midgard_object_class::get_property_parent($mgdschema),
