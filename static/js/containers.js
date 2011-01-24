@@ -39,7 +39,7 @@ midgardCreate.Containers.enableContainers = function() {
             });
             rdfProperties.each(function(index, rdfPropertyInstance) {
                 var rdfPropertyInstance = jQuery(rdfPropertyInstance);
-                rdfPropertyInstance.html('&lt' + rdfPropertyInstance.attr('property') + '&gt;');
+                rdfPropertyInstance.html('&lt;' + rdfPropertyInstance.attr('property') + '&gt;');
             });
 
             if (newChild.attr('about'))
