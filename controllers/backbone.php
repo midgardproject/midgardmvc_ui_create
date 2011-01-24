@@ -116,6 +116,8 @@ class midgardmvc_ui_create_controllers_backbone
                 continue;
             }
             $form->$mgd_property->set_value($value);
+            $form->$mgd_property->validate();
+            $form->$mgd_property->clean();
             $this->object->$mgd_property = $form->$mgd_property->get_value();
         }
     }
