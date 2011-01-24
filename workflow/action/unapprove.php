@@ -19,7 +19,7 @@ class midgardmvc_ui_create_workflow_action_unapprove implements ezcWorkflowServi
         $guid = $object->guid;
         if (!$object->unapprove())
         {
-            throw new ezcWorkflowExecutionException('Failed to unapprove object');
+            throw new ezcWorkflowExecutionException('Failed to unapprove object: ' . midgard_connection::get_instance()->get_error_string());
         }
 
         if (!midgardmvc_core::get_instance()->authentication->is_user())

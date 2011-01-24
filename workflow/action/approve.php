@@ -19,7 +19,7 @@ class midgardmvc_ui_create_workflow_action_approve implements ezcWorkflowService
         $guid = $object->guid;
         if (!$object->approve())
         {
-            throw new ezcWorkflowExecutionException('Failed to approve object');
+            throw new ezcWorkflowExecutionException('Failed to approve object: ' . midgard_connection::get_instance()->get_error_string());
         }
 
         if (!midgardmvc_core::get_instance()->authentication->is_user())
