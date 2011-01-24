@@ -65,7 +65,7 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
             dataType: 'json',
             type: 'POST',
             success: function (data) {
-                if (typeof data == 'null') {
+                if (data == null) {
                     return;
                 }
                 callback(data);
