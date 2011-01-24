@@ -80,7 +80,11 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
             actions: {},
         };
 
-        var url = '/mgd:create/state/' + encodeURIComponent(type) + '/' + encodeURIComponent(this.id);
+        var url = '/mgd:create/state/' + encodeURIComponent(type) + '/';
+        if (this.id) {
+            url += encodeURIComponent(this.id) + '/';
+        }
+
         jQuery.ajax({
             url: url,
             async: false,
