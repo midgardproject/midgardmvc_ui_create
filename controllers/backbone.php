@@ -155,7 +155,9 @@ class midgardmvc_ui_create_controllers_backbone
         }
         else
         {
-            $data = json_decode(file_get_contents('php://input'));
+            $handle = midgardmvc_core::get_instance()->dispatcher->get_stdin();
+            $input = stream_get_contents($handle, (int) $_SERVER['CONTENT_LENGTH']);
+            $data = json_decode($input);
         }
 
         if (isset($data->id))
