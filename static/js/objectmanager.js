@@ -174,7 +174,8 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
             async: false,
             dataType: 'json',
             success: function(data) {
-                if (typeof data == 'null') {
+                if (   typeof data == 'null'
+                    || typeof data.object == 'undefined') {
                     return;
                 }
                 workflowState.label = data.object.type;
