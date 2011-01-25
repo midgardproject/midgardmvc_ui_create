@@ -122,13 +122,17 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
         return url;
     }
 
+    modelProperties.getPlaceholder = function(propertyName) {
+        return '&lt;' + propertyName + '&gt;';
+    };
+
     modelProperties.initialize = function() {
         var modelInstance = this;
         var populateProperties = {};
         jQuery.each(modelPropertiesFromRdf, function(propName, propValue) {
 
             if (!modelInstance.get(propName)) {
-                populateProperties[propName] = '&lt;' + propName + '&gt;';
+                populateProperties[propName] = modelInstance.getPlaceholder(propName);
             }
 
         });

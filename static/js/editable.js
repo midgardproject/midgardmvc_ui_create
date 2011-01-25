@@ -112,6 +112,10 @@ midgardCreate.Editable = {
     },
 
     activateEditable: function(objectInstance, propertyName) {
+        /*if (objectInstance.get(propertyName) == objectInstance.getPlaceholder(propertyName)) {
+            // TODO: Clear placeholder content when user starts editing
+        }*/
+
         if (midgardCreate.Editable.currentObject == objectInstance) {
             return;
         }
@@ -151,7 +155,9 @@ midgardCreate.Editable = {
         jQuery.each(objectContainers, function(index, objectContainer)
         {
             var objectContainer = jQuery(objectContainer);
-            if (typeof objectContainer.attr('about') == 'undefined') {
+            var objectIdentifier = objectContainer.attr('about');
+            if (   typeof objectIdentifier == 'undefined'
+                || objectIdentifier == 'mgd:containerPlaceholder') {
                 // No identifier set, therefore not editable
                 return true;
             }
