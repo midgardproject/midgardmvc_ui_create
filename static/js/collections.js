@@ -48,12 +48,15 @@ midgardCreate.Collections = {
     },
 
     loadFromPage: function() {
-        var objectCollections = jQuery('[mgd\\:type="container_readonly"]');
+        var objectCollections = jQuery('[mgd\\:type="container"]');
         jQuery.each(objectCollections, function(index, collectionElement)
         {
             var collectionElement = jQuery(collectionElement);
 
             var firstChild = collectionElement.children(':first-child');
+            if (midgardCreate.objectManager.getIdentifierForContainer(firstChild) == 'mgd:containerPlaceholder') {
+                firstChild.hide();
+            }
 
             var orderFromElement = collectionElement.attr('mgd:order');
             if (typeof orderFromElement == 'undefined') {
