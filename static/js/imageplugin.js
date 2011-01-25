@@ -11,8 +11,8 @@ midgardCreate.imagePlugin.init = function() {
     var insertLinkButton = new GENTICS.Aloha.ui.Button({
         'iconClass' : 'GENTICS_button midgardCreate_button_img',
         'size' : 'small',
-        'onclick' : function (element, event) { 
-            midgardCreate.Image.showSelectDialog(midgardCreate.Editable.currentObject.id, '', midgardCreate.imagePlugin.insertImage);
+        'onclick' : function (element, event) {
+            midgardCreate.Image.showSelectDialog(midgardCreate.Editable.currentObject, '', midgardCreate.imagePlugin.insertImage);
         },
         'toggle' : false
     });
@@ -26,6 +26,6 @@ midgardCreate.imagePlugin.init = function() {
 
 midgardCreate.imagePlugin.insertImage = function(imageInfo) {
     var rangeObject = GENTICS.Aloha.Selection.rangeObject;
-    var markUp = jQuery('<img src="' + imageInfo.url + '" title="' + imageInfo.title + '" />');
+    var markUp = jQuery('<img src="' + imageInfo.get('displayURL') + '" title="' + imageInfo.get('title') + '" />');
     GENTICS.Utils.Dom.insertIntoDOM(markUp, rangeObject);
 }

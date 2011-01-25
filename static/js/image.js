@@ -4,95 +4,43 @@ if (typeof midgardCreate == 'undefined') {
     midgardCreate = {};
 }
 
-midgardCreate.Image = {};
+midgardCreate.Image = {
+    imageSelectDialog: null,
+    imageDialog: null,
+    collection: null,
+    searchTerm: '',
+    currentObject: null,
 
-midgardCreate.Image.init = function() {
-    midgardCreate.Image.imageSelectDialog = null;
-    midgardCreate.Image.imageDialog = null;
-    midgardCreate.Image.variants = {};
-};
+    init: function() {
+        midgardCreate.Image.prepareCollection();
+    },
 
-midgardCreate.Image.searchImages = function(searchTerm, callback) {
-    midgardCreate.Image.clearSelectDialog();
-
-    var url = '/mgd:create/image/search/';
-    jQuery.ajax({
-        url: url,
-        dataType: 'json',
-        data: {
-            q: searchTerm
-        },
-        success: function(data) {
-            midgardCreate.Image.variants = data.variants;
-            jQuery.each(data.images, function(imageId, imageInfo) {
-                var imageElement = midgardCreate.Image.getImageListElement(imageInfo, callback);
-                imageElement.hide().fadeIn();
-                midgardCreate.Image.imageList.append(imageElement);
-            });
-        }
-    });
-};
-
-midgardCreate.Image.prepareSelectDialog = function(identifier, locationName, callback) {
-    var dialogOptions = {
-        show: 'fade',
-        hide: 'fade',
-        title: 'Choose an image',
-        height: 300,
-        width: 400,
-        zIndex: 12000
-    };
-    midgardCreate.Image.imageSelectDialog = jQuery('<div id="midgardmvc-image"></div>');
-
-    var searchBar = jQuery('<div id="midgardmvc-image-list"></div>');
-
-    var searchInput = jQuery('<input type="search" name="midgardmvc-image-search" placeholder="Search existing images" />');
-    searchInput.change(function () {
-        midgardCreate.Image.searchImages(jQuery(this).val(), callback);
-    });
-    searchBar.append(searchInput);
-
-    midgardCreate.Image.imageSelectDialog.append(searchBar);
-
-    midgardCreate.Image.imageList = jQuery('<ul class="midgardmvc-image-list"></ul>');
-    searchBar.append(midgardCreate.Image.imageList);
-
-    midgardCreate.Image.imageSelectDialog.dialog(dialogOptions);
-
-    if (midgardCreate.checkCapability('fileUploads')) {
-        midgardCreate.Image.prepareUploadTarget(identifier, locationName, callback);
-    }
-};
-
-midgardCreate.Image.showSelectDialog = function(identifier, locationName, callback) {
-    midgardCreate.Image.prepareSelectDialog(identifier, locationName, callback);
-    midgardCreate.Image.imageSelectDialog.dialog('open');
-    midgardCreate.Image.searchImages('', callback);
-};
-
-midgardCreate.Image.prepareUploadTarget = function(identifier, locationName, callback) {
-    var uploadPlaceholder = jQuery('<div id="midgardmvc-image-upload"><h2>Add new image</h2><img id="midgardmvc-image-upload-target" src="/midgardmvc-static/midgardmvc_helper_attachmentserver/placeholder.png" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" /></div>');
-    midgardCreate.Image.imageSelectDialog.prepend(uploadPlaceholder);
-    var placeholderElement = document.getElementById('midgardmvc-image-upload');
-
-    placeholderElement.addEventListener('drop', function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        var files = event.dataTransfer.files;
-        jQuery.each(event.dataTransfer.files, function(i, file) {
-            var reader = new FileReader();
-            reader.file = file;
-            reader.onloadend = function(event) {
-                if (!event.target.file) {
-                    return;
-                }
-                var form = new FormData();
-                form.append('file', event.target.file);
-                form.append('parentguid', identifier);
-
-                if (locationName)
+    prepareCollection: function() {
+        var imageModel = Backbone.Model.extend({
+            initialize: function() {
+                if (!this.get('displayURL'))
                 {
-                    form.append('locationname', locationName);
+                    this.set({displayUrl: ''});
+                }
+                if (!this.get('name'))
+                {
+                    this.set({name: ''});
+                }
+                if (!this.get('title'))
+                {
+                    this.set({name: this.get('name')});
+                }
+            },
+
+            upload: function() {
+                var imageInstance = this;
+                var form = new FormData();
+                form.append('file', imageInstance.get('file'));
+                form.append('parentguid', imageInstance.get('parentguid'));
+
+                if (imageInstance.get('locationname'))
+                {
+                    form.append('locationname', imageInstance.get('locationname'));
                 }
 
                 var xhr = new XMLHttpRequest();
@@ -105,94 +53,212 @@ midgardCreate.Image.prepareUploadTarget = function(identifier, locationName, cal
                         return;
                     }
                     var data = jQuery.parseJSON(xhr.responseText);
-                    var imageInfo = {
-                        url: data.image.url,
-                        title: data.image.title,
-                        name: data.image.name,
-                        guid: data.image.guid,
-                        parentguid: data.image.parentguid
-                    };
+                    if (typeof data.image == 'undefined') {
+                        return;
+                    }
+                    console.log("Updating image instance with data", imageInstance, data);
+                    //imageInstance.id = data.id;
+                    imageInstance.set(data);
+                    console.log(imageInstance);
 
-                    midgardCreate.Image.imageList.prepend(midgardCreate.Image.getImageListElement(imageInfo, callback));
-                    midgardCreate.Image.showImageDialog(imageInfo, midgardCreate.Image.variants, callback);
+                    imageInstance.view.render();
+                    //midgardCreate.Image.showImageDialog(imageInfo, midgardCreate.Image.variants, callback);
                 };
                 xhr.send(form);
+            }
+        });
+
+        var imageView = Backbone.View.extend({
+            tagName: 'li',
+
+            events: {
+                'click': 'showDialog'
+            },
+
+            initialize: function() {
+                _.bindAll(this, 'render', 'showDialog');
+                this.model.bind('change', this.render);
+                this.model.view = this;
+            },
+
+            showDialog: function() {
+                midgardCreate.Image.showImageDialog(this.model);
+            },
+
+            render: function() {
+                jQuery(this.el).html('<img src="' + this.model.get('displayURL') + '" title="' + this.model.get('title') + '" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" />');
+                return this;
+            }
+        });
+
+        var imageCollection = Backbone.Collection.extend({
+            model: imageModel,
+            view: imageView,
+
+            url: function() {
+                return '/mgd:create/image/search/' + encodeURIComponent(midgardCreate.Image.searchTerm);
+            }
+        });
+
+        midgardCreate.Image.collection = new imageCollection();
+
+        midgardCreate.Image.collection.bind('add', function(itemInstance) {
+            new imageView({model: itemInstance});
+            collectionInstance.viewElement.prepend(itemInstance.view.render().el);
+            if (itemInstance.get('file'))
+            {
+                itemInstance.upload();
+            }
+        });
+
+        midgardCreate.Image.collection.bind('remove', function(itemInstance) {
+            console.log("Removing", itemInstance);
+            itemInstance.view.el.remove();
+        });
+
+        midgardCreate.Image.collection.bind('refresh', function(collectionInstance) {
+            collectionInstance.viewElement.empty();
+            collectionInstance.forEach(function(itemInstance) {
+                new imageView({model: itemInstance});
+                collectionInstance.viewElement.append(itemInstance.view.render().el);
+            });
+        });
+    },
+
+    showSelectDialog: function(currentObject, locationName, callback) {
+        midgardCreate.Image.currentObject = currentObject;
+        midgardCreate.Image.callback = callback;
+        midgardCreate.Image.prepareSelectDialog();
+
+        if (midgardCreate.checkCapability('fileUploads')) {
+            midgardCreate.Image.prepareUploadTarget();
+        }
+
+        midgardCreate.Image.imageSelectDialog.dialog('open');
+        midgardCreate.Image.collection.fetch();
+    },
+
+    prepareSelectDialog: function() {
+        var dialogOptions = {
+            show: 'fade',
+            hide: 'fade',
+            title: 'Choose an image',
+            height: 300,
+            width: 400,
+            zIndex: 12000
+        };
+        midgardCreate.Image.imageSelectDialog = jQuery('<div id="midgardmvc-image"></div>');
+
+        var searchBar = jQuery('<div id="midgardmvc-image-list"></div>');
+
+        var searchInput = jQuery('<input type="search" name="midgardmvc-image-search" placeholder="Search existing images" />');
+        searchInput.change(function () {
+            midgardCreate.Image.searchTerm = jQuery(this).val();
+            midgardCreate.Image.collection.fetch();
+        });
+        searchBar.append(searchInput);
+
+        midgardCreate.Image.imageSelectDialog.append(searchBar);
+
+        var imageList = jQuery('<ul class="midgardmvc-image-list"></ul>');
+        searchBar.append(imageList);
+        midgardCreate.Image.collection.viewElement = imageList;
+
+        midgardCreate.Image.imageSelectDialog.dialog(dialogOptions);
+    },
+
+    prepareUploadTarget: function() {
+        var uploadPlaceholder = jQuery('<div id="midgardmvc-image-upload"><h2>Add new image</h2><img id="midgardmvc-image-upload-target" src="/midgardmvc-static/midgardmvc_helper_attachmentserver/placeholder.png" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" /></div>');
+        midgardCreate.Image.imageSelectDialog.prepend(uploadPlaceholder);
+        var placeholderElement = document.getElementById('midgardmvc-image-upload');
+
+        placeholderElement.addEventListener('drop', function(event) {
+            midgardCreate.Image.addDroppedFile(event);
+        }, true);
+
+        placeholderElement.addEventListener('dragenter', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
+        }, true);
+
+        placeholderElement.addEventListener('dragleave', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            jQuery('#midgardmvc-image-upload').removeClass('midgardmvc-image-hover');
+        }, true);
+
+        placeholderElement.addEventListener('dragover', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
+        }, true);
+    },
+
+    addDroppedFile: function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        var files = event.dataTransfer.files;
+        jQuery.each(event.dataTransfer.files, function(i, file) {
+            var reader = new FileReader();
+            reader.file = file;
+            reader.onloadend = function(event) {
+                if (!event.target.file) {
+                    return;
+                }
+                midgardCreate.Image.collection.add({
+                    title: event.target.file.name,
+                    name: event.target.file.name,
+                    displayURL: event.target.result,
+                    file: event.target.file,
+                    parentguid: midgardCreate.Image.currentObject.id
+                });
             };
             reader.readAsDataURL(file);
         });
         return false;
-    }, true);
+    },
 
-    placeholderElement.addEventListener('dragenter', function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
-    }, true);
+    showImageDialog: function(imageObject) {
+        midgardCreate.Image.imageSelectDialog.dialog('close');
 
-    placeholderElement.addEventListener('dragleave', function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        jQuery('#midgardmvc-image-upload').removeClass('midgardmvc-image-hover');
-    }, true);
-
-    placeholderElement.addEventListener('dragover', function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
-    }, true);
-};
-
-midgardCreate.Image.showImageDialog = function(imageInfo, imageVariants, callback) {
-    midgardCreate.Image.imageSelectDialog.dialog('close');
-
-    if (midgardCreate.Image.imageDialog != null) {
-        midgardCreate.Image.imageDialog.dialog('close');
-        midgardCreate.Image.imageDialog = null;
-    }
-
-    var dialogOptions = {
-        show: 'fade',
-        hide: 'fade',
-        title: 'Image: ' + imageInfo.title,
-        height: 300,
-        width: 400,
-        zIndex: 12000
-    };
-    midgardCreate.Image.imageDialog = jQuery('<div id="midgardmvc-image-details"></div>');
-
-    var showImage = jQuery('<img src="' + imageInfo.url + '" style="max-width: 400px; max-height: 200px;" />');
-    midgardCreate.Image.imageDialog.append(showImage);
-
-    var dialogButtons = {
-        'Back to search': function() {
-            jQuery(this).dialog('close');
-            midgardCreate.Image.imageSelectDialog.dialog('open');
+        if (midgardCreate.Image.imageDialog != null) {
+            midgardCreate.Image.imageDialog.dialog('close');
+            midgardCreate.Image.imageDialog = null;
         }
-    };
 
-    jQuery.each(imageVariants, function(variantName, variantLabel) {
-        dialogButtons['Use ' + variantLabel] = function() {
-            imageInfo.url = '/mgd:attachment/' + imageInfo.guid + '/' + variantName + '/' + imageInfo.name;
-            callback(imageInfo);
-            if (midgardCreate.Image.imageDialog != null) {
-                midgardCreate.Image.imageDialog.dialog('close');
-                midgardCreate.Image.imageDialog = null;
+        var dialogOptions = {
+            show: 'fade',
+            hide: 'fade',
+            title: 'Image: ' + imageObject.get('title'),
+            height: 300,
+            width: 400,
+            zIndex: 12000
+        };
+        midgardCreate.Image.imageDialog = jQuery('<div id="midgardmvc-image-details"></div>');
+
+        var showImage = jQuery('<img src="' + imageObject.get('displayURL') + '" style="max-width: 400px; max-height: 200px;" />');
+        midgardCreate.Image.imageDialog.append(showImage);
+
+        var dialogButtons = {
+            'Back to search': function() {
+                jQuery(this).dialog('close');
+                midgardCreate.Image.imageSelectDialog.dialog('open');
             }
-        }
-    });
+        };
 
-    dialogOptions.buttons = dialogButtons;
-    midgardCreate.Image.imageDialog.dialog(dialogOptions);
-};
+        jQuery.each(imageObject.get('variants'), function(variantName, variantLabel) {
+            dialogButtons['Use ' + variantLabel] = function() {
+                imageObject.set({'displayURL': '/mgd:attachment/' + imageObject.id + '/' + variantName + '/' + imageObject.get('name')});
+                midgardCreate.Image.callback(imageObject);
+                if (midgardCreate.Image.imageDialog != null) {
+                    midgardCreate.Image.imageDialog.dialog('close');
+                    midgardCreate.Image.imageDialog = null;
+                }
+            }
+        });
 
-midgardCreate.Image.clearSelectDialog = function() {
-    midgardCreate.Image.imageList.empty();
-};
-
-midgardCreate.Image.getImageListElement = function(imageInfo, callback) {
-    var imageElement = jQuery('<li><img src="' + imageInfo.url + '" title="' + imageInfo.title + '" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" /></li>');
-    imageElement.click(function() { 
-        midgardCreate.Image.showImageDialog(imageInfo, midgardCreate.Image.variants, callback) 
-    });
-    return imageElement;
+        dialogOptions.buttons = dialogButtons;
+        midgardCreate.Image.imageDialog.dialog(dialogOptions);
+    }
 };

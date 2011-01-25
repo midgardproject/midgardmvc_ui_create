@@ -4,18 +4,19 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
     public function __construct(midgardmvc_core_request $request)
     {
         $this->request = $request;
+
+        $this->variants = midgardmvc_core::get_instance()->configuration->attachmentserver_variants;
     }
 
     public function get_search(array $args)
     {
         $qb = new midgard_query_builder('midgardmvc_helper_attachmentserver_attachment');
-        $query = $this->request->get_query();
-        if (   isset($query['q'])
-            && !empty($query['q']))
+        if (   isset($args['searchterm'])
+            && !empty($args['searchterm']))
         {
             $qb->begin_group('OR');
-            $qb->add_constraint('name', 'LIKE', "{$query['q']}%");
-            $qb->add_constraint('title', 'LIKE', "{$query['q']}%");
+            $qb->add_constraint('name', 'LIKE', "{$args['searchterm']}%");
+            $qb->add_constraint('title', 'LIKE', "{$args['searchterm']}%");
             $qb->end_group();
         }
         else
@@ -26,24 +27,23 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
         $qb->add_order('metadata.revised', 'DESC');
         $attachments = $qb->execute();
 
-        $this->data['images'] = array();
+        $this->data = array();
         foreach ($attachments as $attachment)
         {
-            $parent = midgard_object_class::get_object_by_guid($attachment->parentguid);
+            try {
+                $parent = midgard_object_class::get_object_by_guid($attachment->parentguid);
+            }
+            catch (midgard_error_exception $e)
+            {
+                continue;
+            }
             if (  $parent instanceof midgard_attachment
                 || $parent instanceof midgardmvc_helper_attachmentserver_attachment)
             {
                 continue;
             }
             
-            $this->data['images'][] = $this->attachment_to_data($attachment);
-        }
-
-        $this->data['variants'] = array();
-        $variants = midgardmvc_core::get_instance()->configuration->attachmentserver_variants;
-        foreach ($variants as $variant => $config)
-        {
-            $this->data['variants'][$variant] = $variant;
+            $this->data[] = $this->attachment_to_data($attachment);
         }
     }
 
@@ -51,13 +51,20 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
     {
         $data = array
         (
-            'guid' => $attachment->guid,
+            'id' => $attachment->guid,
             'parentguid' => $attachment->parentguid,
             'name' => $attachment->name,
             'title' => $attachment->title,
             'size' => $attachment->metadata->size,
-            'url' => "/mgd:attachment/{$attachment->guid}/{$attachment->name}",
+            'displayURL' => "/mgd:attachment/{$attachment->guid}/{$attachment->name}",
         );
+
+        $data['variants'] = array();
+        foreach ($this->variants as $variant => $config)
+        {
+            $data['variants'][$variant] = $variant;
+        }
+
         return $data;
     }
 
@@ -95,15 +102,12 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
 
     public function handle_result($attachment)
     {
-        $this->data['status'] = 'ok';
-        $this->data['image'] = $this->attachment_to_data($attachment);
+        $this->data = $this->attachment_to_data($attachment);
 
         if (   isset($_POST['variant'])
             && !empty($_POST['variant']))
         {
-            $this->data['image']['url'] = "/mgd:attachment/{$attachment->guid}/{$_POST['variant']}/{$attachment->name}";
-            return;
+            $this->data['displayURL'] = "/mgd:attachment/{$attachment->guid}/{$_POST['variant']}/{$attachment->name}";
         }
-        $this->data['image']['url'] = "/mgd:attachment/{$attachment->guid}/{$attachment->name}";
     }
 }

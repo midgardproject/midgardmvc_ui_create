@@ -49,10 +49,18 @@ routes:
         mimetype: application/json
         template_aliases: 
             root: midgardmvc-show-json
-    midgardmvc_create_image_search:
+    midgardmvc_create_image_latest:
         controller: midgardmvc_ui_create_controllers_image
         action: search
         path: '/mgd:create/image/search'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json
+    midgardmvc_create_image_search:
+        controller: midgardmvc_ui_create_controllers_image
+        action: search
+        path: '/mgd:create/image/search/{$searchterm}'
         root_only: true
         mimetype: application/json
         template_aliases: 
