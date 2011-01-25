@@ -10,6 +10,8 @@ midgardCreate.Image = {
     collection: null,
     searchTerm: '',
     currentObject: null,
+    locationName: '',
+    variantName: '',
 
     init: function() {
         midgardCreate.Image.prepareCollection();
@@ -53,16 +55,16 @@ midgardCreate.Image = {
                         return;
                     }
                     var data = jQuery.parseJSON(xhr.responseText);
-                    if (typeof data.image == 'undefined') {
-                        return;
+                    if (typeof data.displayURL != 'undefined')
+                    {
+                        // Force image refresh
+                        var now = new Date();
+                        data.displayURL = data.displayURL + '?' + now.getTime();
                     }
-                    console.log("Updating image instance with data", imageInstance, data);
-                    //imageInstance.id = data.id;
                     imageInstance.set(data);
-                    console.log(imageInstance);
 
                     imageInstance.view.render();
-                    //midgardCreate.Image.showImageDialog(imageInfo, midgardCreate.Image.variants, callback);
+                    midgardCreate.Image.showImageDialog(imageInstance);
                 };
                 xhr.send(form);
             }
@@ -104,7 +106,7 @@ midgardCreate.Image = {
 
         midgardCreate.Image.collection.bind('add', function(itemInstance) {
             new imageView({model: itemInstance});
-            collectionInstance.viewElement.prepend(itemInstance.view.render().el);
+            midgardCreate.Image.collection.viewElement.prepend(itemInstance.view.render().el);
             if (itemInstance.get('file'))
             {
                 itemInstance.upload();
@@ -112,7 +114,6 @@ midgardCreate.Image = {
         });
 
         midgardCreate.Image.collection.bind('remove', function(itemInstance) {
-            console.log("Removing", itemInstance);
             itemInstance.view.el.remove();
         });
 
@@ -125,8 +126,10 @@ midgardCreate.Image = {
         });
     },
 
-    showSelectDialog: function(currentObject, locationName, callback) {
+    showSelectDialog: function(currentObject, locationName, variantName, callback) {
         midgardCreate.Image.currentObject = currentObject;
+        midgardCreate.Image.locationName = locationName;
+        midgardCreate.Image.variantName = variantName;
         midgardCreate.Image.callback = callback;
         midgardCreate.Image.prepareSelectDialog();
 
@@ -210,6 +213,7 @@ midgardCreate.Image = {
                     title: event.target.file.name,
                     name: event.target.file.name,
                     displayURL: event.target.result,
+                    locationname: midgardCreate.Image.locationName,
                     file: event.target.file,
                     parentguid: midgardCreate.Image.currentObject.id
                 });
@@ -247,16 +251,26 @@ midgardCreate.Image = {
             }
         };
 
-        jQuery.each(imageObject.get('variants'), function(variantName, variantLabel) {
-            dialogButtons['Use ' + variantLabel] = function() {
-                imageObject.set({'displayURL': '/mgd:attachment/' + imageObject.id + '/' + variantName + '/' + imageObject.get('name')});
-                midgardCreate.Image.callback(imageObject);
-                if (midgardCreate.Image.imageDialog != null) {
-                    midgardCreate.Image.imageDialog.dialog('close');
-                    midgardCreate.Image.imageDialog = null;
+        var imageVariants = imageObject.get('variants');
+        if (imageVariants) {
+            jQuery.each(imageVariants, function(variantName, variantLabel) {
+                if (   midgardCreate.Image.variantName != ''
+                    && variantName != midgardCreate.Image.variantName)
+                {
+                    return true;
                 }
-            }
-        });
+                dialogButtons['Use ' + variantLabel] = function() {
+                    // Force image refresh
+                    var now = new Date();
+                    imageObject.set({'displayURL': '/mgd:attachment/' + imageObject.id + '/' + variantName + '/' + imageObject.get('name') + '?' + now.getTime()});
+                    midgardCreate.Image.callback(imageObject);
+                    if (midgardCreate.Image.imageDialog != null) {
+                        midgardCreate.Image.imageDialog.dialog('close');
+                        midgardCreate.Image.imageDialog = null;
+                    }
+                }
+            });
+        }
 
         dialogOptions.buttons = dialogButtons;
         midgardCreate.Image.imageDialog.dialog(dialogOptions);

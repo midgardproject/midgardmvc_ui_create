@@ -53,6 +53,7 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
         (
             'id' => $attachment->guid,
             'parentguid' => $attachment->parentguid,
+            'locationname' => $attachment->locationname,
             'name' => $attachment->name,
             'title' => $attachment->title,
             'size' => $attachment->metadata->size,

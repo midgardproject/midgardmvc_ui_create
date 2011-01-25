@@ -6,22 +6,26 @@ midgardCreate.ImagePlaceholders = {};
 
 midgardCreate.ImagePlaceholders.init = function() {
     midgardCreate.ImagePlaceholders.placeHolders = [];
+
+    midgardCreate.ImagePlaceholders.placeholderModel = Backbone.Model.extend({});
 };
 
 midgardCreate.ImagePlaceholders.enablePlaceholders = function() {
     var placeholders = jQuery('img[mgd\\:locationname]');
     jQuery.each(placeholders, function(index, placeholderElement)
     {
-        var placeHolder = {};
-        placeHolder.element = jQuery(placeholderElement);
-        placeHolder.parentGuid = placeHolder.element.attr('mgd:parentguid');
-        placeHolder.locationName = placeHolder.element.attr('mgd:locationname');
-        placeHolder.variant = placeHolder.element.attr('mgd:variant');
+        var placeholderElement = jQuery(placeholderElement);
+        var placeHolder = new midgardCreate.ImagePlaceholders.placeholderModel({
+            id: placeholderElement.attr('mgd:parentguid'),
+            element: placeholderElement,
+            locationName: placeholderElement.attr('mgd:locationname'),
+            variant: placeholderElement.attr('mgd:variant')
+        });
 
         midgardCreate.ImagePlaceholders.placeHolders[midgardCreate.ImagePlaceholders.placeHolders.length] = placeHolder;
 
-        jQuery(placeHolder.element).bind('click', function() {
-             midgardCreate.Image.showSelectDialog(placeHolder.parentGuid, placeHolder.locationName, midgardCreate.ImagePlaceholders.insertImage, false);
+        jQuery(placeholderElement).bind('click', function() {
+             midgardCreate.Image.showSelectDialog(placeHolder, placeHolder.get('locationName'), placeHolder.get('variant'), midgardCreate.ImagePlaceholders.insertImage);
         });
     });
 };
@@ -29,19 +33,22 @@ midgardCreate.ImagePlaceholders.enablePlaceholders = function() {
 midgardCreate.ImagePlaceholders.disablePlaceholders = function() {
     jQuery.each(midgardCreate.ImagePlaceholders.placeHolders, function(index, placeHolder)
     {
-        jQuery(placeHolder.element).unbind('click');
+        jQuery(placeHolder.get('element')).unbind('click');
     });
 };
 
 midgardCreate.ImagePlaceholders.insertImage = function(imageInfo) {
     jQuery.each(midgardCreate.ImagePlaceholders.placeHolders, function(index, placeHolder) {
-        if (placeHolder.parentGuid != imageInfo.parentguid) {
-            return;
+        if (placeHolder.id != imageInfo.get('parentguid')) {
+            console.log('Not GUID', placeHolder.id, imageInfo.get('parentguid'));
+            return true;
         }
-        if (placeHolder.locationName != imageInfo.locationName) {
-            return;
+        if (placeHolder.get('locationName') != imageInfo.get('locationname')) {
+            console.log('Not location', placeHolder.get('locationName'), imageInfo.get('locationname'));
+            return true;
         }
-        placeHolderElement = jQuery(placeHolder.element);
-        placeHolderElement.attr('src', imageInfo.url);
+        placeHolderElement = placeHolder.get('element');
+        placeHolderElement.attr('src', imageInfo.get('displayURL'));
+        placeHolderElement.attr('title', imageInfo.get('title'));
     });
 };

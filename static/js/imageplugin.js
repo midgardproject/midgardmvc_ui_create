@@ -12,7 +12,7 @@ midgardCreate.imagePlugin.init = function() {
         'iconClass' : 'GENTICS_button midgardCreate_button_img',
         'size' : 'small',
         'onclick' : function (element, event) {
-            midgardCreate.Image.showSelectDialog(midgardCreate.Editable.currentObject, '', midgardCreate.imagePlugin.insertImage);
+            midgardCreate.Image.showSelectDialog(midgardCreate.Editable.currentObject, '', '', midgardCreate.imagePlugin.insertImage);
         },
         'toggle' : false
     });
