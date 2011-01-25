@@ -7,243 +7,222 @@ document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plu
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Table/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Link/plugin.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplugin.js"></script>');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/objectmanager.js"></script>');
 
 if (typeof midgardCreate == 'undefined') {
     midgardCreate = {};
 }
 
-midgardCreate.Editable = {};
+midgardCreate.Editable = {
+    objects: [],
+    currentObject: null,
+    editTransfered: false,
+    saveTransfered: false,
 
-midgardCreate.Editable.init = function() {
+    init: function() {
+        // Add an area for object actions
+        midgardCreate.Editable.objectActions = jQuery('<div id="midgardcreate-objectactions"></div>').hide();
+        jQuery('#midgard-bar .toolbarcontent-center').append(midgardCreate.Editable.objectActions);
 
-    if (!midgardCreate.checkCapability('contentEditable')) {
-        return;
-    }
-
-    // Configure Aloha
-    GENTICS.Aloha.settings = {
-        "ribbon": false,
-        "language": "en"
-    };
-
-    midgardCreate.Editable.objects = [];
-
-    midgardCreate.Editable.currentObject = null;
-
-    // Add Save button to the toolbar
-    midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button();
-    //midgardCreate.toolbar.append(midgardCreate.Editable.saveButton);
-    jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.saveButton);
-
-    // Add Edit toggle to the toolbar
-    jQuery('#midgard-bar .toolbarcontent-right').append(jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>'))
-    midgardCreate.Editable.editButton = jQuery('#midgardcreate-edit').button();
-
-    // Add an area for object actions
-    midgardCreate.Editable.objectActions = jQuery('<div id="midgardcreate-objectactions"></div>').hide();
-    jQuery('#midgard-bar .toolbarcontent-center').append(midgardCreate.Editable.objectActions);
-
-    if (midgardCreate.checkCapability('sessionstorage')) {
-        // Check if user is in editing state
-        var editorState = sessionStorage.getItem('midgardmvc_ui_create_state');
-        if (editorState == 'edit')
-        {
-            // Don't transfer when enabled from session
-            midgardCreate.Editable.enableEditables(false);
-            midgardCreate.Editable.editButton.attr('checked', true);
-            midgardCreate.Editable.editButton.button('refresh');
-        }
-    }
-
-    midgardCreate.Editable.editButton.bind('change', function() {
-        if (midgardCreate.Editable.editButton.attr('checked')) {
-            midgardCreate.Editable.enableEditables(true);
+        if (!midgardCreate.checkCapability('contentEditable')) {
             return;
         }
-        midgardCreate.Editable.disableEditables();
-    });
 
-    midgardCreate.Editable.saveButton.bind('click', function() {
-        midgardCreate.Editable.save();
-    });
-}
+        midgardCreate.Editable.populateToolbar();
+    },
 
-midgardCreate.Editable.activateEditable = function(editableObject, propertyName) {
-    if (midgardCreate.Editable.currentObject == editableObject.model) {
-        return;
-    }
-    midgardCreate.Editable.currentObject = editableObject.model;
-    midgardCreate.Editable.showCurrentObject();
-}
-
-midgardCreate.Editable.showCurrentObject = function() {
-    midgardCreate.Editable.objectActions.fadeOut();
-
-    if (midgardCreate.Editable.currentObject == null) {
-        return;
-    }
-
-    midgardCreate.Editable.currentObject.getWorkflowState(function(stateData) {
-        midgardCreate.Editable.objectActions.empty();
-
-        var objectLabel = jQuery('<a>' + stateData.label + '</a>');
-        midgardCreate.Editable.objectActions.append(objectLabel);
-        jQuery.each(stateData.actions, function(action, actionLabel) {
-            var actionButton = jQuery('<button>' + actionLabel + '</button>').button();
-            midgardCreate.Editable.objectActions.append(actionButton);
-            actionButton.bind('click', function() {
-                midgardCreate.Editable.runWorkflow(midgardCreate.Editable.currentObject, action);
-            });
-        });
-
-        midgardCreate.Editable.objectActions.fadeIn();
-    });
-}
-
-midgardCreate.Editable.runWorkflow = function(targetObject, workflow) {
-    targetObject.runWorkflow(workflow, function(data) {
-        if (data.object == 'remove')
-        {
-            jQuery.each(midgardCreate.Editable.objects, function(index, editableObject) {
-                if (editableObject.model.id == targetObject.id) {
-                    jQuery(editableObject.container).hide('drop');
-                }
-            });
-            midgardCreate.Editable.currentObject = null;
-        }
-        midgardCreate.Editable.showCurrentObject();
-    });
-}
-
-midgardCreate.Editable.enableEditable = function(objectContainer, transfer) {
-    var editableObject = {};
-    editableObject.model = midgardCreate.objectManager.getInstanceForContainer(objectContainer);
-
-    editableObject.type = objectContainer.attr('typeof');
-    editableObject.baseurl = objectContainer.attr('mgd:baseurl');
-    editableObject.container = objectContainer;
-
-    if (transfer) {
-        // First element, show transfer to signify what is going on
-        midgardCreate.Editable.editButton.effect('transfer', { to: jQuery(objectContainer) }, 1000);
-    }
-
-    // Seek editable properties
-    editableObject.properties = {};
-    jQuery.each(jQuery('[property]', objectContainer), function(index, objectProperty)
-    {
-        var objectProperty = jQuery(objectProperty);
-        var propertyName = objectProperty.attr('property');
-        editableObject.properties[propertyName] = {
-            
-            element: objectProperty,
-            aloha: new GENTICS.Aloha.Editable(objectProperty)
+    populateToolbar: function() {
+        // Configure Aloha
+        GENTICS.Aloha.settings = {
+            "ribbon": false,
+            "language": "en"
         };
 
-        // Subscribe to activation event
-        GENTICS.Aloha.EventRegistry.subscribe(editableObject.properties[propertyName].aloha, 'editableActivated', function() {
-            midgardCreate.Editable.activateEditable(editableObject, propertyName); 
-        });
+        midgardCreate.Editable.currentObject = null;
 
-        objectProperty.effect('highlight', { color: midgardCreate.highlightcolor }, 3000);
-    });
+        // Add Save button to the toolbar
+        midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button();
+        //midgardCreate.toolbar.append(midgardCreate.Editable.saveButton);
+        jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.saveButton);
 
-    midgardCreate.Editable.objects[midgardCreate.Editable.objects.length] = editableObject;
-};
+        // Add Edit toggle to the toolbar
+        jQuery('#midgard-bar .toolbarcontent-right').append(jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>'))
+        midgardCreate.Editable.editButton = jQuery('#midgardcreate-edit').button();
 
-midgardCreate.Editable.enableEditables = function(transfer) {
-    var objectContainers = jQuery('[typeof]');
-    jQuery.each(objectContainers, function(index, objectContainer)
-    {
-        var objectContainer = jQuery(objectContainer);
-        if (typeof objectContainer.attr('about') == 'undefined') {
-            // No identifier set, therefore not editable
-            return true;
-        }
-        midgardCreate.Editable.enableEditable(objectContainer, transfer);
-
-        if (transfer) {
-            // Transfer only first element
-            transfer = false;
-        }
-    });
-
-    if (midgardCreate.checkCapability('sessionstorage')) {
-        // Set session to editing state
-        sessionStorage.setItem('midgardmvc_ui_create_state', 'edit');
-    }
-
-    midgardCreate.Containers.enableContainers();
-    midgardCreate.ImagePlaceholders.enablePlaceholders();
-};
-
-midgardCreate.Editable.disableEditables = function() {
-
-    if (midgardCreate.checkCapability('sessionstorage')) {
-        // Remove editing state
-        sessionStorage.removeItem('midgardmvc_ui_create_state');
-    }
-
-    midgardCreate.Editable.objectActions.empty();
-
-    midgardCreate.Containers.disableContainers();
-    midgardCreate.ImagePlaceholders.disablePlaceholders();
-
-    jQuery.each(midgardCreate.Editable.objects, function(index, editableObject) {
-        jQuery.each(editableObject.properties, function(propertyName, editableProperty) {
-            editableProperty = jQuery(editableProperty.element);
-            editableProperty.mahalo();
-        });
-    });
-    midgardCreate.Editable.objects = [];
-};
-
-midgardCreate.Editable.save = function () {
-    var transfered = false;
-
-    midgardCreate.Editable.saveButton.button('option', 'label', 'Saving');
-
-    // iterate all Midgard objects which have been made editable
-    jQuery.each(midgardCreate.Editable.objects, function(index, editableObject) {
-        var objectModified = false;
-        var modifiedProperties = {};
-
-        if (editableObject.baseurl) {
-            modifiedProperties.baseurl = editableObject.baseurl;
-        }
-
-        jQuery.each(editableObject.properties, function(index, editableProperty) {
-            if (!editableProperty.aloha.isModified())
+        if (midgardCreate.checkCapability('sessionstorage')) {
+            // Check if user is in editing state
+            var editorState = sessionStorage.getItem('midgardmvc_ui_create_state');
+            if (editorState == 'edit')
             {
+                // Don't transfer when enabled from session
+                midgardCreate.Editable.editTransfered = true;
+
+                midgardCreate.Editable.enterEditState();
+
+                midgardCreate.Editable.editButton.attr('checked', true);
+                midgardCreate.Editable.editButton.button('refresh');
+            }
+        }
+
+        midgardCreate.Editable.editButton.bind('change', function() {
+            if (midgardCreate.Editable.editButton.attr('checked')) {
+                midgardCreate.Editable.enterEditState();
                 return;
             }
-            modifiedProperties[index] = editableProperty.aloha.getContents();
-            objectModified = true;
-
-            if (!transfered) {
-                editableProperty.element.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
-                transfered = true;
-            }
+            midgardCreate.Editable.leaveEditState();
         });
 
-        if (!objectModified)
-        {
-            return true;
+        midgardCreate.Editable.saveButton.bind('click', function() {
+            midgardCreate.Editable.save();
+        });
+    },
+
+    showCurrentObject: function() {
+        midgardCreate.Editable.objectActions.fadeOut();
+
+        if (midgardCreate.Editable.currentObject == null) {
+            return;
         }
 
-        editableObject.model.set(modifiedProperties);
-        Backbone.emulateHTTP = true;
-        Backbone.emulateJSON = true;
-        editableObject.model.save(null, {
-            success: function(model, response) {
-                editableObject.container.attr('about', model.id);
-                if (midgardCreate.Editable.currentObject == model) {
-                    midgardCreate.Editable.showCurrentObject();
-                }
-            }
-        });
-    });
+        midgardCreate.Editable.currentObject.getWorkflowState(function(stateData) {
+            midgardCreate.Editable.objectActions.empty();
 
-    midgardCreate.Editable.saveButton.button('option', 'label', 'Save');
-} ;
+            var objectLabel = jQuery('<a>' + stateData.label + '</a>');
+            midgardCreate.Editable.objectActions.append(objectLabel);
+            jQuery.each(stateData.actions, function(action, actionLabel) {
+                var actionButton = jQuery('<button>' + actionLabel + '</button>').button();
+                midgardCreate.Editable.objectActions.append(actionButton);
+                actionButton.bind('click', function() {
+                    midgardCreate.Editable.runWorkflow(midgardCreate.Editable.currentObject, action);
+                });
+            });
+
+            midgardCreate.Editable.objectActions.fadeIn();
+        });
+    },
+
+    runWorkflow: function(targetObject, workflow) {
+        targetObject.runWorkflow(workflow, function(data) {
+            if (data.object == 'remove')
+            {
+                targetObject.view.remove();
+                midgardCreate.Editable.currentObject = null;
+            }
+            midgardCreate.Editable.showCurrentObject();
+        });
+    },
+
+    activateEditable: function(objectInstance, propertyName) {
+        if (midgardCreate.Editable.currentObject == objectInstance) {
+            return;
+        }
+        midgardCreate.Editable.currentObject = objectInstance;
+        midgardCreate.Editable.showCurrentObject();
+    },
+
+    enableEditable: function(objectInstance) {
+        if (midgardCreate.Editable.editTransfered) {
+            // First element, show transfer to signify what is going on
+            midgardCreate.Editable.editButton.effect('transfer', { to: objectInstance.view.el }, 1000);
+            midgardCreate.Editable.editTransfered = false;
+        }
+
+        // Seek editable properties from RDFa
+        objectInstance.editables = {};
+        jQuery.each(jQuery('[property]', objectInstance.view.el), function(index, objectProperty)
+        {
+            var objectProperty = jQuery(objectProperty);
+            var propertyName = objectProperty.attr('property');
+            objectInstance.editables[propertyName] = new GENTICS.Aloha.Editable(objectProperty);
+
+            // Subscribe to activation event
+            GENTICS.Aloha.EventRegistry.subscribe(objectInstance.editables[propertyName], 'editableActivated', function() {
+                midgardCreate.Editable.activateEditable(objectInstance, propertyName); 
+            });
+
+            objectProperty.effect('highlight', { color: midgardCreate.highlightcolor }, 3000);
+        });
+
+        midgardCreate.Editable.objects[midgardCreate.Editable.objects.length] = objectInstance;
+    },
+
+    enterEditState: function() {
+        // Seek editable objects from DOM
+        var objectContainers = jQuery('[typeof][about]');
+        jQuery.each(objectContainers, function(index, objectContainer)
+        {
+            var objectContainer = jQuery(objectContainer);
+            if (typeof objectContainer.attr('about') == 'undefined') {
+                // No identifier set, therefore not editable
+                return true;
+            }
+            var objectInstance = midgardCreate.objectManager.getInstanceForContainer(objectContainer);
+            midgardCreate.Editable.enableEditable(objectInstance);
+        });
+
+        if (midgardCreate.checkCapability('sessionstorage')) {
+            // Set session to editing state
+            sessionStorage.setItem('midgardmvc_ui_create_state', 'edit');
+        }
+
+        midgardCreate.Collections.enableCollections();
+        midgardCreate.ImagePlaceholders.enablePlaceholders();
+    },
+
+    leaveEditState: function() {
+        if (midgardCreate.checkCapability('sessionstorage')) {
+            // Remove editing state
+            sessionStorage.removeItem('midgardmvc_ui_create_state');
+        }
+
+        midgardCreate.Editable.objectActions.empty();
+
+        midgardCreate.Collections.disableCollections();
+        midgardCreate.ImagePlaceholders.disablePlaceholders();
+
+        jQuery.each(midgardCreate.Editable.objects, function(index, objectInstance) {
+            jQuery.each(objectInstance.editables, function(propertyName, alohaInstance) {
+                alohaInstance.destroy();
+            });
+        });
+        midgardCreate.Editable.objects = [];
+    },
+
+    save: function() {
+        midgardCreate.Editable.saveButton.button('option', 'label', 'Saving');
+
+        // iterate all Midgard objects which have been made editable
+        jQuery.each(midgardCreate.Editable.objects, function(index, objectInstance) {
+            var modifiedProperties = {};
+            jQuery.each(objectInstance.editables, function(propertyName, alohaInstance) {
+                if (!alohaInstance.isModified())
+                {
+                    return true;
+                }
+                modifiedProperties[propertyName] = alohaInstance.getContents();
+            });
+
+            if (jQuery.isEmptyObject(modifiedProperties))
+            {
+                return true;
+            }
+
+            objectInstance.set(modifiedProperties);
+
+            if (!midgardCreate.Editable.saveTransfered) {
+                objectInstance.view.el.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
+                midgardCreate.Editable.saveTransfered = true;
+            }
+
+            objectInstance.save(null, {
+                success: function(savedModel, response) {
+                    if (midgardCreate.Editable.currentObject == savedModel) {
+                        midgardCreate.Editable.showCurrentObject();
+                    }
+                }
+            });
+        });
+
+        midgardCreate.Editable.saveButton.button('option', 'label', 'Save');
+        midgardCreate.Editable.saveTransfered = true;
+    }
+};

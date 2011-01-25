@@ -228,6 +228,7 @@ jQuery(document).ready(function() {
     <<define capability check>>
     <<define effects>>
     <<define toolbar>>
+    <<initialize objectmanager>>
     <<initialize collections>>
     <<initialize images>>
     <<initialize image placeholders>>
@@ -492,6 +493,18 @@ To put things together, the toolbar defitions are called from a JavaScript file 
 <<midgard create initialization>>
 @
 
+### Object manager
+
+All objects shown on Midgard Create pages are managed by the Midgard Create Object manager, which uses functionality from backbone.js to handle saving and other operations to them.
+
+<<midgard create dependencies>>=
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/objectmanager.js"></script>');
+@
+
+<<initialize objectmanager>>=
+midgardCreate.objectManager.init();
+@
+
 ### Editables
 
 The Editable functionality in Midgard Create is implemented using [Aloha Editor](http://aloha-editor.com).
@@ -511,11 +524,11 @@ midgardCreate.Editable.init();
 ### Collections
 
 <<midgard create dependencies>>=
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/containers.js"></script>');
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/collections.js"></script>');
 @
 
 <<initialize collections>>=
-midgardCreate.Containers.init();
+midgardCreate.Collections.init();
 @
 
 ### Image handling
