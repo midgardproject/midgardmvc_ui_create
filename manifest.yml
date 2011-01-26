@@ -73,3 +73,11 @@ routes:
         mimetype: application/json
         template_aliases: 
             root: midgardmvc-show-json
+    midgardmvc_create_image_associatelocation:
+        controller: midgardmvc_ui_create_controllers_image
+        action: associatelocation
+        path: '/mgd:create/image/associatelocation/{$identifier}'
+        root_only: true
+        mimetype: application/json
+        template_aliases: 
+            root: midgardmvc-show-json

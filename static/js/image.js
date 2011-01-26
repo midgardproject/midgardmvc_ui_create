@@ -10,7 +10,6 @@ midgardCreate.Image = {
     collection: null,
     searchTerm: '',
     currentObject: null,
-    locationName: '',
     variantName: '',
 
     init: function() {
@@ -39,11 +38,6 @@ midgardCreate.Image = {
                 var form = new FormData();
                 form.append('file', imageInstance.get('file'));
                 form.append('parentguid', imageInstance.get('parentguid'));
-
-                if (imageInstance.get('locationname'))
-                {
-                    form.append('locationname', imageInstance.get('locationname'));
-                }
 
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/mgd:create/image/upload/', false);
@@ -126,9 +120,8 @@ midgardCreate.Image = {
         });
     },
 
-    showSelectDialog: function(currentObject, locationName, variantName, callback) {
+    showSelectDialog: function(currentObject, variantName, callback) {
         midgardCreate.Image.currentObject = currentObject;
-        midgardCreate.Image.locationName = locationName;
         midgardCreate.Image.variantName = variantName;
         midgardCreate.Image.callback = callback;
         midgardCreate.Image.prepareSelectDialog();
@@ -175,32 +168,32 @@ midgardCreate.Image = {
         midgardCreate.Image.imageSelectDialog.prepend(uploadPlaceholder);
         var placeholderElement = document.getElementById('midgardmvc-image-upload');
 
-        placeholderElement.addEventListener('drop', function(event) {
+        uploadPlaceholder.get(0).addEventListener('drop', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
             midgardCreate.Image.addDroppedFile(event);
         }, true);
 
-        placeholderElement.addEventListener('dragenter', function(event) {
+        uploadPlaceholder.get(0).addEventListener('dragenter', function(event) {
             event.stopPropagation();
             event.preventDefault();
-            jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
+            jQuery(uploadPlaceholder).addClass('midgardmvc-image-hover');
         }, true);
 
-        placeholderElement.addEventListener('dragleave', function(event) {
+        uploadPlaceholder.get(0).addEventListener('dragleave', function(event) {
             event.stopPropagation();
             event.preventDefault();
-            jQuery('#midgardmvc-image-upload').removeClass('midgardmvc-image-hover');
+            jQuery(uploadPlaceholder).removeClass('midgardmvc-image-hover');
         }, true);
 
-        placeholderElement.addEventListener('dragover', function(event) {
+        uploadPlaceholder.get(0).addEventListener('dragover', function(event) {
             event.stopPropagation();
             event.preventDefault();
-            jQuery('#midgardmvc-image-upload').addClass('midgardmvc-image-hover');
+            jQuery(uploadPlaceholder).addClass('midgardmvc-image-hover');
         }, true);
     },
 
     addDroppedFile: function(event) {
-        event.stopPropagation();
-        event.preventDefault();
         var files = event.dataTransfer.files;
         jQuery.each(event.dataTransfer.files, function(i, file) {
             var reader = new FileReader();
@@ -213,7 +206,6 @@ midgardCreate.Image = {
                     title: event.target.file.name,
                     name: event.target.file.name,
                     displayURL: event.target.result,
-                    locationname: midgardCreate.Image.locationName,
                     file: event.target.file,
                     parentguid: midgardCreate.Image.currentObject.id
                 });
@@ -266,7 +258,8 @@ midgardCreate.Image = {
                     midgardCreate.Image.callback(imageObject);
                     if (midgardCreate.Image.imageDialog != null) {
                         midgardCreate.Image.imageDialog.dialog('close');
-                        midgardCreate.Image.imageDialog = null;
+                        midgardCreate.Image.imageDialog.remove();
+                        midgardCreate.Image.imageDialog.remove = null;
                     }
                 }
             });

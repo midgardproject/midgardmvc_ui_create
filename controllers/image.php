@@ -10,7 +10,7 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
 
     public function get_search(array $args)
     {
-        $qb = new midgard_query_builder('midgardmvc_helper_attachmentserver_attachment');
+        $qb = new midgard_query_builder('midgard_attachment');
         if (   isset($args['searchterm'])
             && !empty($args['searchterm']))
         {
@@ -53,7 +53,6 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
         (
             'id' => $attachment->guid,
             'parentguid' => $attachment->parentguid,
-            'locationname' => $attachment->locationname,
             'name' => $attachment->name,
             'title' => $attachment->title,
             'size' => $attachment->metadata->size,
@@ -110,5 +109,112 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
         {
             $this->data['displayURL'] = "/mgd:attachment/{$attachment->guid}/{$_POST['variant']}/{$attachment->name}";
         }
+    }
+
+    public function put_associatelocation(array $args)
+    {
+        try
+        {
+            $this->parent = midgard_object_class::get_object_by_guid($args['identifier']);
+        }
+        catch (midgard_error_exception $e)
+        {
+            throw new midgardmvc_exception_notfound("Object {$args['identifier']}: " . $e->getMessage());
+        }
+
+        $data = $this->read_input();
+        try
+        {
+            $this->associate_attachment = new midgardmvc_helper_attachmentserver_attachment($data->attachmentGuid);
+        }
+        catch (midgard_error_exception $e)
+        {
+            throw new midgardmvc_exception_notfound("File attachment {$data->attachmentGuid}: " . $e->getMessage());
+        }
+
+        if (   $this->associate_attachment->parentguid == $this->parent->guid
+            && $this->associate_attachment->locationname == $data->locationName)
+        {
+            // This attachment is already associated, return
+            $this->attachment_to_json($this->associate_attachment);
+            return;
+        }
+
+        $transaction = new midgard_transaction();
+        $transaction->begin();
+
+        $qb = new midgard_query_builder('midgardmvc_helper_attachmentserver_attachment');
+        $qb->add_constraint('parentguid', '=', $this->parent->guid);
+        $qb->add_constraint('locationname', '=', $data->locationName);
+        $attachments = $qb->execute();
+        if (count($attachments) > 0)
+        {
+            // Move old attachment from out of the way
+            foreach ($attachments as $attachment)
+            {
+                $attachment = $attachments[0];
+                $attachment->locationname = '';
+                $attachment->update();
+            }
+        }
+
+        if ($this->associate_attachment->locationname == '')
+        {
+            // This is an unplaced attachment, we can use it as-is
+            $this->associate_attachment->locationname = $data->locationName;
+            $this->associate_attachment->update();
+            $transaction->commit();
+            $this->attachment_to_json($this->associate_attachment);
+            return;
+        }
+
+        // This attachment is already associated with another location, copy
+        $new_attachment = new midgardmvc_helper_attachmentserver_attachment();
+        $new_attachment->name = "{$data->locationName}_{$this->associate_attachment->name}";
+        $new_attachment->title = $this->associate_attachment->title;
+        $new_attachment->mimetype = $this->associate_attachment->mimetype;
+        $new_attachment->location = $this->associate_attachment->location;
+        $new_attachment->locationname = $data->locationName;
+        $new_attachment->create();
+        $transaction->commit();
+        $this->attachment_to_json($new_attachment);
+    }
+
+    private function attachment_to_json($attachment)
+    {
+        $this->data = array
+        (
+            'id' => $this->parent->guid,
+            'locationName' => $attachment->locationname,
+            'attachmentGuid' => $attachment->guid,
+        );
+    }
+
+    private function read_input()
+    {
+        if (isset($_POST['model']))
+        {
+            // Backbone.emulateJSON is set
+            $data = json_decode($_POST['model']);
+        }
+        else
+        {
+            $handle = midgardmvc_core::get_instance()->dispatcher->get_stdin();
+            $input = stream_get_contents($handle, (int) $_SERVER['CONTENT_LENGTH']);
+            $data = json_decode($input);
+        }
+
+        if (isset($data->id))
+        {
+            unset($data->id);
+        }
+
+        if (isset($data->baseurl))
+        {
+            $this->baseurl = $data->baseurl;
+            unset($data->baseurl);
+        }
+
+        return $data;
     }
 }
