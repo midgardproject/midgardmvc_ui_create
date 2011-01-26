@@ -124,10 +124,10 @@ midgardCreate.Editable = {
     },
 
     enableEditable: function(objectInstance) {
-        if (midgardCreate.Editable.editTransfered) {
+        if (!midgardCreate.Editable.editTransfered) {
             // First element, show transfer to signify what is going on
             midgardCreate.Editable.editButton.effect('transfer', { to: objectInstance.view.el }, 1000);
-            midgardCreate.Editable.editTransfered = false;
+            midgardCreate.Editable.editTransfered = true;
         }
 
         // Seek editable properties from RDFa
