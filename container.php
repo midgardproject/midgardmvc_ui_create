@@ -14,6 +14,15 @@
 class midgardmvc_ui_create_container extends SplObjectStorage
 {
     private $placeholder = null;
+    private $urlpattern = '';
+
+    public function __get($key)
+    {
+        if ($key == 'urlpattern')
+        {
+            return $this->urlpattern;
+        }
+    }
 
     public function attach(midgard_object $object, $data = null)
     {
@@ -59,5 +68,16 @@ class midgardmvc_ui_create_container extends SplObjectStorage
 
         $this->placeholder = $object;
         $this->attach($object);
+    }
+
+    public function set_urlpattern($urlpattern)
+    {
+        if (!midgardmvc_ui_create_injector::can_use())
+        {
+            // URL Patterns only matter to Create users
+            return;
+        }
+
+        $this->urlpattern = $urlpattern;
     }
 }

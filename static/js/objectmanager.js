@@ -93,6 +93,15 @@ midgardCreate.objectManager = {
                 var property = propertyElement.attr('property');
                 propertyElement.html(model.get(property));
             });
+
+            if (   typeof model.collection != 'undefined'
+                && model.collection.urlpattern
+                && model.id) {
+                jQuery('a[rel="bookmark"]', this.el).each(function(index, linkElement) {
+                    var linkElement = jQuery(linkElement);
+                    linkElement.attr('href', model.collection.urlpattern.replace('GUID', model.id.replace('urn:uuid:', '')));
+                });
+            }
             return this;
         };
 

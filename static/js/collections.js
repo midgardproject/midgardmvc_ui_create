@@ -63,9 +63,15 @@ midgardCreate.Collections = {
                 orderFromElement = 'asc';
             }
 
+            var urlPattern = collectionElement.attr('mgd:urlpattern');
+            if (typeof urlPattern == 'undefined') {
+                urlPattern = null;
+            }
+
             var collectionCollection = Backbone.Collection.extend({
                 model: midgardCreate.objectManager.getModelForContainer(firstChild),
-                order: orderFromElement
+                order: orderFromElement,
+                urlpattern: urlPattern
             });
             var collectionInstance = new collectionCollection({});
 
