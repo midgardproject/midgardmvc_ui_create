@@ -158,7 +158,8 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
             }
         }
 
-        if ($this->associate_attachment->locationname == '')
+        if (   $this->associate_attachment->parentguid == $this->parent->guid
+            && $this->associate_attachment->locationname == '')
         {
             // This is an unplaced attachment, we can use it as-is
             $this->associate_attachment->locationname = $data->locationName;
@@ -170,6 +171,7 @@ class midgardmvc_ui_create_controllers_image extends midgardmvc_helper_attachmen
 
         // This attachment is already associated with another location, copy
         $new_attachment = new midgardmvc_helper_attachmentserver_attachment();
+        $new_attachment->parentguid = $this->parent->guid;
         $new_attachment->name = "{$data->locationName}_{$this->associate_attachment->name}";
         $new_attachment->title = $this->associate_attachment->title;
         $new_attachment->mimetype = $this->associate_attachment->mimetype;
