@@ -15,52 +15,52 @@
 
 /* Component containers
 ----------------------------------*/
-.ui-widget { font-family: Verdana, Arial, sans-serif; font-size: 1.1em; }
-.ui-widget .ui-widget { font-size: 1em; }
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: Verdana, Arial, sans-serif; font-size: 1em; }
-.ui-widget-content { border: 0px solid #555555; background: transparent url(images/ui-bg_highlight-soft_25_000000_1x100.png) 50% top repeat-x; color: #ffffff; }
-.ui-widget-content a { color: #ffffff; }
-.ui-widget-header { border: 1px solid #333333; background: #444444 url(images/ui-bg_highlight-soft_44_444444_1x100.png) 50% 50% repeat-x; color: #ffffff; font-weight: bold; }
-.ui-widget-header a { color: #ffffff; }
-.ui-widget-midgardbar { border: 0px solid #555555; background: transparent url(images/ui-bg-midgardbar.png) 50% top repeat-x; color: #ffffff; }
-.ui-widget-midgardbar a { color: #ffffff; }
-.ui-widget-hidebut { background: transparent url(images/midgard_logo.png) 50% 50% no-repeat; margin: 0px 2px 10px 3px; padding: 10px 15px; text-decoration: none; }
+.midgard-create .ui-widget { font-family: Verdana, Arial, sans-serif; font-size: 1.1em; }
+.midgard-create .ui-widget .ui-widget { font-size: 1em; }
+.midgard-create .ui-widget input, .midgard-create .ui-widget select, .midgard-create .ui-widget textarea, .midgard-create .ui-widget button { font-family: Verdana, Arial, sans-serif; font-size: 1em; }
+.midgard-create .ui-widget-content { border: 0px solid #555555; background: transparent url(images/ui-bg_highlight-soft_25_000000_1x100.png) 50% top repeat-x; color: #ffffff; }
+.midgard-create .ui-widget-content a { color: #ffffff; }
+.midgard-create .ui-widget-header { border: 1px solid #333333; background: #444444 url(images/ui-bg_highlight-soft_44_444444_1x100.png) 50% 50% repeat-x; color: #ffffff; font-weight: bold; }
+.midgard-create .ui-widget-header a { color: #ffffff; }
+.midgard-create .ui-widget-midgardbar { border: 0px solid #555555; background: transparent url(images/ui-bg-midgardbar.png) 50% top repeat-x; color: #ffffff; }
+.midgard-create .ui-widget-midgardbar a { color: #ffffff; }
+.midgard-create .ui-widget-hidebut { background: transparent url(images/midgard_logo.png) 50% 50% no-repeat; margin: 0px 2px 10px 3px; padding: 10px 15px; text-decoration: none; }
 .ui-widget-showbut { background: transparent url(images/midgard_logo_slice.png) 0% 0% no-repeat; margin: 0px 0px 0px 0px; padding: 0px 15px; text-decoration: none; }
 
 
 /* Interaction states
 ----------------------------------*/
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #282c2d; background: #1e2224 url(images/ui-bg_highlight-soft_38_1e2224_1x100.png) 50% 50% repeat-x; font-weight: normal; color: #f7f7f7; }
-.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited { color: #f7f7f7; text-decoration: none; }
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #3b3e3f; background: #3d4548 url(images/ui-bg_highlight-soft_33_3d4548_1x100.png) 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
-.ui-state-hover a, .ui-state-hover a:hover { color: #ffffff; text-decoration: none; }
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #2c2b2b; background: #14191a url(images/ui-bg_highlight-hard_20_14191a_1x100.png) 50% 50% repeat-x; font-weight: normal; color: #8c8c8c; }
-.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited { color: #8c8c8c; text-decoration: none; }
-.ui-widget :active { outline: none; }
+.midgard-create .ui-state-default, .midgard-create .ui-widget-content .ui-state-default, .midgard-create .ui-widget-header .ui-state-default { border: 1px solid #282c2d !important; background: #1e2224 url(images/ui-bg_highlight-soft_38_1e2224_1x100.png) 50% 50% repeat-x !important; font-weight: normal; color: #f7f7f7 !important; }
+.midgard-create .ui-state-default a, .midgard-create .ui-state-default a:link, .ui-state-default a:visited { color: #f7f7f7 !important; text-decoration: none !important; }
+.midgard-create .ui-state-hover, .midgard-create .ui-widget-content .ui-state-hover, .midgard-create .ui-widget-header .ui-state-hover, .midgard-create .ui-state-focus, .midgard-create .ui-widget-content .ui-state-focus, .midgard-create .ui-widget-header .ui-state-focus { border: 1px solid #3b3e3f !important; background: #3d4548 url(images/ui-bg_highlight-soft_33_3d4548_1x100.png) 50% 50% repeat-x !important; font-weight: normal !important; color: #ffffff !important; }
+.midgard-create .ui-state-hover a, .midgard-create .ui-state-hover a:hover { color: #ffffff; text-decoration: none; }
+.midgard-create .ui-state-active, .midgard-create .ui-widget-content .ui-state-active, .midgard-create .ui-widget-header .ui-state-active { border: 1px solid #2c2b2b !important; background: #14191a url(images/ui-bg_highlight-hard_20_14191a_1x100.png) 50% 50% repeat-x !important; font-weight: normal !important; color: #8c8c8c !important; }
+.midgard-create .ui-state-active a, .midgard-create .ui-state-active a:link, .midgard-create .ui-state-active a:visited { color: #8c8c8c; text-decoration: none; }
+.midgard-create .ui-widget :active { outline: none; }
 
 /* Interaction Cues
 ----------------------------------*/
-.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #cccccc; background: #eeeeee url(images/ui-bg_highlight-soft_80_eeeeee_1x100.png) 50% top repeat-x; color: #2e7db2; }
-.ui-state-highlight a, .ui-widget-content .ui-state-highlight a,.ui-widget-header .ui-state-highlight a { color: #2e7db2; }
-.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #ffb73d; background: #ffc73d url(images/ui-bg_glass_40_ffc73d_1x400.png) 50% 50% repeat-x; color: #111111; }
-.ui-state-error a, .ui-widget-content .ui-state-error a, .ui-widget-header .ui-state-error a { color: #111111; }
-.ui-state-error-text, .ui-widget-content .ui-state-error-text, .ui-widget-header .ui-state-error-text { color: #111111; }
-.ui-priority-primary, .ui-widget-content .ui-priority-primary, .ui-widget-header .ui-priority-primary { font-weight: bold; }
-.ui-priority-secondary, .ui-widget-content .ui-priority-secondary,  .ui-widget-header .ui-priority-secondary { opacity: .7; filter:Alpha(Opacity=70); font-weight: normal; }
-.ui-state-disabled, .ui-widget-content .ui-state-disabled, .ui-widget-header .ui-state-disabled { opacity: .35; filter:Alpha(Opacity=35); background-image: none; }
+.midgard-create .ui-state-highlight, .midgard-create .ui-widget-content .ui-state-highlight, .midgard-create .ui-widget-header .ui-state-highlight  {border: 1px solid #cccccc !important; background: #eeeeee url(images/ui-bg_highlight-soft_80_eeeeee_1x100.png) 50% top repeat-x !important; color: #2e7db2 !important; }
+.midgard-create .ui-state-highlight a, .midgard-create .ui-widget-content .ui-state-highlight a, .midgard-create .ui-widget-header .ui-state-highlight a { color: #2e7db2; }
+.midgard-create .ui-state-error, .midgard-create .ui-widget-content .ui-state-error, .midgard-create .ui-widget-header .ui-state-error {border: 1px solid #ffb73d; background: #ffc73d url(images/ui-bg_glass_40_ffc73d_1x400.png) 50% 50% repeat-x; color: #111111; }
+.midgard-create .ui-state-error a, .midgard-create .ui-widget-content .midgard-create .ui-state-error a, .midgard-create .ui-widget-header .ui-state-error a { color: #111111; }
+.midgard-create .ui-state-error-text, .midgard-create .ui-widget-content .ui-state-error-text, .midgard-create .ui-widget-header .ui-state-error-text { color: #111111; }
+.midgard-create .ui-priority-primary, .midgard-create .ui-widget-content .ui-priority-primary, .midgard-create .ui-widget-header .ui-priority-primary { font-weight: bold; }
+.midgard-create .ui-priority-secondary, .midgard-create .ui-widget-content .ui-priority-secondary, .midgard-create .ui-widget-header .ui-priority-secondary { opacity: .7; filter:Alpha(Opacity=70); font-weight: normal; }
+.midgard-create .ui-state-disabled, .midgard-create .ui-widget-content .ui-state-disabled, .midgard-create .ui-widget-header .ui-state-disabled { opacity: .35; filter:Alpha(Opacity=35); background-image: none; }
 
 /* Icons
 ----------------------------------*/
 
 /* states and images */
-.ui-icon { width: 16px; height: 16px; background-image: url(images/ui-icons_cccccc_256x240.png); }
-.ui-widget-content .ui-icon {background-image: url(images/ui-icons_cccccc_256x240.png); }
-.ui-widget-header .ui-icon {background-image: url(images/ui-icons_ffffff_256x240.png); }
-.ui-state-default .ui-icon { background-image: url(images/ui-icons_cccccc_256x240.png); }
-.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url(images/ui-icons_ffffff_256x240.png); }
-.ui-state-active .ui-icon {background-image: url(images/ui-icons_222222_256x240.png); }
-.ui-state-highlight .ui-icon {background-image: url(images/ui-icons_4b8e0b_256x240.png); }
-.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: url(images/ui-icons_a83300_256x240.png); }
+.midgard-create .ui-icon { width: 16px; height: 16px; background-image: url(images/ui-icons_cccccc_256x240.png); }
+.midgard-create .ui-widget-content .ui-icon {background-image: url(images/ui-icons_cccccc_256x240.png); }
+.midgard-create .ui-widget-header .ui-icon {background-image: url(images/ui-icons_ffffff_256x240.png); }
+.midgard-create .ui-state-default .ui-icon { background-image: url(images/ui-icons_cccccc_256x240.png); }
+.midgard-create .ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url(images/ui-icons_ffffff_256x240.png); }
+.midgard-create .ui-state-active .ui-icon {background-image: url(images/ui-icons_222222_256x240.png); }
+.midgard-create .ui-state-highlight .ui-icon {background-image: url(images/ui-icons_4b8e0b_256x240.png); }
+.midgard-create .ui-state-error .ui-icon, .midgard-create .ui-state-error-text .ui-icon {background-image: url(images/ui-icons_a83300_256x240.png); }
 
 /* positioning */
 .ui-icon-carat-1-n { background-position: 0 0; }
@@ -244,17 +244,17 @@
 ----------------------------------*/
 
 /* Corner radius */
-.ui-corner-tl { -moz-border-radius-topleft: 3px; -webkit-border-top-left-radius: 3px; border-top-left-radius: 3px; }
-.ui-corner-tr { -moz-border-radius-topright: 3px; -webkit-border-top-right-radius: 3px; border-top-right-radius: 3px; }
-.ui-corner-bl { -moz-border-radius-bottomleft: 3px; -webkit-border-bottom-left-radius: 3px; border-bottom-left-radius: 3px; }
-.ui-corner-br { -moz-border-radius-bottomright: 3px; -webkit-border-bottom-right-radius: 3px; border-bottom-right-radius: 3px; }
-.ui-corner-top { -moz-border-radius-topleft: 3px; -webkit-border-top-left-radius: 3px; border-top-left-radius: 3px; -moz-border-radius-topright: 3px; -webkit-border-top-right-radius: 3px; border-top-right-radius: 3px; }
-.ui-corner-bottom { -moz-border-radius-bottomleft: 3px; -webkit-border-bottom-left-radius: 3px; border-bottom-left-radius: 3px; -moz-border-radius-bottomright: 3px; -webkit-border-bottom-right-radius: 3px; border-bottom-right-radius: 3px; }
-.ui-corner-right {  -moz-border-radius-topright: 3px; -webkit-border-top-right-radius: 3px; border-top-right-radius: 3px; -moz-border-radius-bottomright: 3px; -webkit-border-bottom-right-radius: 3px; border-bottom-right-radius: 3px; }
-.ui-corner-left { -moz-border-radius-topleft: 3px; -webkit-border-top-left-radius: 3px; border-top-left-radius: 3px; -moz-border-radius-bottomleft: 3px; -webkit-border-bottom-left-radius: 3px; border-bottom-left-radius: 3px; }
-.ui-corner-all { -moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; }
+.midgard-create .ui-corner-tl { -moz-border-radius-topleft: 3px; -webkit-border-top-left-radius: 3px; border-top-left-radius: 3px; }
+.midgard-create .ui-corner-tr { -moz-border-radius-topright: 3px; -webkit-border-top-right-radius: 3px; border-top-right-radius: 3px; }
+.midgard-create .ui-corner-bl { -moz-border-radius-bottomleft: 3px; -webkit-border-bottom-left-radius: 3px; border-bottom-left-radius: 3px; }
+.midgard-create .ui-corner-br { -moz-border-radius-bottomright: 3px; -webkit-border-bottom-right-radius: 3px; border-bottom-right-radius: 3px; }
+.midgard-create .ui-corner-top { -moz-border-radius-topleft: 3px; -webkit-border-top-left-radius: 3px; border-top-left-radius: 3px; -moz-border-radius-topright: 3px; -webkit-border-top-right-radius: 3px; border-top-right-radius: 3px; }
+.midgard-create .ui-corner-bottom { -moz-border-radius-bottomleft: 3px; -webkit-border-bottom-left-radius: 3px; border-bottom-left-radius: 3px; -moz-border-radius-bottomright: 3px; -webkit-border-bottom-right-radius: 3px; border-bottom-right-radius: 3px; }
+.midgard-create .ui-corner-right {  -moz-border-radius-topright: 3px; -webkit-border-top-right-radius: 3px; border-top-right-radius: 3px; -moz-border-radius-bottomright: 3px; -webkit-border-bottom-right-radius: 3px; border-bottom-right-radius: 3px; }
+.midgard-create .ui-corner-left { -moz-border-radius-topleft: 3px; -webkit-border-top-left-radius: 3px; border-top-left-radius: 3px; -moz-border-radius-bottomleft: 3px; -webkit-border-bottom-left-radius: 3px; border-bottom-left-radius: 3px; }
+.midgard-create .ui-corner-all { -moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; }
 
 /* Overlays */
-.ui-widget-overlay { background: #5c5c5c url(images/ui-bg_flat_50_5c5c5c_40x100.png) 50% 50% repeat-x; opacity: .80;filter:Alpha(Opacity=80); }
-.ui-widget-shadow { margin: -7px 0 0 -7px; padding: 7px; background: #cccccc url(images/ui-bg_flat_30_cccccc_40x100.png) 50% 50% repeat-x; opacity: .60;filter:Alpha(Opacity=60); -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
+.midgard-create .ui-widget-overlay { background: #5c5c5c url(images/ui-bg_flat_50_5c5c5c_40x100.png) 50% 50% repeat-x; opacity: .80;filter:Alpha(Opacity=80); }
+.midgard-create .ui-widget-shadow { margin: -7px 0 0 -7px; padding: 7px; background: #cccccc url(images/ui-bg_flat_30_cccccc_40x100.png) 50% 50% repeat-x; opacity: .60;filter:Alpha(Opacity=60); -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
 .ui-effects-transfer { border: #AAA 2px solid; border-radius: 6px; }

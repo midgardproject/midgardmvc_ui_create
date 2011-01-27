@@ -64,9 +64,9 @@ jQuery(document).ready(function() {
     };
     midgardCreate.highlightcolor = '#67cc08';
     midgardCreate.toolbar = {};
-    midgardCreate.toolbar.minimized = jQuery('<a id="midgard-bar-minimized" class="ui-widget-showbut"></a>');
+    midgardCreate.toolbar.minimized = jQuery('<a id="midgard-bar-minimized" class="midgard-create ui-widget-showbut"></a>');
     jQuery('body').append(midgardCreate.toolbar.minimized);
-    midgardCreate.toolbar.full = jQuery('<div id="midgard-bar"><div class="ui-widget-content"><div class="toolbarcontent"><div class="midgard-logo-button"><a id="midgard-bar-hidebutton" class="ui-widget-hidebut"></a></div><div class="toolbarcontent-left"></div><div class="toolbarcontent-center"></div><div class="toolbarcontent-right"></div></div></div>');
+    midgardCreate.toolbar.full = jQuery('<div class="midgard-create" id="midgard-bar"><div class="ui-widget-content"><div class="toolbarcontent"><div class="midgard-logo-button"><a id="midgard-bar-hidebutton" class="ui-widget-hidebut"></a></div><div class="toolbarcontent-left"></div><div class="toolbarcontent-center"></div><div class="toolbarcontent-right"></div></div></div>');
     jQuery('body').append(midgardCreate.toolbar.full);
     midgardCreate.toolbar.minimized.bind('click', function() {
         midgardCreate.toolbar.show();
