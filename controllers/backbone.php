@@ -111,7 +111,8 @@ class midgardmvc_ui_create_controllers_backbone
         foreach ($data as $property => $value)
         {
             $mgd_property = $this->rdfmapper->__get($property);
-            if (!isset($form->$mgd_property))
+            if (   !isset($form->$mgd_property)
+                || !$form->$mgd_property instanceof midgardmvc_helper_forms_field)
             {
                 continue;
             }
