@@ -209,8 +209,7 @@ if (!self::can_use())
 The actual user interaction is implemented in the included JavaScript with jQuery and jQuery UI. For this, we load jQuery UI and our own initialization file:
 
 <<midgard create injector>>=
-midgardmvc_core::get_instance()->head->enable_jquery();
-midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js');
+midgardmvc_core::get_instance()->head->enable_jquery_ui();
 midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
 @
 

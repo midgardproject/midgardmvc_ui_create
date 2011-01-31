@@ -1,6 +1,9 @@
 // Include Aloha Editor
 GENTICS_Aloha_base = '/midgardmvc-static/midgardmvc_ui_create/js/deps/aloha/';
-document.write('<script type="text/javascript" src="' + GENTICS_Aloha_base + 'aloha.js"></script>');
+document.write('<script type="text/javascript" src="' + GENTICS_Aloha_base + 'deps/extjs/ext-jquery-adapter.js"></script>');
+document.write('<script type="text/javascript" src="' + GENTICS_Aloha_base + 'deps/extjs/ext-all.js"></script>');
+document.write('<script type="text/javascript" src="' + GENTICS_Aloha_base + 'deps/jquery.cookie.js"></script>');
+document.write('<script type="text/javascript" src="' + GENTICS_Aloha_base + 'aloha-nodeps.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Format/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.List/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Paste/plugin.js"></script>');
@@ -41,7 +44,6 @@ midgardCreate.Editable = {
 
         // Add Save button to the toolbar
         midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button();
-        //midgardCreate.toolbar.append(midgardCreate.Editable.saveButton);
         jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.saveButton);
 
         // Add Edit toggle to the toolbar

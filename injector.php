@@ -26,7 +26,7 @@ class midgardmvc_ui_create_injector
             return;
         }
         midgardmvc_core::get_instance()->head->enable_jquery();
-        midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_core/jQuery/jquery-ui-1.8.7.min.js');
+        midgardmvc_core::get_instance()->head->enable_jquery_ui();
         midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
     }
 
