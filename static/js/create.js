@@ -26,11 +26,11 @@ document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmv
 
 // Initialize Midgard Create
 jQuery(document).ready(function() {
-    if (typeof midgardCreate == 'undefined') {
+    if (typeof midgardCreate === 'undefined') {
         midgardCreate = {};
     }
     midgardCreate.checkCapability = function(capability) {
-        if (capability == 'contentEditable') {
+        if (capability === 'contentEditable') {
             if (navigator.userAgent.match(/iPhone/i)) {
                 return false;
             }
@@ -42,7 +42,7 @@ jQuery(document).ready(function() {
             }
             return true;
         }
-        if (capability == 'fileUploads') {
+        if (capability === 'fileUploads') {
             if (navigator.userAgent.match(/iPhone/i)) {
                 return false;
             }
@@ -52,10 +52,10 @@ jQuery(document).ready(function() {
             if (navigator.userAgent.match(/iPad/i)) {
                 return false;
             }
-            if (typeof FileReader == 'undefined') {
+            if (typeof FileReader === 'undefined') {
                 return false;
             }
-            if (typeof FormData == 'undefined') {
+            if (typeof FormData === 'undefined') {
                 return false;
             }
             return Modernizr.draganddrop;
@@ -83,17 +83,17 @@ jQuery(document).ready(function() {
        if (midgardCreate.checkCapability('sessionstorage')) {
            sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'full');
        }
-    }
+    };
     midgardCreate.toolbar.hide = function() {
         midgardCreate.toolbar.full.slideToggle();
         midgardCreate.toolbar.minimized.slideToggle();
         if (midgardCreate.checkCapability('sessionstorage')) {
             sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'minimized');
         }
-    }
+    };
     if (midgardCreate.checkCapability('sessionstorage')) {
         var toolbarState = sessionStorage.getItem('midgardmvc_ui_create_toolbar');
-        if (toolbarState == 'minimized')
+        if (toolbarState === 'minimized')
         {
             midgardCreate.toolbar.full.hide();
         }

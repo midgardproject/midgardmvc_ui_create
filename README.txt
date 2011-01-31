@@ -148,6 +148,10 @@ providers_component: midgardmvc
 
 #### Running the website
 
+Websites built with Midgard Create can be run on any normal PHP environment. However, for reasons of both ease of deploying, and performance, we utilize the Application Server in PHP, or AiP as the server in this case.
+
+Since the AiP environment works a bit differently from regular PHP execution on a website, the Midgard MVC dispatcher needs to be modified accordingly. For that purpose, we set Midgard MVC to use the `appserv` implementation of dispatcher:
+
 <<website application configuration>>=
 services_dispatcher: appserv
 @

@@ -1,4 +1,4 @@
-if (typeof midgardCreate == 'undefined') {
+if (typeof midgardCreate === 'undefined') {
     midgardCreate = {};
 }
 
@@ -28,4 +28,4 @@ midgardCreate.imagePlugin.insertImage = function(imageInfo) {
     var rangeObject = GENTICS.Aloha.Selection.rangeObject;
     var markUp = jQuery('<img src="' + imageInfo.get('displayURL') + '" title="' + imageInfo.get('title') + '" />');
     GENTICS.Utils.Dom.insertIntoDOM(markUp, rangeObject);
-}
+};

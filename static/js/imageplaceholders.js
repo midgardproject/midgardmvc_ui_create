@@ -1,4 +1,4 @@
-if (typeof midgardCreate == 'undefined') {
+if (typeof midgardCreate === 'undefined') {
     midgardCreate = {};
 }
 

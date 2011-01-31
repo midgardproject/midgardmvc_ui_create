@@ -1,4 +1,4 @@
-if (typeof midgardCreate == 'undefined') {
+if (typeof midgardCreate === 'undefined') {
     midgardCreate = {};
 }
 
@@ -17,7 +17,7 @@ midgardCreate.Collections = {
                 collectionInstance.add([{}]);
             });
 
-            if (collectionInstance.order == 'asc') {
+            if (collectionInstance.order === 'asc') {
                 collectionInstance.view.el.after(collectionInstance.view.addButton);
             }
             else
@@ -33,14 +33,14 @@ midgardCreate.Collections = {
         jQuery.each(midgardCreate.Collections.collections, function(index, collectionInstance) {
             var removeItems = [];
             collectionInstance.forEach(function(collectionItem) {
-                if (typeof collectionItem.id == 'undefined')
+                if (typeof collectionItem.id === 'undefined')
                 {
                     removeItems[removeItems.length] = collectionItem;
                 }
             });
             collectionInstance.remove(removeItems);
 
-            if (typeof collectionInstance.view.addButton == 'undefined') {
+            if (typeof collectionInstance.view.addButton === 'undefined') {
                 return;
             }
             collectionInstance.view.addButton.remove();
@@ -54,17 +54,17 @@ midgardCreate.Collections = {
             var collectionElement = jQuery(collectionElement);
 
             var firstChild = collectionElement.children(':first-child');
-            if (midgardCreate.objectManager.getIdentifierForContainer(firstChild) == 'mgd:containerPlaceholder') {
+            if (midgardCreate.objectManager.getIdentifierForContainer(firstChild) === 'mgd:containerPlaceholder') {
                 firstChild.hide();
             }
 
             var orderFromElement = collectionElement.attr('mgd:order');
-            if (typeof orderFromElement == 'undefined') {
+            if (typeof orderFromElement === 'undefined') {
                 orderFromElement = 'asc';
             }
 
             var urlPattern = collectionElement.attr('mgd:urlpattern');
-            if (typeof urlPattern == 'undefined') {
+            if (typeof urlPattern === 'undefined') {
                 urlPattern = null;
             }
 
@@ -76,7 +76,7 @@ midgardCreate.Collections = {
             var collectionInstance = new collectionCollection({});
 
             // Insert baseURLs to models if one is set
-            if (typeof collectionElement.attr('mgd:baseurl') != 'undefined')
+            if (typeof collectionElement.attr('mgd:baseurl') !== 'undefined')
             {
                 collectionInstance.bind('add', function(itemInstance) {
                     itemInstance.set({baseurl: collectionElement.attr('mgd:baseurl')});
@@ -95,9 +95,9 @@ midgardCreate.Collections = {
                 },
 
                 addItem: function(itemInstance) {
-                    new itemView({model: itemInstance});
-                    var itemViewElement = itemInstance.view.render().el;
-                    if (this.collection.order == 'asc') {
+                    var itemInstanceView = new itemView({model: itemInstance});
+                    var itemViewElement = itemInstanceView.render().el;
+                    if (this.collection.order === 'asc') {
                         this.el.append(itemViewElement);
                     } else {
                         this.el.prepend(itemViewElement);
@@ -107,7 +107,7 @@ midgardCreate.Collections = {
                 },
 
                 removeItem: function(itemInstance) {
-                    if (typeof itemInstance.view == 'undefined') {
+                    if (typeof itemInstance.view === 'undefined') {
                         return;
                     }
                     itemInstance.view.el.hide('drop');

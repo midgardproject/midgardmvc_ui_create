@@ -1,6 +1,6 @@
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/insertimage.css">');
 
-if (typeof midgardCreate == 'undefined') {
+if (typeof midgardCreate === 'undefined') {
     midgardCreate = {};
 }
 
@@ -42,14 +42,14 @@ midgardCreate.Image = {
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/mgd:create/image/upload/', false);
                 xhr.onreadystatechange = function(event) {
-                    if (xhr.readyState != 4) {
+                    if (xhr.readyState !== 4) {
                         return;
                     }
-                    if (xhr.status != 200) {
+                    if (xhr.status !== 200) {
                         return;
                     }
                     var data = jQuery.parseJSON(xhr.responseText);
-                    if (typeof data.displayURL != 'undefined')
+                    if (typeof data.displayURL !== 'undefined')
                     {
                         // Force image refresh
                         var now = new Date();
@@ -99,8 +99,8 @@ midgardCreate.Image = {
         midgardCreate.Image.collection = new imageCollection();
 
         midgardCreate.Image.collection.bind('add', function(itemInstance) {
-            new imageView({model: itemInstance});
-            midgardCreate.Image.collection.viewElement.prepend(itemInstance.view.render().el);
+            var itemInstanceView = new imageView({model: itemInstance});
+            midgardCreate.Image.collection.viewElement.prepend(itemInstanceView.render().el);
             if (itemInstance.get('file'))
             {
                 itemInstance.upload();
@@ -114,8 +114,8 @@ midgardCreate.Image = {
         midgardCreate.Image.collection.bind('refresh', function(collectionInstance) {
             collectionInstance.viewElement.empty();
             collectionInstance.forEach(function(itemInstance) {
-                new imageView({model: itemInstance});
-                collectionInstance.viewElement.append(itemInstance.view.render().el);
+                var itemInstanceView = new imageView({model: itemInstance});
+                collectionInstance.viewElement.append(itemInstanceView.render().el);
             });
         });
     },
@@ -167,7 +167,6 @@ midgardCreate.Image = {
     prepareUploadTarget: function() {
         var uploadPlaceholder = jQuery('<div id="midgardmvc-image-upload"><h2>Add new image</h2><img id="midgardmvc-image-upload-target" src="/midgardmvc-static/midgardmvc_helper_attachmentserver/placeholder.png" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" /></div>');
         midgardCreate.Image.imageSelectDialog.prepend(uploadPlaceholder);
-        var placeholderElement = document.getElementById('midgardmvc-image-upload');
 
         uploadPlaceholder.get(0).addEventListener('drop', function(event) {
             event.stopPropagation();
@@ -195,7 +194,6 @@ midgardCreate.Image = {
     },
 
     addDroppedFile: function(event) {
-        var files = event.dataTransfer.files;
         jQuery.each(event.dataTransfer.files, function(i, file) {
             var reader = new FileReader();
             reader.file = file;
@@ -219,7 +217,7 @@ midgardCreate.Image = {
     showImageDialog: function(imageObject) {
         midgardCreate.Image.imageSelectDialog.dialog('close');
 
-        if (midgardCreate.Image.imageDialog != null) {
+        if (midgardCreate.Image.imageDialog !== null) {
             midgardCreate.Image.imageDialog.dialog('close');
             midgardCreate.Image.imageDialog = null;
         }
@@ -248,8 +246,8 @@ midgardCreate.Image = {
         var imageVariants = imageObject.get('variants');
         if (imageVariants) {
             jQuery.each(imageVariants, function(variantName, variantLabel) {
-                if (   midgardCreate.Image.variantName != ''
-                    && variantName != midgardCreate.Image.variantName)
+                if (   midgardCreate.Image.variantName !== ''
+                    && variantName !== midgardCreate.Image.variantName)
                 {
                     return true;
                 }
@@ -258,12 +256,12 @@ midgardCreate.Image = {
                     var now = new Date();
                     imageObject.set({'displayURL': '/mgd:attachment/' + imageObject.id + '/' + variantName + '/' + imageObject.get('name') + '?' + now.getTime()});
                     midgardCreate.Image.callback(imageObject);
-                    if (midgardCreate.Image.imageDialog != null) {
+                    if (midgardCreate.Image.imageDialog !== null) {
                         midgardCreate.Image.imageDialog.dialog('close');
                         midgardCreate.Image.imageDialog.remove();
                         midgardCreate.Image.imageDialog.remove = null;
                     }
-                }
+                };
             });
         }
 

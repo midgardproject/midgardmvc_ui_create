@@ -8,7 +8,7 @@ document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plu
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Link/plugin.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplugin.js"></script>');
 
-if (typeof midgardCreate == 'undefined') {
+if (typeof midgardCreate === 'undefined') {
     midgardCreate = {};
 }
 
@@ -45,13 +45,13 @@ midgardCreate.Editable = {
         jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.saveButton);
 
         // Add Edit toggle to the toolbar
-        jQuery('#midgard-bar .toolbarcontent-right').append(jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>'))
+        jQuery('#midgard-bar .toolbarcontent-right').append(jQuery('<input type="checkbox" id="midgardcreate-edit" /><label for="midgardcreate-edit">Edit</label>'));
         midgardCreate.Editable.editButton = jQuery('#midgardcreate-edit').button();
 
         if (midgardCreate.checkCapability('sessionstorage')) {
             // Check if user is in editing state
             var editorState = sessionStorage.getItem('midgardmvc_ui_create_state');
-            if (editorState == 'edit')
+            if (editorState === 'edit')
             {
                 // Don't transfer when enabled from session
                 midgardCreate.Editable.editTransfered = true;
@@ -79,7 +79,7 @@ midgardCreate.Editable = {
     showCurrentObject: function() {
         midgardCreate.Editable.objectActions.fadeOut();
 
-        if (midgardCreate.Editable.currentObject == null) {
+        if (midgardCreate.Editable.currentObject === null) {
             return;
         }
 
@@ -102,7 +102,7 @@ midgardCreate.Editable = {
 
     runWorkflow: function(targetObject, workflow) {
         targetObject.runWorkflow(workflow, function(data) {
-            if (data.object == 'remove')
+            if (data.object === 'remove')
             {
                 targetObject.view.remove();
                 midgardCreate.Editable.currentObject = null;
@@ -116,7 +116,7 @@ midgardCreate.Editable = {
             // TODO: Clear placeholder content when user starts editing
         }*/
 
-        if (midgardCreate.Editable.currentObject == objectInstance) {
+        if (midgardCreate.Editable.currentObject === objectInstance) {
             return;
         }
         midgardCreate.Editable.currentObject = objectInstance;
@@ -156,8 +156,8 @@ midgardCreate.Editable = {
         {
             var objectContainer = jQuery(objectContainer);
             var objectIdentifier = objectContainer.attr('about');
-            if (   typeof objectIdentifier == 'undefined'
-                || objectIdentifier == 'mgd:containerPlaceholder') {
+            if (   typeof objectIdentifier === 'undefined'
+                || objectIdentifier === 'mgd:containerPlaceholder') {
                 // No identifier set, therefore not editable
                 return true;
             }
@@ -221,7 +221,7 @@ midgardCreate.Editable = {
 
             objectInstance.save(null, {
                 success: function(savedModel, response) {
-                    if (midgardCreate.Editable.currentObject == savedModel) {
+                    if (midgardCreate.Editable.currentObject === savedModel) {
                         midgardCreate.Editable.showCurrentObject();
                     }
                 }

@@ -1,7 +1,7 @@
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/underscore-min.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/backbone-min.js"></script>');
 
-if (typeof midgardCreate == 'undefined') {
+if (typeof midgardCreate === 'undefined') {
     midgardCreate = {};
 }
 
@@ -34,7 +34,7 @@ midgardCreate.objectManager = {
     getTypeForContainer: function(objectContainer) {
         var objectContainer = jQuery(objectContainer);
 
-        if (typeof objectContainer.attr('typeof') != 'undefined')
+        if (typeof objectContainer.attr('typeof') !== 'undefined')
         {
             // Direct match with container
             return objectContainer.attr('typeof');
@@ -45,7 +45,7 @@ midgardCreate.objectManager = {
     getIdentifierForContainer: function(objectContainer) {
         var objectContainer = jQuery(objectContainer);
 
-        if (typeof objectContainer.attr('about') != 'undefined')
+        if (typeof objectContainer.attr('about') !== 'undefined')
         {
             // Direct match with container
             return objectContainer.attr('about');
@@ -56,7 +56,7 @@ midgardCreate.objectManager = {
     getCleanContainer: function(objectContainer) {
         var objectContainer = jQuery(objectContainer).clone(false);
 
-        if (typeof objectContainer.attr('about') != 'undefined')
+        if (typeof objectContainer.attr('about') !== 'undefined')
         {
             // Direct match with container
             objectContainer.attr('about', '');
@@ -71,7 +71,7 @@ midgardCreate.objectManager = {
         var objectContainer = jQuery(objectContainer);
         var type = midgardCreate.objectManager.getTypeForContainer(objectContainer);
 
-        if (typeof midgardCreate.objectManager.views[type] != 'undefined') {
+        if (typeof midgardCreate.objectManager.views[type] !== 'undefined') {
             // We already have a view for this type
             return midgardCreate.objectManager.views[type];
         }
@@ -94,7 +94,7 @@ midgardCreate.objectManager = {
                 propertyElement.html(model.get(property));
             });
 
-            if (   typeof model.collection != 'undefined'
+            if (   typeof model.collection !== 'undefined'
                 && model.collection.urlpattern
                 && model.id) {
                 jQuery('a[rel="bookmark"]', this.el).each(function(index, linkElement) {
@@ -114,7 +114,7 @@ midgardCreate.objectManager = {
 midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
     var type = midgardCreate.objectManager.getTypeForContainer(objectContainer);
 
-    if (typeof midgardCreate.objectManager.models[type] != 'undefined') {
+    if (typeof midgardCreate.objectManager.models[type] !== 'undefined') {
         // We already have a model for this type
         return midgardCreate.objectManager.models[type];
     }
@@ -129,7 +129,7 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
             url += encodeURIComponent(this.id) + '/';
         }
         return url;
-    }
+    };
 
     modelProperties.getPlaceholder = function(propertyName) {
         return '&lt;' + propertyName + '&gt;';
@@ -158,19 +158,19 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
             dataType: 'json',
             type: 'POST',
             success: function (data) {
-                if (data == null) {
+                if (data === null) {
                     return;
                 }
                 callback(data);
             }
         });
-    }
+    };
 
     modelProperties.getWorkflowState = function(callback) {
         var workflowState = {
             label: 'item',
             history: [],
-            actions: {},
+            actions: {}
         };
 
         var url = '/mgd:create/state/' + encodeURIComponent(type) + '/';
@@ -183,8 +183,8 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
             async: false,
             dataType: 'json',
             success: function(data) {
-                if (   typeof data == 'null'
-                    || typeof data.object == 'undefined') {
+                if (   typeof data === 'null'
+                    || typeof data.object === 'undefined') {
                     return;
                 }
                 workflowState.label = data.object.type;
@@ -195,7 +195,7 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
             error: function() {
             }
         });
-    }
+    };
 
     midgardCreate.objectManager.models[type] = Backbone.Model.extend(modelProperties);
 
@@ -209,6 +209,6 @@ midgardCreate.objectManager.getInstanceForContainer = function(objectContainer) 
     properties.id = objectContainer.attr('about');
 
     var modelInstance = new model(properties);
-    new view({model: modelInstance, el: objectContainer});
+    var modelInstanceView = new view({model: modelInstance, el: objectContainer});
     return modelInstance;
 };
