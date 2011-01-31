@@ -18,6 +18,7 @@ if (typeof midgardCreate === 'undefined') {
 midgardCreate.Editable = {
     objects: [],
     currentObject: null,
+    editableTimer: null,
     editTransfered: false,
     saveTransfered: false,
 
@@ -43,7 +44,7 @@ midgardCreate.Editable = {
         midgardCreate.Editable.currentObject = null;
 
         // Add Save button to the toolbar
-        midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button();
+        midgardCreate.Editable.saveButton = jQuery('<button id="midgardcreate-save">Save</button>').button({disabled: true});
         jQuery('#midgard-bar .toolbarcontent-right').append(midgardCreate.Editable.saveButton);
 
         // Add Edit toggle to the toolbar
@@ -118,11 +119,43 @@ midgardCreate.Editable = {
             // TODO: Clear placeholder content when user starts editing
         }*/
 
+        if (midgardCreate.Editable.editableTimer !== null) {
+            window.clearInterval(midgardCreate.Editable.editableTimer);
+            midgardCreate.Editable.editableTimer = null;
+        }
+        midgardCreate.Editable.editableTimer = window.setInterval(function() {
+            midgardCreate.Editable.checkEditable(objectInstance, propertyName);
+        }, 1000);
+
         if (midgardCreate.Editable.currentObject === objectInstance) {
             return;
         }
         midgardCreate.Editable.currentObject = objectInstance;
         midgardCreate.Editable.showCurrentObject();
+    },
+
+    deactivateEditable: function(objectInstance, propertyName) {
+        if (midgardCreate.Editable.editableTimer !== null) {
+            window.clearInterval(midgardCreate.Editable.editableTimer);
+            midgardCreate.Editable.editableTimer = null;
+        }
+    },
+
+    checkEditable: function(objectInstance, propertyName) {
+        if (objectInstance.editables[propertyName].isModified())
+        {
+            midgardCreate.Editable.setModified(true);
+        }
+    },
+
+    setModified: function(modified) {
+        if (modified) {
+            midgardCreate.Editable.saveTransfered = false;
+            midgardCreate.Editable.saveButton.button({disabled: false});
+        }
+        else {
+            midgardCreate.Editable.saveButton.button({disabled: true});
+        }
     },
 
     enableEditable: function(objectInstance) {
@@ -140,8 +173,11 @@ midgardCreate.Editable = {
             var propertyName = objectProperty.attr('property');
             objectInstance.editables[propertyName] = new GENTICS.Aloha.Editable(objectProperty);
 
-            // Subscribe to activation event
+            // Subscribe to activation and deactivation events
             GENTICS.Aloha.EventRegistry.subscribe(objectInstance.editables[propertyName], 'editableActivated', function() {
+                midgardCreate.Editable.activateEditable(objectInstance, propertyName); 
+            });
+            GENTICS.Aloha.EventRegistry.subscribe(objectInstance.editables[propertyName], 'editableDeactivated', function() {
                 midgardCreate.Editable.activateEditable(objectInstance, propertyName); 
             });
 
@@ -216,13 +252,17 @@ midgardCreate.Editable = {
 
             objectInstance.set(modifiedProperties);
 
-            if (!midgardCreate.Editable.saveTransfered) {
-                objectInstance.view.el.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
-                midgardCreate.Editable.saveTransfered = true;
-            }
-
             objectInstance.save(null, {
                 success: function(savedModel, response) {
+                    if (!midgardCreate.Editable.saveTransfered) {
+                        savedModel.view.el.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
+                        midgardCreate.Editable.saveTransfered = true;
+                    }
+
+                    jQuery.each(modifiedProperties, function(propertyName, propertyValue) {
+                        savedModel.editables[propertyName].setUnmodified();
+                    });
+
                     if (midgardCreate.Editable.currentObject === savedModel) {
                         midgardCreate.Editable.showCurrentObject();
                     }
@@ -231,6 +271,6 @@ midgardCreate.Editable = {
         });
 
         midgardCreate.Editable.saveButton.button('option', 'label', 'Save');
-        midgardCreate.Editable.saveTransfered = true;
+        midgardCreate.Editable.setModified(false);
     }
 };
