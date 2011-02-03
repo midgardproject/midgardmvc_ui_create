@@ -73,7 +73,7 @@ class midgardmvc_ui_create_controllers_aloha
 
         $this->data['state']['actions'] = array();
 
-        $actions = $this->get_workflows_for_object($this->object);
+        $actions = midgardmvc_helper_workflow_utils::get_workflows_for_object($this->object);
         foreach ($actions as $name => $workflow)
         {
             $this->data['state']['actions'][$name] = $workflow['label'];
@@ -84,7 +84,7 @@ class midgardmvc_ui_create_controllers_aloha
     {
         $this->object = midgardmvc_ui_create_rdfmapper::load_object(rawurldecode($args['type']), rawurldecode($args['identifier']));
 
-        $workflows = $this->get_workflows_for_object($this->object);
+        $workflows = midgardmvc_helper_workflow_utils::get_workflows_for_object($this->object);
         if (!isset($workflows[$args['workflow']]))
         {
             throw new midgardmvc_exception_notfound("Workflow {$args['workflow']} not defined");
@@ -94,44 +94,12 @@ class midgardmvc_ui_create_controllers_aloha
 
         $workflow_class = $workflows[$args['workflow']]['provider'];
         $workflow = new $workflow_class();
-        if (!$workflow->can_handle($this->object))
-        {
-            throw new midgardmvc_exception_notfound("Workflow {$args['workflow']} cannot handle this object");
-        }
 
-        $values = $workflow->run($this->object);
+        $values = $workflow->start($this->object);
         foreach ($values as $key => $value)
         {
             $this->data[$key] = $value;
         }
-    }
-
-    private function get_workflows_for_object(midgard_object $object)
-    {
-        $workflows = midgardmvc_core::get_instance()->configuration->workflows;
-        $object_workflows = array();
-        foreach ($workflows as $workflow_name => $workflow)
-        {
-            $wf_class = $workflow['provider'];
-            $wf = new $wf_class();
-
-            if (!$wf instanceof midgardmvc_helper_workflow_definition)
-            {
-                throw new Exception("Invalid workflow definition {$workflow_name}: {$wf_class} doesn't implement midgardmvc_helper_workflow_definition");
-            }
-
-            if (!$wf->can_handle($object))
-            {
-                continue;
-            }
-
-            $object_workflows[$workflow_name] = array
-            (
-                'label' => $workflow['label'],
-                'provider' => $wf_class,
-            );
-        }
-        return $object_workflows;
     }
 
     private function get_type_label($mgdschema)
@@ -140,4 +108,3 @@ class midgardmvc_ui_create_controllers_aloha
         return $parts[count($parts) - 1];
     }
 }
-?>
