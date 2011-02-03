@@ -5,9 +5,9 @@ authors:
         name: Henri Bergius
         email: henri.bergius@iki.fi
         url: http://bergie.iki.fi/
-requires_pear:
-    Workflow:
-        channel: components.ez.no
+requires:
+    midgardmvc_helper_workflow:
+        - {type: github, user: bergie, repository: midgardmvc_helper_workflow, branch: master}
 routes:
     midgardmvc_create_object:
         controller: midgardmvc_ui_create_controllers_backbone

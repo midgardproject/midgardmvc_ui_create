@@ -115,9 +115,9 @@ class midgardmvc_ui_create_controllers_aloha
             $wf_class = $workflow['provider'];
             $wf = new $wf_class();
 
-            if (!$wf instanceof midgardmvc_ui_create_workflow)
+            if (!$wf instanceof midgardmvc_helper_workflow_definition)
             {
-                throw new Exception("Invalid workflow definition {$workflow_name}: {$wf_class} doesn't implement midgardmvc_ui_create_workflow");
+                throw new Exception("Invalid workflow definition {$workflow_name}: {$wf_class} doesn't implement midgardmvc_helper_workflow_definition");
             }
 
             if (!$wf->can_handle($object))

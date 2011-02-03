@@ -11,8 +11,8 @@
  *
  * @package midgardmvc_ui_create
  */
-class midgardmvc_ui_create_workflow_delete implements midgardmvc_ui_create_workflow {
-
+class midgardmvc_ui_create_workflow_delete implements midgardmvc_helper_workflow_definition
+{
     public function can_handle(midgard_object $object)
     {
         if (midgardmvc_core::get_instance()->authorization->can_do('midgard:delete', $object))
@@ -54,7 +54,7 @@ class midgardmvc_ui_create_workflow_delete implements midgardmvc_ui_create_workf
     {
         $workflow = $this->get();
 
-        $execution = new midgardmvc_ui_create_workflow_execution($workflow);
+        $execution = new midgardmvc_helper_workflow_execution_interactive($workflow);
         $execution->setVariable('object', $object);
         $execution->start();
 
