@@ -50,7 +50,7 @@ class midgardmvc_ui_create_workflow_delete implements midgardmvc_helper_workflow
         return $workflow;
     }
 
-    public function run(midgard_object $object, array $args = null)
+    public function start(midgard_object $object, array $args = null)
     {
         $workflow = $this->get();
 
@@ -63,11 +63,17 @@ class midgardmvc_ui_create_workflow_delete implements midgardmvc_helper_workflow
         {
             $values['status'] = 'failure';
             $values['object'] = 'keep';
+            $values['execution'] = $execution->guid;
             return $values;
         }
 
         $values['status'] = 'ok';
         $values['object'] = 'remove';
         return $values;
+    }
+
+
+    public function resume($execution_guid, array $args = null)
+    {
     }
 }

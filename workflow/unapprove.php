@@ -55,7 +55,7 @@ class midgardmvc_ui_create_workflow_unapprove implements midgardmvc_helper_workf
         return $workflow;
     }
 
-    public function run(midgard_object $object, array $args = null)
+    public function start(midgard_object $object, array $args = null)
     {
         $workflow = $this->get();
 
@@ -68,8 +68,14 @@ class midgardmvc_ui_create_workflow_unapprove implements midgardmvc_helper_workf
         if (!$execution->hasEnded())
         {
             $values['status'] = 'failure';
+            $values['execution'] = $execution->guid;
         }
         $values['status'] = 'ok';
         return $values;
+    }
+
+
+    public function resume($execution_guid, array $args = null)
+    {
     }
 }
