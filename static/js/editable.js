@@ -111,7 +111,7 @@ midgardCreate.Editable = {
                 midgardCreate.Editable.objectHistory.empty();
                 jQuery.each(stateData.history, function(history, historyItem) {
                     var historyEntry = jQuery('<div></div>');
-                    historyEntry.html('<strong>' + historyItem.actor.firstname + ' ' + historyItem.actor.lastname + '</strong><span class="date">' + jQuery.easydate.format_date(new Date(historyItem.time)) + '</span>' + historyItem.verb);
+                    historyEntry.html('<strong>' + historyItem.actor.firstname + ' ' + historyItem.actor.lastname + '</strong><span class="historydate">' + jQuery.easydate.format_date(new Date(historyItem.time)) + '</span>' + historyItem.verb);
                     midgardCreate.Editable.objectHistory.append(historyEntry);
                 });
                 objectLabel.popover({
