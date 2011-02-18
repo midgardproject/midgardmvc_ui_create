@@ -10,6 +10,9 @@ document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plu
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Table/plugin.js"></script>');
 document.write('<script type="text/javascript" src="' +GENTICS_Aloha_base + 'plugins/com.gentics.aloha.plugins.Link/plugin.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplugin.js"></script>');
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/popover.js"></script>');
+document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/js/deps/popover.css">');
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/jquery.easydate-0.2.4.min.js"></script>');
 
 if (typeof midgardCreate === 'undefined') {
     midgardCreate = {};
@@ -26,6 +29,9 @@ midgardCreate.Editable = {
         // Add an area for object actions
         midgardCreate.Editable.objectActions = jQuery('<div id="midgardcreate-objectactions"></div>').hide();
         jQuery('#midgard-bar .toolbarcontent-center').append(midgardCreate.Editable.objectActions);
+
+        midgardCreate.Editable.objectHistory = jQuery('<div id="midgardcreate-objecthistory"></div>').hide();
+        jQuery('body').append(midgardCreate.Editable.objectHistory);
 
         if (!midgardCreate.checkCapability('contentEditable')) {
             return;
@@ -80,26 +86,43 @@ midgardCreate.Editable = {
     },
 
     showCurrentObject: function() {
-        midgardCreate.Editable.objectActions.fadeOut();
+        // Hide old popover, if any
+        jQuery(midgardCreate.Editable.objectActions).children('a.popover-on').click();
 
-        if (midgardCreate.Editable.currentObject === null) {
-            return;
-        }
+        midgardCreate.Editable.objectActions.fadeOut('fast', function() {
 
-        midgardCreate.Editable.currentObject.getWorkflowState(function(stateData) {
-            midgardCreate.Editable.objectActions.empty();
+            if (midgardCreate.Editable.currentObject === null) {
+                return;
+            }
 
-            var objectLabel = jQuery('<a>' + stateData.label + '</a>');
-            midgardCreate.Editable.objectActions.append(objectLabel);
-            jQuery.each(stateData.actions, function(action, actionLabel) {
-                var actionButton = jQuery('<button>' + actionLabel + '</button>').button();
-                midgardCreate.Editable.objectActions.append(actionButton);
-                actionButton.bind('click', function() {
-                    midgardCreate.Editable.runWorkflow(midgardCreate.Editable.currentObject, action);
+            midgardCreate.Editable.currentObject.getWorkflowState(function(stateData) {
+                midgardCreate.Editable.objectActions.empty();
+
+                var objectLabel = jQuery('<a class="objectlabel">' + stateData.label + '</a>');
+                midgardCreate.Editable.objectActions.append(objectLabel);
+                jQuery.each(stateData.actions, function(action, actionLabel) {
+                    var actionButton = jQuery('<button>' + actionLabel + '</button>').button();
+                    midgardCreate.Editable.objectActions.append(actionButton);
+                    actionButton.bind('click', function() {
+                        midgardCreate.Editable.runWorkflow(midgardCreate.Editable.currentObject, action);
+                    });
                 });
+
+                midgardCreate.Editable.objectHistory.empty();
+                jQuery.each(stateData.history, function(history, historyItem) {
+                    var historyEntry = jQuery('<div></div>');
+                    historyEntry.html('<strong>' + historyItem.actor.firstname + ' ' + historyItem.actor.lastname + '</strong><span class="date">' + jQuery.easydate.format_date(new Date(historyItem.time)) + '</span>' + historyItem.verb);
+                    midgardCreate.Editable.objectHistory.append(historyEntry);
+                });
+                objectLabel.popover({
+                    header: jQuery('<div>' + stateData.label + ': ' + stateData.state + '</div>'),
+                    content: midgardCreate.Editable.objectHistory
+                });
+                midgardCreate.Editable.objectHistory.show();
+
+                midgardCreate.Editable.objectActions.fadeIn();
             });
 
-            midgardCreate.Editable.objectActions.fadeIn();
         });
     },
 

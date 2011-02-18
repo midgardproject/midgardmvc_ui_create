@@ -188,6 +188,7 @@ midgardCreate.objectManager.getModelForContainer = function(objectContainer) {
                     return;
                 }
                 workflowState.label = data.object.type;
+                workflowState.state = data.state.current;
                 workflowState.actions = data.state.actions;
                 workflowState.history = data.state.history;
                 callback(workflowState);

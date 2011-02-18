@@ -65,5 +65,16 @@ body
     position: absolute;
     top: 6px;
     right: 10px;
+}
 
+.popover .content div {
+    border-bottom: 1px solid #c0c0c0;
+}
+
+.popover .content div .date {
+    display: block;
+}
+
+.popover .content strong {
+    font-weight: bold;
 }

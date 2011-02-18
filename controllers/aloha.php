@@ -58,6 +58,10 @@ class midgardmvc_ui_create_controllers_aloha
         foreach ($logs as $log)
         {
             $actor = $this->get_actor($log->actor);
+
+            $verb_parts = explode('/', $log->verb);
+            $verb = $verb_parts[count($verb_parts) - 1];
+
             $this->data['state']['history'][] = array
             (
                 'actor' => array
@@ -66,7 +70,7 @@ class midgardmvc_ui_create_controllers_aloha
                     'lastname' => $actor->lastname,
                     'guid' => $actor->guid,
                 ),
-                'verb' => $log->verb,
+                'verb' => $verb,
                 'time' => $log->metadata->created->format(DateTime::ISO8601),
             );
         }
