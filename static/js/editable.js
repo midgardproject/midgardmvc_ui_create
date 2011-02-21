@@ -193,6 +193,9 @@ midgardCreate.Editable = {
         jQuery.each(jQuery('[property]', objectInstance.view.el), function(index, objectProperty)
         {
             var objectProperty = jQuery(objectProperty);
+
+            midgardCreate.Image.prepareUploadTarget(objectInstance, objectProperty.get(0), midgardCreate.imagePlugin.insertImage);
+
             var propertyName = objectProperty.attr('property');
             objectInstance.editables[propertyName] = new GENTICS.Aloha.Editable(objectProperty);
 

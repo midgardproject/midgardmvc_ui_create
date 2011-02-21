@@ -9,7 +9,6 @@ midgardCreate.Image = {
     imageDialog: null,
     collection: null,
     searchTerm: '',
-    currentObject: null,
     variantName: '',
 
     init: function() {
@@ -100,6 +99,11 @@ midgardCreate.Image = {
 
         midgardCreate.Image.collection.bind('add', function(itemInstance) {
             var itemInstanceView = new imageView({model: itemInstance});
+
+            if (midgardCreate.Image.collection.viewElement === undefined) {
+                midgardCreate.Image.prepareSelectDialog();
+            }
+
             midgardCreate.Image.collection.viewElement.prepend(itemInstanceView.render().el);
             if (itemInstance.get('file'))
             {
@@ -121,13 +125,14 @@ midgardCreate.Image = {
     },
 
     showSelectDialog: function(currentObject, variantName, callback) {
-        midgardCreate.Image.currentObject = currentObject;
         midgardCreate.Image.variantName = variantName;
-        midgardCreate.Image.callback = callback;
         midgardCreate.Image.prepareSelectDialog();
 
         if (midgardCreate.checkCapability('fileUploads')) {
-            midgardCreate.Image.prepareUploadTarget();
+            var uploadPlaceholder = jQuery('<div id="midgardmvc-image-upload"><h2>Add new image</h2><img id="midgardmvc-image-upload-target" src="/midgardmvc-static/midgardmvc_helper_attachmentserver/placeholder.png" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" /></div>');
+            midgardCreate.Image.imageSelectDialog.prepend(uploadPlaceholder);
+
+            midgardCreate.Image.prepareUploadTarget(currentObject, uploadPlaceholder.get(0), callback);
         }
 
         midgardCreate.Image.imageSelectDialog.dialog('open');
@@ -164,36 +169,34 @@ midgardCreate.Image = {
         midgardCreate.Image.imageSelectDialog.dialog(dialogOptions);
     },
 
-    prepareUploadTarget: function() {
-        var uploadPlaceholder = jQuery('<div id="midgardmvc-image-upload"><h2>Add new image</h2><img id="midgardmvc-image-upload-target" src="/midgardmvc-static/midgardmvc_helper_attachmentserver/placeholder.png" typeof="http://purl.org/dc/dcmitype/Image" mgd:placeholder="true" width="100" height="100" /></div>');
-        midgardCreate.Image.imageSelectDialog.prepend(uploadPlaceholder);
-
-        uploadPlaceholder.get(0).addEventListener('drop', function(event) {
+    prepareUploadTarget: function(targetObject, uploadTarget, callback) {
+        uploadTarget.addEventListener('drop', function(event) {
             event.stopPropagation();
             event.preventDefault();
-            midgardCreate.Image.addDroppedFile(event);
+            midgardCreate.Image.addDroppedFile(event, targetObject, callback);
         }, true);
 
-        uploadPlaceholder.get(0).addEventListener('dragenter', function(event) {
+        uploadTarget.addEventListener('dragenter', function(event) {
             event.stopPropagation();
             event.preventDefault();
-            jQuery(uploadPlaceholder).addClass('midgardmvc-image-hover');
+            jQuery(uploadTarget).addClass('midgardmvc-image-hover');
         }, true);
 
-        uploadPlaceholder.get(0).addEventListener('dragleave', function(event) {
+        uploadTarget.addEventListener('dragleave', function(event) {
             event.stopPropagation();
             event.preventDefault();
-            jQuery(uploadPlaceholder).removeClass('midgardmvc-image-hover');
+            jQuery(uploadTarget).removeClass('midgardmvc-image-hover');
         }, true);
 
-        uploadPlaceholder.get(0).addEventListener('dragover', function(event) {
+        uploadTarget.addEventListener('dragover', function(event) {
             event.stopPropagation();
             event.preventDefault();
-            jQuery(uploadPlaceholder).addClass('midgardmvc-image-hover');
+            jQuery(uploadTarget).addClass('midgardmvc-image-hover');
         }, true);
     },
 
-    addDroppedFile: function(event) {
+    addDroppedFile: function(event, targetObject, callback) {
+        midgardCreate.Image.callback = callback;
         jQuery.each(event.dataTransfer.files, function(i, file) {
             var reader = new FileReader();
             reader.file = file;
@@ -206,7 +209,7 @@ midgardCreate.Image = {
                     name: event.target.file.name,
                     displayURL: event.target.result,
                     file: event.target.file,
-                    parentguid: midgardCreate.Image.currentObject.id
+                    parentguid: targetObject.id
                 });
             };
             reader.readAsDataURL(file);
