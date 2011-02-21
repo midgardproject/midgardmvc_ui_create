@@ -8,6 +8,8 @@ authors:
 requires:
     midgardmvc_helper_workflow:
         - {type: github, user: bergie, repository: midgardmvc_helper_workflow, branch: master}
+    midgardmvc_helper_attachmentserver:
+        - {type: github, user: bergie, repository: midgardmvc_helper_attachmentserver, branch: master}
 routes:
     midgardmvc_create_object:
         controller: midgardmvc_ui_create_controllers_backbone
