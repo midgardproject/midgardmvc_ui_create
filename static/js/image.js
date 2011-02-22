@@ -125,6 +125,7 @@ midgardCreate.Image = {
     },
 
     showSelectDialog: function(currentObject, variantName, callback) {
+        midgardCreate.Image.callback = callback;
         midgardCreate.Image.variantName = variantName;
         midgardCreate.Image.prepareSelectDialog();
 
@@ -169,10 +170,36 @@ midgardCreate.Image = {
         midgardCreate.Image.imageSelectDialog.dialog(dialogOptions);
     },
 
+    preventDefaults: function() {
+        document.addEventListener('drop', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            return false
+        });
+        document.addEventListener('dragover', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            return false
+        });
+        document.addEventListener('dragenter', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            return false
+        });
+        document.addEventListener('dragleave', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            return false
+        });
+    },
+
     prepareUploadTarget: function(targetObject, uploadTarget, callback) {
+        midgardCreate.Image.preventDefaults();
+
         uploadTarget.addEventListener('drop', function(event) {
             event.stopPropagation();
             event.preventDefault();
+            jQuery(uploadTarget).removeClass('midgardmvc-image-hover');
             midgardCreate.Image.addDroppedFile(event, targetObject, callback);
         }, true);
 
