@@ -48,7 +48,7 @@ midgardCreate.Collections = {
     },
 
     loadFromPage: function() {
-        var objectCollections = jQuery('[mgd\\:type="container"]');
+        var objectCollections = jQuery('[typeof="http://purl.org/dc/dcmitype/Collection"]');
         jQuery.each(objectCollections, function(index, collectionElement)
         {
             var collectionElement = jQuery(collectionElement);

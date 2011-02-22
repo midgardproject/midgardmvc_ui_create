@@ -15,12 +15,18 @@ class midgardmvc_ui_create_container extends SplObjectStorage
 {
     private $placeholder = null;
     private $urlpattern = '';
+    private $typeof = 'http://purl.org/dc/dcmitype/Collection';
 
     public function __get($key)
     {
         if ($key == 'urlpattern')
         {
             return $this->urlpattern;
+        }
+
+        if ($key == 'typeof')
+        {
+            return $this->typeof;
         }
     }
 
@@ -79,5 +85,10 @@ class midgardmvc_ui_create_container extends SplObjectStorage
         }
 
         $this->urlpattern = $urlpattern;
+    }
+
+    public function set_typeof($typeof)
+    {
+        $this->typeof = $typeof;
     }
 }
