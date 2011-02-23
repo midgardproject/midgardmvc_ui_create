@@ -54,7 +54,7 @@ midgardCreate.Collections = {
             var collectionElement = jQuery(collectionElement);
 
             var firstChild = collectionElement.children(':first-child');
-            if (midgardCreate.objectManager.getIdentifierForContainer(firstChild) === 'mgd:containerPlaceholder') {
+            if (VIE.ContainerManager._getContainerValue(firstChild, 'about') === 'mgd:containerPlaceholder') {
                 firstChild.hide();
             }
 
@@ -69,7 +69,7 @@ midgardCreate.Collections = {
             }
 
             var collectionCollection = Backbone.Collection.extend({
-                model: midgardCreate.objectManager.getModelForContainer(firstChild),
+                model: VIE.ContainerManager.getModelForContainer(firstChild),
                 order: orderFromElement,
                 urlpattern: urlPattern
             });
@@ -83,7 +83,7 @@ midgardCreate.Collections = {
                 });
             }
 
-            var itemView = midgardCreate.objectManager.getViewForContainer(midgardCreate.objectManager.getCleanContainer(firstChild));
+            var itemView = VIE.ContainerManager._getViewForContainer(VIE.ContainerManager.cloneContainer(firstChild));
             var collectionView = Backbone.View.extend({
                 collection: collectionInstance,
                 el: collectionElement,

@@ -94,7 +94,6 @@ midgardCreate.Editable = {
             if (midgardCreate.Editable.currentObject === null) {
                 return;
             }
-
             midgardCreate.Editable.currentObject.getWorkflowState(function(stateData) {
                 midgardCreate.Editable.objectActions.empty();
 
@@ -190,7 +189,7 @@ midgardCreate.Editable = {
 
         // Seek editable properties from RDFa
         objectInstance.editables = {};
-        jQuery.each(jQuery('[property]', objectInstance.view.el), function(index, objectProperty)
+        jQuery('[property]', objectInstance.view.el).each(function(index, objectProperty)
         {
             var objectProperty = jQuery(objectProperty);
 
@@ -204,7 +203,7 @@ midgardCreate.Editable = {
                 midgardCreate.Editable.activateEditable(objectInstance, propertyName); 
             });
             GENTICS.Aloha.EventRegistry.subscribe(objectInstance.editables[propertyName], 'editableDeactivated', function() {
-                midgardCreate.Editable.activateEditable(objectInstance, propertyName); 
+                midgardCreate.Editable.deactivateEditable(objectInstance, propertyName); 
             });
 
             objectProperty.effect('highlight', { color: midgardCreate.highlightcolor }, 3000);
@@ -225,7 +224,7 @@ midgardCreate.Editable = {
                 // No identifier set, therefore not editable
                 return true;
             }
-            var objectInstance = midgardCreate.objectManager.getInstanceForContainer(objectContainer);
+            var objectInstance = VIE.ContainerManager.getInstanceForContainer(objectContainer);
             midgardCreate.Editable.enableEditable(objectInstance);
         });
 
