@@ -27,6 +27,26 @@ midgardCreate.objectManager = {
                 return '&lt;' + propertyName + '&gt;';
             };
 
+            properties.initialize = function() {
+                var modelInstance = this;
+                var populateProperties = {};
+                jQuery.each(properties, function(propName, propValue) {
+
+                    if (typeof propValue === 'function') {
+                        return true;
+                    }
+
+                    if (!modelInstance.get(propName)) {
+                        populateProperties[propName] = modelInstance.getPlaceholder(propName);
+                    }
+
+                });
+
+                if (!jQuery.isEmptyObject(populateProperties)) {
+                    modelInstance.set(populateProperties);
+                }
+            };
+
             properties.runWorkflow = function(workflow, callback) {
                 var url = '/mgd:create/run/' + encodeURIComponent(this.type) + '/' + encodeURIComponent(this.id) + '/' + workflow;
                 jQuery.ajax({
