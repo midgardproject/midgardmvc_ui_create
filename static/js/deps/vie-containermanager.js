@@ -6,6 +6,35 @@ VIE.ContainerManager = {
     models: {},
     views: {},
     instances: [],
+    instanceSingletons: {},
+
+    findContainerProperties: function(element, allowPropertiesInProperties) {
+        var childProperties = jQuery(element).find('[property]');
+
+        if (jQuery(element).attr('property') !== undefined) {
+            // The element itself is a property
+            childProperties.push(element);
+        }
+
+        childProperties = jQuery(childProperties).filter(function() {
+            if (jQuery(this).closest('[typeof][about]').index(element) !== 0) {
+                // The property is under another entity, skip
+                return false;
+            }
+
+            if (!allowPropertiesInProperties) {
+                if (!jQuery(this).parents('[property]').length) {
+                    return true;
+                }
+                // This property is under another property, skip
+                return false;
+            }
+
+            return true;
+        });
+
+        return childProperties;
+    },
 
     /**
      * @private
@@ -13,10 +42,31 @@ VIE.ContainerManager = {
     _getContainerProperties: function(element, emptyValues) {
         var containerProperties = {};
 
-        jQuery.each(jQuery('[property]', element), function(index, objectProperty) {
+        VIE.ContainerManager.findContainerProperties(element, true).each(function() {
         	var propertyName;
-            objectProperty = jQuery(objectProperty);
+            var objectProperty = jQuery(this);
             propertyName = objectProperty.attr('property');
+
+            if (typeof containerProperties[propertyName] !== 'undefined') {
+                if (containerProperties[propertyName] instanceof Array) {
+                    if (emptyValues) {
+                        return;
+                    }
+                    containerProperties[propertyName].push(objectProperty.html());
+                    return;
+                }
+                // Multivalued property, convert to Array
+                var previousValue = containerProperties[propertyName];
+                containerProperties[propertyName] = [];
+
+                if (emptyValues) {
+                    return;
+                }
+
+                containerProperties[propertyName].push(previousValue);
+                containerProperties[propertyName].push(objectProperty.html());
+                return;
+            }
 
             if (emptyValues) {
                 containerProperties[propertyName] = '';
@@ -56,7 +106,7 @@ VIE.ContainerManager = {
             element.attr('about', '');
         }
         element.find('[about]').attr('about', '');
-        element.find('[property]').html('');
+        VIE.ContainerManager.findContainerProperties(element, false).html('');
 
         return element;
     },
@@ -74,7 +124,6 @@ VIE.ContainerManager = {
         viewProperties.initialize = function() {
             _.bindAll(this, 'render');
             this.model.bind('change', this.render);
-            this.model.view = this;
         };
         viewProperties.tagName = element.get(0).nodeName;
         viewProperties.make = function(tagName, attributes, content) { 
@@ -82,10 +131,18 @@ VIE.ContainerManager = {
         };
         viewProperties.render = function() {
             var model = this.model;
-            jQuery('[property]', this.el).each(function(index, propertyElement) {
-                propertyElement = jQuery(propertyElement);
-                var property = propertyElement.attr('property');
-                propertyElement.html(model.get(property));
+            VIE.ContainerManager.findContainerProperties(this.el, true).each(function() {
+                var propertyElement = jQuery(this);
+                var propertyName = propertyElement.attr('property');
+
+                if (model.get(propertyName) instanceof Array) {
+                    // For now we don't deal with multivalued properties in Views
+                    return true;
+                }
+
+                if (propertyElement.html() !== model.get(propertyName)) {
+                    propertyElement.html(model.get(propertyName));
+                }
             });
             return this;
         };
@@ -107,7 +164,9 @@ VIE.ContainerManager = {
         var modelPropertiesFromRdf = VIE.ContainerManager._getContainerProperties(element, true);
         var modelProperties = jQuery.extend({}, modelPropertiesFromRdf);
 
-        modelProperties.type = type;
+        modelProperties.getType = function() {
+            return type;
+        }
 
         VIE.ContainerManager.findAdditionalModelProperties(element, modelProperties);
 
@@ -134,12 +193,38 @@ VIE.ContainerManager = {
         var view = VIE.ContainerManager.getViewForContainer(element);
 
         properties.id = VIE.ContainerManager._getContainerValue(element, 'about');
+        if (properties.id === '') {
+            var modelInstance = new model(properties);
+            modelInstance.views = [];
+        }
+        else 
+        {
+            if (VIE.ContainerManager.instanceSingletons[properties.id] === undefined) {
+                VIE.ContainerManager.instanceSingletons[properties.id] = new model(properties);
+                VIE.ContainerManager.instanceSingletons[properties.id].views = [];
+            }
+            var modelInstance = VIE.ContainerManager.instanceSingletons[properties.id];
 
-        var modelInstance = new model(properties);
-        modelInstance.view = new view({model: modelInstance, el: element});
+            modelInstance.set(properties);
+        }
+
+        var viewExists = false;
+        jQuery.each(modelInstance.views, function() {
+            // Check whether we already have this view instantiated for the element
+            if (this.el.get(0) == element.get(0)) {
+                viewExists = true;
+                return false;
+            }
+        });
+        if (!viewExists) {
+            modelInstance.views.push(new view({model: modelInstance, el: element}));
+        }
 
         VIE.ContainerManager.findAdditionalInstanceProperties(element, modelInstance);
-        VIE.ContainerManager.instances.push(modelInstance);
+
+        if (jQuery.inArray(modelInstance, VIE.ContainerManager.instances) === -1) {
+            VIE.ContainerManager.instances.push(modelInstance);
+        }
 
         return modelInstance;
     },

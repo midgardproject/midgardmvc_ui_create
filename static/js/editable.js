@@ -129,7 +129,9 @@ midgardCreate.Editable = {
         targetObject.runWorkflow(workflow, function(data) {
             if (data.object === 'remove')
             {
-                targetObject.view.remove();
+                jQuery.each(targetObject.views, function() {
+                    this.remove();
+                });
                 midgardCreate.Editable.currentObject = null;
             }
             midgardCreate.Editable.showCurrentObject();
@@ -183,15 +185,15 @@ midgardCreate.Editable = {
     enableEditable: function(objectInstance) {
         if (!midgardCreate.Editable.editTransfered) {
             // First element, show transfer to signify what is going on
-            midgardCreate.Editable.editButton.effect('transfer', { to: objectInstance.view.el }, 1000);
+            midgardCreate.Editable.editButton.effect('transfer', { to: objectInstance.views[0].el }, 1000);
             midgardCreate.Editable.editTransfered = true;
         }
 
         // Seek editable properties from RDFa
         objectInstance.editables = {};
-        jQuery('[property]', objectInstance.view.el).each(function(index, objectProperty)
+        VIE.ContainerManager.findContainerProperties(objectInstance.views[0].el, false).each(function()
         {
-            var objectProperty = jQuery(objectProperty);
+            var objectProperty = jQuery(this);
 
             midgardCreate.Image.prepareUploadTarget(objectInstance, objectProperty.get(0), midgardCreate.imagePlugin.insertImage);
 
@@ -280,7 +282,7 @@ midgardCreate.Editable = {
             objectInstance.save(null, {
                 success: function(savedModel, response) {
                     if (!midgardCreate.Editable.saveTransfered) {
-                        savedModel.view.el.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
+                        savedModel.views[0].el.effect('transfer', { to: jQuery(midgardCreate.Editable.saveButton) }, 1000);
                         midgardCreate.Editable.saveTransfered = true;
                     }
 

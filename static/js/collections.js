@@ -95,7 +95,9 @@ midgardCreate.Collections = {
                 },
 
                 addItem: function(itemInstance) {
+                    itemInstance.views = [];
                     var itemInstanceView = new itemView({model: itemInstance});
+                    itemInstance.views.push(itemInstanceView);
                     var itemViewElement = itemInstanceView.render().el;
                     if (this.collection.order === 'asc') {
                         this.el.append(itemViewElement);

@@ -16,7 +16,7 @@ midgardCreate.objectManager = {
 
         VIE.ContainerManager.findAdditionalModelProperties = function(element, properties) {
             properties.url = function() {
-                var url = '/mgd:create/object/' + encodeURIComponent(this.type) + '/';
+                var url = '/mgd:create/object/' + encodeURIComponent(this.getType()) + '/';
                 if (this.id) {
                     url += encodeURIComponent(this.id) + '/';
                 }
@@ -48,7 +48,7 @@ midgardCreate.objectManager = {
             };
 
             properties.runWorkflow = function(workflow, callback) {
-                var url = '/mgd:create/run/' + encodeURIComponent(this.type) + '/' + encodeURIComponent(this.id) + '/' + workflow;
+                var url = '/mgd:create/run/' + encodeURIComponent(this.getType()) + '/' + encodeURIComponent(this.id) + '/' + workflow;
                 jQuery.ajax({
                     url: url,
                     dataType: 'json',
@@ -69,7 +69,7 @@ midgardCreate.objectManager = {
                     actions: {}
                 };
 
-                var url = '/mgd:create/state/' + encodeURIComponent(this.type) + '/';
+                var url = '/mgd:create/state/' + encodeURIComponent(this.getType()) + '/';
                 if (this.id) {
                     url += encodeURIComponent(this.id) + '/';
                 }
