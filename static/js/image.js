@@ -175,22 +175,22 @@ midgardCreate.Image = {
             event.stopPropagation();
             event.preventDefault();
             return false
-        });
+        }, false);
         document.addEventListener('dragover', function(event) {
             event.stopPropagation();
             event.preventDefault();
             return false
-        });
+        }, false);
         document.addEventListener('dragenter', function(event) {
             event.stopPropagation();
             event.preventDefault();
             return false
-        });
+        }, false);
         document.addEventListener('dragleave', function(event) {
             event.stopPropagation();
             event.preventDefault();
             return false
-        });
+        }, false);
     },
 
     prepareUploadTarget: function(targetObject, uploadTarget, callback) {
