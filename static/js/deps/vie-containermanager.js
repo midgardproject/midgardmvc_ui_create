@@ -9,11 +9,15 @@ VIE.ContainerManager = {
     instanceSingletons: {},
 
     findContainerProperties: function(element, allowPropertiesInProperties) {
+        if (!element.attr('typeof')) {
+            element = element.children('[typeof][about]');
+        }
         return jQuery(element).find('[property]').add(jQuery(element).filter('[property]')).filter(function() {
             var closestRDFaEntity = jQuery(this).closest('[typeof][about]');
             if (   closestRDFaEntity.index(element) !== 0
                 && closestRDFaEntity.length !== 0) {
                 // The property is under another entity, skip
+                console.log("Wrong entity", element, closestRDFaEntity, this);
                 return false;
             }
 
@@ -98,7 +102,7 @@ VIE.ContainerManager = {
             // Direct match with container
             element.attr('about', '');
         }
-        element.find('[about]').attr('about', '#example');
+        element.find('[about]').attr('about', '');
         VIE.ContainerManager.findContainerProperties(element, false).html('');
 
         return element;
