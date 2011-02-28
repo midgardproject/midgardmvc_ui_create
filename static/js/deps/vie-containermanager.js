@@ -9,15 +9,10 @@ VIE.ContainerManager = {
     instanceSingletons: {},
 
     findContainerProperties: function(element, allowPropertiesInProperties) {
-        var childProperties = jQuery(element).find('[property]');
-
-        if (jQuery(element).attr('property') !== undefined) {
-            // The element itself is a property
-            childProperties.push(element);
-        }
-
-        childProperties = jQuery(childProperties).filter(function() {
-            if (jQuery(this).closest('[typeof][about]').index(element) !== 0) {
+        return jQuery(element).find('[property]').add(jQuery(element).filter('[property]')).filter(function() {
+            var closestRDFaEntity = jQuery(this).closest('[typeof][about]');
+            if (   closestRDFaEntity.index(element) !== 0
+                && closestRDFaEntity.length !== 0) {
                 // The property is under another entity, skip
                 return false;
             }
@@ -32,8 +27,6 @@ VIE.ContainerManager = {
 
             return true;
         });
-
-        return childProperties;
     },
 
     /**
@@ -105,7 +98,7 @@ VIE.ContainerManager = {
             // Direct match with container
             element.attr('about', '');
         }
-        element.find('[about]').attr('about', '');
+        element.find('[about]').attr('about', '#example');
         VIE.ContainerManager.findContainerProperties(element, false).html('');
 
         return element;
@@ -154,6 +147,7 @@ VIE.ContainerManager = {
 
     getModelForContainer: function(element) {
         var type = VIE.ContainerManager._getContainerValue(element, 'typeof');
+        
 
         if (typeof VIE.ContainerManager.models[type] !== 'undefined') {
             // We already have a model for this type
@@ -167,6 +161,21 @@ VIE.ContainerManager = {
         modelProperties.getType = function() {
             return type;
         }
+
+        modelProperties.toJSONLD = function() {
+            var instance = this;
+            var instanceLD = {"@":"<" + instance.id + ">"};
+
+            // This can have only one type here, in rdf more types can be allowed
+            instanceLD.a = instance.getType();
+            for (var property in instance.attributes) if(instance.attributes.hasOwnProperty(property)) { //  && typeof instance.attributes[property] != "function"
+                if (["id"].indexOf(property) == -1)
+                    instanceLD[property] = instance.attributes[property];
+            }
+            return instanceLD;
+        }
+
+        modelProperties.getInstanceForJSONLD = function(){}
 
         VIE.ContainerManager.findAdditionalModelProperties(element, modelProperties);
 
@@ -187,25 +196,9 @@ VIE.ContainerManager = {
     findAdditionalInstanceProperties: function(element, modelInstance) {
     },
 
-    getInstanceForContainer: function(element) {
-        var model = VIE.ContainerManager.getModelForContainer(element);
-        var properties = VIE.ContainerManager._getContainerProperties(element, false);
-        var view = VIE.ContainerManager.getViewForContainer(element);
-
-        properties.id = VIE.ContainerManager._getContainerValue(element, 'about');
-        if (properties.id === '') {
-            var modelInstance = new model(properties);
+    registerInstance: function(modelInstance, element) {
+        if (modelInstance.views === undefined) {
             modelInstance.views = [];
-        }
-        else 
-        {
-            if (VIE.ContainerManager.instanceSingletons[properties.id] === undefined) {
-                VIE.ContainerManager.instanceSingletons[properties.id] = new model(properties);
-                VIE.ContainerManager.instanceSingletons[properties.id].views = [];
-            }
-            var modelInstance = VIE.ContainerManager.instanceSingletons[properties.id];
-
-            modelInstance.set(properties);
         }
 
         var viewExists = false;
@@ -217,16 +210,39 @@ VIE.ContainerManager = {
             }
         });
         if (!viewExists) {
+            var view = VIE.ContainerManager.getViewForContainer(element);
             modelInstance.views.push(new view({model: modelInstance, el: element}));
         }
 
         VIE.ContainerManager.findAdditionalInstanceProperties(element, modelInstance);
+
+        if (modelInstance.id) {
+            VIE.ContainerManager.instanceSingletons[modelInstance.id] = modelInstance;
+        }
 
         if (jQuery.inArray(modelInstance, VIE.ContainerManager.instances) === -1) {
             VIE.ContainerManager.instances.push(modelInstance);
         }
 
         return modelInstance;
+    },
+
+    getInstanceForContainer: function(element) {
+        var model = VIE.ContainerManager.getModelForContainer(element);
+        var properties = VIE.ContainerManager._getContainerProperties(element, false);
+        properties.id = VIE.ContainerManager._getContainerValue(element, 'about');
+
+        if (   !properties.id
+            || VIE.ContainerManager.instanceSingletons[properties.id] === undefined) {
+            var modelInstance = new model(properties);
+        }
+        else 
+        {
+            var modelInstance = VIE.ContainerManager.instanceSingletons[properties.id];
+            modelInstance.set(properties);
+        }
+
+        return VIE.ContainerManager.registerInstance(modelInstance, element);
     },
 
     cleanup: function() {
