@@ -94,5 +94,34 @@ midgardCreate.objectManager = {
                 });
             };
         };
+
+        VIE.ContainerManager.findAdditionalViewProperties = function(element, viewProperties) {
+            viewProperties.render = function() {
+                var model = this.model;
+                VIE.ContainerManager.findContainerProperties(this.el, true).each(function() {
+                    var propertyElement = jQuery(this);
+                    var propertyName = propertyElement.attr('property');
+
+                    if (model.get(propertyName) instanceof Array) {
+                        // For now we don't deal with multivalued properties in Views
+                        return true;
+                    }
+
+                    if (propertyElement.html() !== model.get(propertyName)) {
+                        propertyElement.html(model.get(propertyName));
+                    }
+                });
+
+                if (   typeof model.collection !== 'undefined'
+                    && model.collection.urlpattern
+                    && model.id) {
+                    jQuery('a[rel="bookmark"]', this.el).each(function() {	
+                        jQuery(this).attr('href', model.collection.urlpattern.replace('GUID', model.id.replace('urn:uuid:', '')));
+                    });
+                };
+
+                return this;
+            };
+        };
     }
 };

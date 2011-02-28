@@ -35,7 +35,7 @@ midgardCreate.Collections = {
             collectionInstance.forEach(function(collectionItem) {
                 if (typeof collectionItem.id === 'undefined')
                 {
-                    removeItems[removeItems.length] = collectionItem;
+                    removeItems.push(collectionItem);
                 }
             });
             collectionInstance.remove(removeItems);
@@ -54,8 +54,9 @@ midgardCreate.Collections = {
             var collectionElement = jQuery(collectionElement);
 
             var firstChild = collectionElement.children(':first-child');
+            var childElement = VIE.ContainerManager.cloneContainer(firstChild);
             if (VIE.ContainerManager.getContainerIdentifier(firstChild) === 'mgd:containerPlaceholder') {
-                firstChild.hide();
+                firstChild.remove();
             }
 
             var orderFromElement = collectionElement.attr('mgd:order');
@@ -69,11 +70,11 @@ midgardCreate.Collections = {
             }
 
             var collectionCollection = Backbone.Collection.extend({
-                model: VIE.ContainerManager.getModelForContainer(firstChild),
+                model: VIE.ContainerManager.getModelForContainer(childElement),
                 order: orderFromElement,
                 urlpattern: urlPattern
             });
-            var collectionInstance = new collectionCollection({});
+            var collectionInstance = new collectionCollection(null);
 
             // Insert baseURLs to models if one is set
             if (typeof collectionElement.attr('mgd:baseurl') !== 'undefined')
@@ -83,22 +84,19 @@ midgardCreate.Collections = {
                 });
             }
 
-            var itemView = VIE.ContainerManager.getViewForContainer(VIE.ContainerManager.cloneContainer(firstChild));
             var collectionView = Backbone.View.extend({
                 collection: collectionInstance,
                 el: collectionElement,
 
                 initialize: function() {
-                    _.bindAll(this, 'addItem', 'removeItem');
+                    _.bindAll(this, 'addItem', 'updateLink', 'removeItem');
                     this.collection.bind('add', this.addItem);
                     this.collection.bind('remove', this.removeItem);
                 },
 
                 addItem: function(itemInstance) {
-                    itemInstance.views = [];
-                    var itemInstanceView = new itemView({model: itemInstance});
-                    itemInstance.views.push(itemInstanceView);
-                    var itemViewElement = itemInstanceView.render().el;
+                    itemInstance = VIE.ContainerManager.registerInstance(itemInstance, VIE.ContainerManager.cloneContainer(childElement));
+                    var itemViewElement = itemInstance.views[0].render().el;
                     if (this.collection.order === 'asc') {
                         this.el.append(itemViewElement);
                     } else {
@@ -109,10 +107,10 @@ midgardCreate.Collections = {
                 },
 
                 removeItem: function(itemInstance) {
-                    if (typeof itemInstance.view === 'undefined') {
+                    if (typeof itemInstance.views[0] === 'undefined') {
                         return;
                     }
-                    itemInstance.view.el.hide('drop');
+                    itemInstance.views[0].el.hide('drop');
                 }
             });
 
