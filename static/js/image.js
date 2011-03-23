@@ -148,7 +148,7 @@ midgardCreate.Image = {
             height: 300,
             width: 400,
             zIndex: 12000,
-            dialogClass: 'midgard-create'
+            dialogClass: 'midgard-create-dialog midgard-create'
         };
         midgardCreate.Image.imageSelectDialog = jQuery('<div id="midgardmvc-image"></div>');
 
@@ -259,7 +259,7 @@ midgardCreate.Image = {
             height: 300,
             width: 400,
             zIndex: 12000,
-            dialogClass: 'midgard-create'
+            dialogClass: 'midgard-create-dialog midgard-create'
         };
         midgardCreate.Image.imageDialog = jQuery('<div id="midgardmvc-image-details"></div>');
 

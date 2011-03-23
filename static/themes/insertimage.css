@@ -30,6 +30,7 @@ button.midgardCreate_button_img {
 }
 
 #midgardmvc-image-upload {
+    text-align: center;
     padding-bottom: 6px;
     background-color: #ffffff;
     border-radius: 6px;
