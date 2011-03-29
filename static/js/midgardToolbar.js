@@ -1,7 +1,8 @@
 (function(jQuery, undefined) {
     jQuery.widget('Midgard.toolbar', {
         options: {
-            display: 'full'
+            display: 'full',
+            statechange: function() {}
         },
     
         _create: function() {
@@ -16,10 +17,7 @@
                 widget.hide();
             });
             
-            if (midgardCreate.checkCapability('sessionstorage') &&
-                sessionStorage.getItem('Midgard.toolbar.state')) {
-                this._setOption('display', sessionStorage.getItem('Midgard.toolbar.state'));
-            }
+            this._setDisplay(this.options.display);
         },
         
         _setOption: function(key, value) {
@@ -31,24 +29,22 @@
         
         _setDisplay: function(value) {
             if (value === 'minimized') {
-                jQuery('#midgard-bar:visible', this.element).slideToggle();
-                jQuery('#midgard-bar-minimized:hidden', this.element).slideToggle();
+                this.hide();
             } else {
-                jQuery('#midgard-bar-minimized:visible', this.element).slideToggle();
-                jQuery('#midgard-bar:hidden', this.element).slideToggle();
-            }
-        
-            if (midgardCreate.checkCapability('sessionstorage')) {
-                sessionStorage.setItem('Midgard.toolbar.state', value);
-            }
+                this.show();
+            } 
         },
         
         hide: function() {
-            this._setOption('display', 'minimized');
+            jQuery('#midgard-bar:visible', this.element).slideToggle();
+            jQuery('#midgard-bar-minimized:hidden', this.element).slideToggle();
+            this._trigger('statechange', null, {display: 'minimized'});
         },
         
         show: function() {
-            this._setOption('display', 'full');
+            jQuery('#midgard-bar-minimized:visible', this.element).slideToggle();
+            jQuery('#midgard-bar:hidden', this.element).slideToggle();
+            this._trigger('statechange', null, {display: 'full'});
         },
         
         _getMinimized: function() {

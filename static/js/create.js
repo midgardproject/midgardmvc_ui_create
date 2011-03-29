@@ -65,7 +65,19 @@ jQuery(document).ready(function() {
         return Modernizr[capability];
     };
     midgardCreate.highlightcolor = '#67cc08';
-    jQuery('body').toolbar();
+    
+    var toolbarOptions = {};
+    if (midgardCreate.checkCapability('sessionstorage')) {
+        jQuery('body').bind('toolbarstatechange', function(event, options) {
+            sessionStorage.setItem('Midgard.toolbar.state', options.display);
+        });
+
+        if (sessionStorage.getItem('Midgard.toolbar.state')) {
+            toolbarOptions.display = sessionStorage.getItem('Midgard.toolbar.state');
+        }
+    }
+    jQuery('body').toolbar(toolbarOptions);
+    
     midgardCreate.objectManager.init();
     midgardCreate.Collections.init();
     midgardCreate.Image.init();
