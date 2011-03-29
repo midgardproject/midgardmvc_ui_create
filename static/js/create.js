@@ -24,6 +24,8 @@ document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmv
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/image.js"></script>');
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplaceholders.js"></script>');
 
+document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/midgardToolbar.js"></script>');
+
 // Initialize Midgard Create
 jQuery(document).ready(function() {
     if (typeof midgardCreate === 'undefined') {
@@ -63,48 +65,7 @@ jQuery(document).ready(function() {
         return Modernizr[capability];
     };
     midgardCreate.highlightcolor = '#67cc08';
-    midgardCreate.toolbar = {};
-    midgardCreate.toolbar.minimized = jQuery('<a id="midgard-bar-minimized" class="midgard-create ui-widget-showbut"></a>');
-    jQuery('body').append(midgardCreate.toolbar.minimized);
-    midgardCreate.toolbar.full = jQuery('<div class="midgard-create" id="midgard-bar"><div class="ui-widget-content"><div class="toolbarcontent"><div class="midgard-logo-button"><a id="midgard-bar-hidebutton" class="ui-widget-hidebut"></a></div><div class="toolbarcontent-left"></div><div class="toolbarcontent-center"></div><div class="toolbarcontent-right"></div></div></div>');
-    jQuery('body').append(midgardCreate.toolbar.full);
-    midgardCreate.toolbar.minimized.bind('click', function() {
-        midgardCreate.toolbar.show();
-        return false;
-    });
-    var hideButton = jQuery('#midgard-bar-hidebutton');
-    hideButton.bind('click', function() {
-        midgardCreate.toolbar.hide();
-        return false;
-    });
-    midgardCreate.toolbar.show = function() {
-       midgardCreate.toolbar.minimized.slideToggle();
-       midgardCreate.toolbar.full.slideToggle();
-       if (midgardCreate.checkCapability('sessionstorage')) {
-           sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'full');
-       }
-    };
-    midgardCreate.toolbar.hide = function() {
-        midgardCreate.toolbar.full.slideToggle();
-        midgardCreate.toolbar.minimized.slideToggle();
-        if (midgardCreate.checkCapability('sessionstorage')) {
-            sessionStorage.setItem('midgardmvc_ui_create_toolbar', 'minimized');
-        }
-    };
-    if (midgardCreate.checkCapability('sessionstorage')) {
-        var toolbarState = sessionStorage.getItem('midgardmvc_ui_create_toolbar');
-        if (toolbarState === 'minimized')
-        {
-            midgardCreate.toolbar.full.hide();
-        }
-        else
-        {
-            midgardCreate.toolbar.minimized.hide();
-        }
-    }
-    else {
-        midgardCreate.toolbar.minimized.hide();
-    }
+    jQuery('body').toolbar();
     midgardCreate.objectManager.init();
     midgardCreate.Collections.init();
     midgardCreate.Image.init();
