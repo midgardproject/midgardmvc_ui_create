@@ -1,18 +1,6 @@
 /**
  * Midgard Create initialization
  */
-/**
- * This file is generated automatically from Literate Programming code
- * stored in the README.txt documentation file in this repository.
- * Instead of modifying this file directly, modify the corresponding
- * code chunks in README.txt and regenerate it using the tangle command
- * of noweb.php:
- *
- *    $ noweb.php tangle README.txt
- *
- * Read more about the concept in:
- * @link http://bergie.iki.fi/blog/literate_programming_with_php/
- */
 
 // Include dependencies of Midgard Create
 document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
