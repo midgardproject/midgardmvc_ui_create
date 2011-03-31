@@ -12,9 +12,11 @@
             var widget = this;
             jQuery('#midgard-bar-minimized').click(function() {
                 widget.show();
+                widget._trigger('statechange', null, {display: 'full'});
             });
             jQuery('#midgard-bar-hidebutton').click(function() {
                 widget.hide();
+                widget._trigger('statechange', null, {display: 'minimized'});
             });
             
             this._setDisplay(this.options.display);
@@ -38,13 +40,11 @@
         hide: function() {
             jQuery('#midgard-bar:visible', this.element).slideToggle();
             jQuery('#midgard-bar-minimized:hidden', this.element).slideToggle();
-            this._trigger('statechange', null, {display: 'minimized'});
         },
         
         show: function() {
             jQuery('#midgard-bar-minimized:visible', this.element).slideToggle();
             jQuery('#midgard-bar:hidden', this.element).slideToggle();
-            this._trigger('statechange', null, {display: 'full'});
         },
         
         _getMinimized: function() {

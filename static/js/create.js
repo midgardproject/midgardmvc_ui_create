@@ -2,24 +2,59 @@
  * Midgard Create initialization
  */
 
+if (typeof midgardCreate === 'undefined') {
+    midgardCreate = {};
+}
+
+midgardCreate.require = function(script) {
+    if (typeof script !== 'string') {
+        for (index in script) {
+            midgardCreate.require(script[index]);
+        }
+        return;
+    }
+    
+    if (script.substr(0, 1) !== '/') {
+        script = '/midgardmvc-static/midgardmvc_ui_create/js/' + script;
+    }
+
+    required = [];
+    if (required.indexOf(script) !== -1) {
+        return;
+    }
+    document.write('<script type="text/javascript" src="' + script + '"></script>');
+    required.push(script);
+};
+
 // Include dependencies of Midgard Create
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/deps/modernizr-1.6.min.js"></script>');
+midgardCreate.require([
+    'deps/modernizr-1.6.min.js',
+    /*'objectmanager.js',
+    'editable.js',
+    'collections.js',
+    'image.js',
+    'imageplaceholders.js',*/
+    'deps/underscore-min.js',
+    'deps/backbone-min.js',
+    'deps/vie.js',
+    'midgardToolbar.js',
+    'midgardEditable.js',
+    'midgardCreate.js'
+]);
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/midgardbar.css">');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/objectmanager.js"></script>');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/editable.js"></script>');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/collections.js"></script>');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/image.js"></script>');
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/imageplaceholders.js"></script>');
-
-document.write('<script type="text/javascript" src="/midgardmvc-static/midgardmvc_ui_create/js/midgardToolbar.js"></script>');
 
 // Initialize Midgard Create
 jQuery(document).ready(function() {
-    if (typeof midgardCreate === 'undefined') {
-        midgardCreate = {};
-    }
-    midgardCreate.checkCapability = function(capability) {
+    jQuery('body').midgardCreate();
+
+    /*
+    midgardCreate.objectManager.init();
+    midgardCreate.Collections.init();
+    midgardCreate.Image.init();
+    midgardCreate.ImagePlaceholders.init();
+    midgardCreate.Editable.init();
+        midgardCreate.checkCapability = function(capability) {
         if (capability === 'contentEditable') {
             if (navigator.userAgent.match(/iPhone/i)) {
                 return false;
@@ -52,23 +87,5 @@ jQuery(document).ready(function() {
         }
         return Modernizr[capability];
     };
-    midgardCreate.highlightcolor = '#67cc08';
-    
-    var toolbarOptions = {};
-    if (midgardCreate.checkCapability('sessionstorage')) {
-        jQuery('body').bind('toolbarstatechange', function(event, options) {
-            sessionStorage.setItem('Midgard.toolbar.state', options.display);
-        });
-
-        if (sessionStorage.getItem('Midgard.toolbar.state')) {
-            toolbarOptions.display = sessionStorage.getItem('Midgard.toolbar.state');
-        }
-    }
-    jQuery('body').toolbar(toolbarOptions);
-    
-    midgardCreate.objectManager.init();
-    midgardCreate.Collections.init();
-    midgardCreate.Image.init();
-    midgardCreate.ImagePlaceholders.init();
-    midgardCreate.Editable.init();
+    */
 });
