@@ -39,13 +39,15 @@ midgardCreate.require([
     'deps/vie.js',
     'midgardToolbar.js',
     'midgardEditable.js',
-    'midgardCreate.js'
+    'midgardStorage.js',
+    'midgardCreate.js',
 ]);
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-theme/jquery.ui.all.css">');
 document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_create/themes/midgard-toolbar/midgardbar.css">');
 
 // Initialize Midgard Create
 jQuery(document).ready(function() {
+    jQuery('body').midgardStorage();
     jQuery('body').midgardCreate();
 
     /*

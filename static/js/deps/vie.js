@@ -172,7 +172,7 @@
         //
         //     var json = '{"@": "<http://www.example.com/books/wikinomics>","dc:title": "Wikinomics","dc:creator": "Don Tapscott","dc:date": "2006-10-01"}';
         //     var objectInstance = VIE.EntityManager.getByJSONLD(json);
-        getByJSONLD: function(jsonld) {
+        getByJSONLD: function(jsonld, options) {
             VIE.EntityManager.initializeCollection();
             var entityInstance;
             var properties;
@@ -194,7 +194,7 @@
             
             if (entityInstance) {
                 properties = VIE.EntityManager._JSONtoProperties(jsonld, entityInstance.attributes);
-                entityInstance.set(properties);
+                entityInstance.set(properties, options);
                 
                 if (!entityInstance.type &&
                     typeof jsonld.a !== 'undefined') {

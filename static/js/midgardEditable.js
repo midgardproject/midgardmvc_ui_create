@@ -42,6 +42,7 @@ midgardCreate.require([
             VIE.RDFa.findPredicateElements(this.options.model.id, this.element, false).each(function() {
                 return widget._enableProperty(jQuery(this));
             });
+            this.options.model.trigger('edit', this.options.model);
         },
         
         disable: function() {
@@ -53,7 +54,6 @@ midgardCreate.require([
                 try {
                     editable.destroy();
                 } catch (err) {
-                    console.log("Failed disable, ", editable.obj);
                 }
             });
             this.options.editables = [];
@@ -62,6 +62,7 @@ midgardCreate.require([
                 instance: this.options.model,
                 element: this.element
             });
+            this.options.model.trigger('browse', this.options.model);
         },
         
         _enableProperty: function(element) {
@@ -116,6 +117,7 @@ midgardCreate.require([
             changedProperties[propertyName] = editable.getContents();
             editable.setUnmodified();
             this.options.model.set(changedProperties, {silent: true});
+            this.options.model.trigger('edit:edited', this.options.model);
 
             this._trigger('changed', null, {
                 editable: editable,

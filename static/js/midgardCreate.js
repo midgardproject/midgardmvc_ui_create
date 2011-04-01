@@ -76,41 +76,6 @@
             this.element.toolbar({display: this.options.toolbar});
         },
         
-        _checkEditableEvent: function(subject, element) {
-            if (VIE.RDFa.getSubject(element) !== subject) {
-                // Propagated event from another entity, ignore
-                return false;
-            }
-            return true;
-        },
-        
-        _saveLocal: function(model) {
-            if (!Modernizr.localstorage) {
-                return;
-            }
-
-            if (model.isNew()) {
-                // TODO: We need a list of these
-                return;
-            }
-            
-            localStorage.setItem(model.getSubject(), JSON.stringify(model.toJSONLD()));
-        },
-        
-        _readLocal: function(model) {
-            if (!Modernizr.localstorage) {
-                return false;
-            }
-            
-            var local = localStorage.getItem(model.getSubject());
-            if (!local) {
-                return false;
-            }
-            
-            VIE.EntityManager.getByJSONLD(JSON.parse(local));
-            return true;
-        },
-        
         _enableEdit: function() {
             var widget = this;
             jQuery('[about]').each(function() {
@@ -118,34 +83,15 @@
                 var loadedLocal = false;
                                 
                 jQuery(this).bind('editableenable', function(event, options) {
-                    if (!widget._checkEditableEvent(subject, options.element)) {
+                    if (VIE.RDFa.getSubject(options.element) !== subject) {
+                        // Propagated event from another entity, ignore
                         return;
-                    }
-                    
-                    if (!loadedLocal) {
-                        // Check if local storage has a version and use that
-                        if (widget._readLocal(options.instance)) {
-                            // Enable save button since there are local modifications
-                            widget._saveButton().button({disabled: false});
-                        }
-                        loadedLocal = true;
                     }
                     
                     // Highlight the editable
                     options.element.effect('highlight', {color: widget.options.highlightColor}, 3000);
                 });
-                
-                jQuery(this).bind('editablechanged', function(event, options) {
-                    if (!widget._checkEditableEvent(subject, options.element)) {
-                        return;
-                    }
-                    
-                    // Save to local storage
-                    widget._saveLocal(options.instance);
-                    
-                    // Enable save button
-                    widget._saveButton().button({disabled: false});
-                });
+
                 jQuery(this).editable({disabled: false});
             });
             if (Modernizr.sessionstorage) {
