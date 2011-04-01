@@ -66,7 +66,12 @@
         _enableEdit: function() {
             var widget = this;
             jQuery('[about]').each(function() {
+                var subject = VIE.RDFa.getSubject(this);
                 jQuery(this).bind('editableenable', function(event, options) {
+                    if (VIE.RDFa.getSubject(options.element) !== subject) {
+                        // Propagated event from another entity, ignore
+                        return;
+                    }
                     options.element.effect('highlight', {color: widget.options.highlightColor}, 3000);
                 });
                 jQuery(this).bind('editablechanged', function(event, options) {
@@ -82,7 +87,7 @@
         
         _disableEdit: function() {
             jQuery('[about]').each(function() {
-                jQuery(this).editable({disabled: true});
+                jQuery(this).editable({disabled: true}).removeClass('ui-state-disabled');
             });
             if (Modernizr.sessionstorage) {
                 sessionStorage.setItem('Midgard.create.state', 'browse');

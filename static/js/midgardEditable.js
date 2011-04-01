@@ -14,10 +14,9 @@ midgardCreate.require([
 
 (function(jQuery, undefined) {
     jQuery.widget('Midgard.editable', {
-        editables: [],
-        model: null,
-    
         options: {
+            editables: [],
+            model: null,
             editor: 'aloha',
             enable: function() {},
             disable: function() {},
@@ -27,7 +26,7 @@ midgardCreate.require([
         },
     
         _create: function() {
-            this.model = VIE.RDFaEntities.getInstance(this.element);
+            this.options.model = VIE.RDFaEntities.getInstance(this.element);
         },
         
         _init: function() {
@@ -40,13 +39,13 @@ midgardCreate.require([
         
         enable: function() {      
             var widget = this;
-            VIE.RDFa.findPredicateElements(this.model.id, this.element, false).each(function() {
+            VIE.RDFa.findPredicateElements(this.options.model.id, this.element, false).each(function() {
                 return widget._enableProperty(jQuery(this));
             });
         },
         
         disable: function() {
-            jQuery.each(this.editables, function(index, editable) {
+            jQuery.each(this.options.editables, function(index, editable) {
                 editable.setUnmodified();
                 if (typeof editable.changeTimer !== 'undefined') {
                     window.clearInterval(editable.changeTimer);
@@ -54,25 +53,26 @@ midgardCreate.require([
                 try {
                     editable.destroy();
                 } catch (err) {
-                    console.log("Failed disable");
+                    console.log("Failed disable, ", editable.obj);
                 }
             });
+            this.options.editables = [];
             
             this._trigger('disable', null, {
-                instance: this.model,
+                instance: this.options.model,
                 element: this.element
             });
         },
         
         _enableProperty: function(element) {
             var propertyName = VIE.RDFa.getPredicate(element);
-            if (this.model.get(propertyName) instanceof Array) {
+            if (this.options.model.get(propertyName) instanceof Array) {
                 // For now we don't deal with multivalued properties in Aloha
                 return true;
             }
 
             var editable = new GENTICS.Aloha.Editable(element);
-            editable.vieEntity = this.model;
+            editable.vieEntity = this.options.model;
 
             // Subscribe to activation and deactivation events
             var widget = this;
@@ -80,7 +80,7 @@ midgardCreate.require([
                 widget._trigger('activated', null, {
                     editable: editable,
                     property: propertyName,
-                    instance: this.model,
+                    instance: widget.options.model,
                     element: element
                 });
             });
@@ -88,7 +88,7 @@ midgardCreate.require([
                 widget._trigger('deactivated', null, {
                     editable: editable,
                     property: propertyName,
-                    instance: this.model,
+                    instance: widget.options.model,
                     element: element
                 });
             });
@@ -97,15 +97,15 @@ midgardCreate.require([
             editable.changeTimer = window.setInterval(function() {
                 widget._checkModified(propertyName, editable);
             }, 2000);
-            
+
             this._trigger('enable', null, {
                 editable: editable,
                 property: propertyName,
-                instance: this.model,
+                instance: this.options.model,
                 element: element
             });
             
-            this.editables.push(editable);
+            this.options.editables.push(editable);
         },
         
         _checkModified: function(propertyName, editable) {
@@ -115,12 +115,12 @@ midgardCreate.require([
             var changedProperties = {};
             changedProperties[propertyName] = editable.getContents();
             editable.setUnmodified();
-            this.model.set(changedProperties, {silent: true});
+            this.options.model.set(changedProperties, {silent: true});
 
             this._trigger('changed', null, {
                 editable: editable,
                 property: propertyName,
-                instance: this.model,
+                instance: this.options.model,
                 element: editable.obj
             });
         }
