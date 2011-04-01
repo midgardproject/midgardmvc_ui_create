@@ -35,13 +35,12 @@ class midgardmvc_ui_create_controllers_backbone
 
     public function get_object(array $args)
     {
-        $this->load_object($args);
+        $this->read_input();
         $this->object_to_json();
     }
 
     public function post_object(array $args)
     {
-        $this->load_object($args);
         $data = $this->read_input();
         if ($this->object->guid)
         {
@@ -69,7 +68,6 @@ class midgardmvc_ui_create_controllers_backbone
 
     public function put_object(array $args)
     {
-        $this->load_object($args);
         $data = $this->read_input();
         if (!$this->object->guid)
         {
@@ -105,7 +103,7 @@ class midgardmvc_ui_create_controllers_backbone
         $activity->create();
     }
 
-    private function populate_object(stdClass $data)
+    private function populate_object(array $data)
     {
         $form = midgardmvc_helper_forms_mgdschema::create($this->object, false);
         foreach ($data as $property => $value)
@@ -152,25 +150,40 @@ class midgardmvc_ui_create_controllers_backbone
         if (isset($_POST['model']))
         {
             // Backbone.emulateJSON is set
-            $data = json_decode($_POST['model']);
+            $data = get_object_vars(json_decode($_POST['model']));
         }
         else
         {
             $handle = midgardmvc_core::get_instance()->dispatcher->get_stdin();
-            $input = stream_get_contents($handle, (int) $_SERVER['CONTENT_LENGTH']);
-            $data = json_decode($input);
+            $input = substr(urldecode(stream_get_contents($handle, (int) $_SERVER['CONTENT_LENGTH'])), 6);
+            $data = get_object_vars(json_decode($input));
         }
 
-        if (isset($data->id))
+        if (isset($data['a'])) 
         {
-            unset($data->id);
+            if (isset($data['@'])) 
+            {
+                // Type and identifier known
+                $this->object = midgardmvc_ui_create_rdfmapper::load_object($data['a'], $data['@']);
+                unset($data['@']);
+            }
+            else
+            {
+                // Only type known, create as new object
+                $this->object = midgardmvc_ui_create_rdfmapper::load_object($data['a'], null);
+            }
+            unset($data['a']);
+        }
+        elseif (isset($data['@']))
+        {
+            // TODO: Load object by identifier only
         }
 
-        if (isset($data->baseurl))
-        {
-            $this->baseurl = $data->baseurl;
-            unset($data->baseurl);
+        if (!$this->object) {
+            throw new midgardmvc_exception_notfound("Unable to work with object");
         }
+
+        $this->rdfmapper = new midgardmvc_ui_create_rdfmapper($this->object);
 
         return $data;
     }
@@ -179,7 +192,8 @@ class midgardmvc_ui_create_controllers_backbone
     {
         $this->data = array
         (
-            'id' => $this->rdfmapper->about,
+            '@' => $this->rdfmapper->about,
+            'a' => $this->rdfmapper->typeof
         );
         $skip = array
         (

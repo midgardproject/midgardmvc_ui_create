@@ -1,6 +1,7 @@
 (function(jQuery, undefined) {
     jQuery.widget('Midgard.midgardCreate', {
         options: {
+            statechange: function() {},
             toolbar: 'full',
             saveButton: null,
             state: 'browse',
@@ -12,6 +13,7 @@
             this._enableToolbar();
             this._saveButton();
             this._editButton();
+            this.element.midgardStorage();
         },
         
         _init: function() {
@@ -34,6 +36,10 @@
             if (sessionStorage.getItem('Midgard.create.state')) {
                 this._setOption('state', sessionStorage.getItem('Midgard.create.state'));
             }
+            
+            this.element.bind('midgardcreatestatechange', function(event, state) {
+                sessionStorage.setItem('Midgard.create.state', state);
+            });
         },
         
         _saveButton: function() {
@@ -94,20 +100,16 @@
 
                 jQuery(this).editable({disabled: false});
             });
-            if (Modernizr.sessionstorage) {
-                sessionStorage.setItem('Midgard.create.state', 'edit');
-            }
             this._setOption('state', 'edit');
+            this._trigger('statechange', null, 'edit');
         },
         
         _disableEdit: function() {
             jQuery('[about]').each(function() {
                 jQuery(this).editable({disabled: true}).removeClass('ui-state-disabled');
             });
-            if (Modernizr.sessionstorage) {
-                sessionStorage.setItem('Midgard.create.state', 'browse');
-            }
             this._setOption('state', 'browse');
+            this._trigger('statechange', null, 'browse');
         }
     })
 })(jQuery);

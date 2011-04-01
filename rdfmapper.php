@@ -99,9 +99,20 @@ class midgardmvc_ui_create_rdfmapper
         }
         return $typeofs[$mgdschema];
     }
+    
+    private static function from_reference($string)
+    {
+        if (   substr($string, 0, 1) == '<'
+            && substr($string, -1, 1) == '>') {
+            return substr($string, 1, strlen($string) - 2);
+        }
+        return $string;
+    }
 
     public static function typeof_to_class($type)
     {
+        $type = self::from_reference($type);
+
         static $mapped_classes = array();
         if (isset($mapped_classes[$type]))
         {
@@ -216,6 +227,8 @@ class midgardmvc_ui_create_rdfmapper
         {
             return new $mgdschema;
         }
+
+        $identifier = self::from_reference($identifier);
 
         if (substr($identifier, 0, 4) == 'mgd:')
         {

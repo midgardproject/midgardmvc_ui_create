@@ -29,11 +29,6 @@ midgardCreate.require = function(script) {
 // Include dependencies of Midgard Create
 midgardCreate.require([
     'deps/modernizr-1.6.min.js',
-    /*'objectmanager.js',
-    'editable.js',
-    'collections.js',
-    'image.js',
-    'imageplaceholders.js',*/
     'deps/underscore-min.js',
     'deps/backbone-min.js',
     'deps/vie.js',
@@ -47,7 +42,6 @@ document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_cr
 
 // Initialize Midgard Create
 jQuery(document).ready(function() {
-    jQuery('body').midgardStorage();
     jQuery('body').midgardCreate();
 
     /*
