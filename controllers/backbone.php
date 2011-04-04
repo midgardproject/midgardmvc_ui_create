@@ -69,17 +69,21 @@ class midgardmvc_ui_create_controllers_backbone
     public function put_object(array $args)
     {
         $data = $this->read_input();
-        if (!$this->object->guid)
-        {
-            throw new midgardmvc_exception_notfound("PUT is only used for updating existing objects");
-        }
         $this->populate_object($data);
 
         $transaction = new midgard_transaction();
         $transaction->begin();
 
         $this->enter_context();
-        $this->object->update();
+        if (!$this->object->guid)
+        {
+            // TODO: Backbone should not PUT new objects but use POST instead
+            $this->object->create();
+        }
+        else
+        {
+            $this->object->update();
+        }
         $this->leave_context();
 
         $this->log_activity('http://activitystrea.ms/schema/1.0/post');
@@ -114,6 +118,14 @@ class midgardmvc_ui_create_controllers_backbone
             {
                 continue;
             }
+            
+            if (is_array($value)) 
+            {
+                // Object reference
+                $reference = midgardmvc_ui_create_rdfmapper::load_object(null, $value[0]);
+                $value = $reference->id;
+            }
+            
             $form->$mgd_property->set_value($value);
             $form->$mgd_property->validate();
             $form->$mgd_property->clean();
@@ -155,7 +167,7 @@ class midgardmvc_ui_create_controllers_backbone
         else
         {
             $handle = midgardmvc_core::get_instance()->dispatcher->get_stdin();
-            $input = substr(urldecode(stream_get_contents($handle, (int) $_SERVER['CONTENT_LENGTH'])), 6);
+            $input = urldecode(stream_get_contents($handle, (int) $_SERVER['CONTENT_LENGTH']));
             $data = get_object_vars(json_decode($input));
         }
 
@@ -176,7 +188,9 @@ class midgardmvc_ui_create_controllers_backbone
         }
         elseif (isset($data['@']))
         {
-            // TODO: Load object by identifier only
+            // Load object by identifier only
+            $this->object = midgardmvc_ui_create_rdfmapper::load_object(null, $data['@']);
+            unset($data['@']);
         }
 
         if (!$this->object) {
@@ -184,7 +198,6 @@ class midgardmvc_ui_create_controllers_backbone
         }
 
         $this->rdfmapper = new midgardmvc_ui_create_rdfmapper($this->object);
-
         return $data;
     }
 

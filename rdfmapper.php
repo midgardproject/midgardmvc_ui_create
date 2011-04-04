@@ -221,11 +221,15 @@ class midgardmvc_ui_create_rdfmapper
 
     public static function load_object($type, $identifier = null)
     {
-        $mgdschema = self::typeof_to_class($type);
-
-        if (is_null($identifier))
+        if ($type)
         {
-            return new $mgdschema;
+            $mgdschema = self::typeof_to_class($type);
+
+            if (   is_null($identifier)
+                || substr(self::from_reference($identifier), 0, 7) == '_:bnode')
+            {
+                return new $mgdschema;
+            }
         }
 
         $identifier = self::from_reference($identifier);
@@ -241,6 +245,10 @@ class midgardmvc_ui_create_rdfmapper
 
         try
         {
+            if (!$type)
+            {
+                return midgard_object_class::get_object_by_guid($identifier);
+            }
             return new $mgdschema($identifier);
         }
         catch (midgard_error_exception $e)
