@@ -2,7 +2,8 @@
     jQuery.widget('Midgard.midgardStorage', {
         options: {
             localStorage: false,
-            changedModels: []
+            changedModels: [],
+            loaded: function() {}
         },
     
         _create: function() {
@@ -13,6 +14,8 @@
             }
 
             VIE.EntityManager.initializeCollection();
+            
+            // TODO: This won't be necessary when we have our own Backbone.sync
             VIE.EntityManager.entities.bind('add', function(model) {
                 widget._prepareEntity(model);
             });
@@ -55,6 +58,13 @@
                     }
                 });
             });
+            
+            widget.element.bind('midgardstorageloaded', function(event, options) {
+                if (_.indexOf(widget.options.changedModels, options.instance) === -1) {
+                    widget.options.changedModels.push(options.instance);
+                }
+                jQuery('#midgardcreate-save').button({disabled: false});
+            });
         },
         
         _prepareEntity: function(model) {
@@ -63,14 +73,6 @@
             // Add the Midgard-specific save URL used by Backbone.sync
             model.url = '/mgd:create/object/';
             model.toJSON = model.toJSONLD;
-            
-            // Regular change event from VIE
-            model.bind('storage:loaded', function(model) {
-                if (_.indexOf(widget.options.changedModels, model) === -1) {
-                    widget.options.changedModels.push(model);
-                }
-                jQuery('#midgardcreate-save').button({disabled: false});
-            });
         },
         
         _saveRemote: function(options) {
@@ -156,7 +158,10 @@
             }
             model.originalAttributes = _.clone(model.attributes);
             var entity = VIE.EntityManager.getByJSONLD(JSON.parse(local));
-            model.trigger('storage:loaded', model);
+            
+            this._trigger('loaded', null, {
+                instance: entity,
+            });
         },
         
         _readLocalReferences: function(model, property, collection) {
