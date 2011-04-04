@@ -18,6 +18,7 @@ midgardCreate.require([
             editables: [],
             model: null,
             editor: 'aloha',
+            addButton: null,
             enable: function() {},
             disable: function() {},
             activated: function() {},
@@ -26,7 +27,9 @@ midgardCreate.require([
         },
     
         _create: function() {
-            this.options.model = VIE.RDFaEntities.getInstance(this.element);
+            if (!this.options.model) {
+                this.options.model = VIE.RDFaEntities.getInstance(this.element);
+            }
         },
         
         _init: function() {
@@ -39,9 +42,37 @@ midgardCreate.require([
         
         enable: function() {      
             var widget = this;
-            VIE.RDFa.findPredicateElements(this.options.model.id, this.element, false).each(function() {
+            VIE.RDFa.findPredicateElements(this.options.model.id, jQuery('[property]', this.element), false).each(function() {
                 return widget._enableProperty(jQuery(this));
             });
+            
+            _.forEach(VIE.RDFaEntities.CollectionViews, function(view) {
+                if (VIE.RDFa.getSubject(view.el) !== VIE.RDFa._toReference(widget.options.model.id)) {
+                    return;
+                }
+
+                if (widget.options.addButton) {
+                    return;
+                }
+                
+                view.bind('add', function(itemView) {
+                    //itemView.el.effect('slide');
+                    itemView.model.primaryCollection = view.collection;
+                    itemView.el.editable({disabled: widget.options.disabled, model: itemView.model});
+                });
+                
+                view.bind('remove', function(itemView) {
+                    itemView.el.hide('drop');
+                });
+                
+                widget.options.addButton = jQuery('<button>Add</button>').button();
+                widget.options.addButton.click(function() {
+                    view.collection.add({});
+                });
+                
+                view.el.after(widget.options.addButton); 
+            });
+            
             this.options.model.trigger('edit', this.options.model);
         },
         
@@ -58,20 +89,28 @@ midgardCreate.require([
             });
             this.options.editables = [];
             
+            if (this.options.addButton) {
+                this.options.addButton.remove();
+                delete this.options.addButton;
+            }
+
             this._trigger('disable', null, {
                 instance: this.options.model,
-                element: this.element
+                entityElement: this.element
             });
             this.options.model.trigger('browse', this.options.model);
         },
         
         _enableProperty: function(element) {
             var propertyName = VIE.RDFa.getPredicate(element);
+            if (!propertyName) {
+                return true;
+            }
             if (this.options.model.get(propertyName) instanceof Array) {
                 // For now we don't deal with multivalued properties in Aloha
                 return true;
             }
-
+            
             var editable = new GENTICS.Aloha.Editable(element);
             editable.vieEntity = this.options.model;
 
@@ -82,7 +121,8 @@ midgardCreate.require([
                     editable: editable,
                     property: propertyName,
                     instance: widget.options.model,
-                    element: element
+                    element: element,
+                    entityElement: this.element
                 });
             });
             GENTICS.Aloha.EventRegistry.subscribe(editable, 'editableDeactivated', function() {
@@ -90,10 +130,11 @@ midgardCreate.require([
                     editable: editable,
                     property: propertyName,
                     instance: widget.options.model,
-                    element: element
+                    element: element,
+                    entityElement: this.element
                 });
             });
-            
+
             // Register a timer to copy any modified contents
             editable.changeTimer = window.setInterval(function() {
                 widget._checkModified(propertyName, editable);
@@ -103,7 +144,8 @@ midgardCreate.require([
                 editable: editable,
                 property: propertyName,
                 instance: this.options.model,
-                element: element
+                element: element,
+                entityElement: this.element
             });
             
             this.options.editables.push(editable);
@@ -118,13 +160,14 @@ midgardCreate.require([
             editable.setUnmodified();
             this.options.model.set(changedProperties, {silent: true});
             this.options.model.trigger('edit:edited', this.options.model);
-
+            
             this._trigger('changed', null, {
                 editable: editable,
                 property: propertyName,
                 instance: this.options.model,
-                element: editable.obj
+                element: editable.obj,
+                entityElement: this.element
             });
         }
-    })
+    });
 })(jQuery);

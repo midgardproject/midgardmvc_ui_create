@@ -85,17 +85,20 @@
         _enableEdit: function() {
             var widget = this;
             jQuery('[about]').each(function() {
-                var subject = VIE.RDFa.getSubject(this);
-                var loadedLocal = false;
-                                
-                jQuery(this).bind('editableenable', function(event, options) {
-                    if (VIE.RDFa.getSubject(options.element) !== subject) {
+                var element = this;
+                var highlightEditable = function(event, options) {
+                    if (options.entityElement.get(0) !== element) {
                         // Propagated event from another entity, ignore
                         return;
                     }
-                    
+
                     // Highlight the editable
                     options.element.effect('highlight', {color: widget.options.highlightColor}, 3000);
+                };
+                
+                jQuery(this).bind('editableenable', highlightEditable);
+                jQuery(this).bind('editabledisable', function() {
+                    jQuery(this).unbind('editableenable', highlightEditable);
                 });
 
                 jQuery(this).editable({disabled: false});

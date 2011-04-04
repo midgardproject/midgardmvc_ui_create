@@ -37,7 +37,7 @@
             model.toJSON = model.toJSONLD;
             
             // Regular change event from VIE
-            model.bind('change', function(model) {
+            model.bind('storage:loaded', function(model) {
                 if (_.indexOf(widget.options.changedModels, model) === -1) {
                     widget.options.changedModels.push(model);
                 }
@@ -56,6 +56,11 @@
             // When entering edit state with an entity
             model.bind('edit', function(model) {
                 widget._readLocal(model);
+                _.each(model.attributes, function(attributeValue, property) {
+                    if (attributeValue instanceof VIE.RDFEntityCollection) {
+                        //widget._readLocalReferences(model, property, attributeValue);
+                    }
+                });
             });
             
             // When leaving edit state with an entity
@@ -95,12 +100,46 @@
                 return;
             }
 
-            if (model.isNew()) {
-                // TODO: We need a list of these
-                return;
+            if (typeof model.id === 'object') {
+                // Anonymous object, save as refs instead
+                if (!model.primaryCollection) {
+                    return;
+                }
+                return this._saveLocalReferences(model.primaryCollection.subject, model.primaryCollection.predicate, model);
             }
             
             localStorage.setItem(model.getSubject(), JSON.stringify(model.toJSONLD()));
+        },
+        
+        _getReferenceId: function(model, property) {
+            return model.id + ':' + property;
+        },
+        
+        _saveLocalReferences: function(subject, predicate, model) {
+            if (!this.options.localStorage) {
+                return;
+            }
+            
+            if (!subject ||
+                !predicate) {
+                return;
+            }
+            
+            var widget = this;
+            var identifier = subject + ':' + predicate;
+            var json = model.toJSONLD();
+            if (localStorage.getItem(identifier)) {
+                var referenceList = JSON.parse(localStorage.getItem(identifier));
+                var index = _.pluck(referenceList, '@').indexOf(json['@']);
+                if (index !== -1) {
+                    referenceList[index] = json;
+                } else {
+                    referenceList.push(json);
+                }
+                localStorage.setItem(identifier, JSON.stringify(referenceList));
+                return;
+            }
+            localStorage.setItem(identifier, JSON.stringify([json]));
         },
 
         _readLocal: function(model) {
@@ -114,9 +153,35 @@
             }
             model.originalAttributes = _.clone(model.attributes);
             var entity = VIE.EntityManager.getByJSONLD(JSON.parse(local));
+            model.trigger('storage:loaded', model);
+        },
+        
+        _readLocalReferences: function(model, property, collection) {
+            if (!this.options.localStorage) {
+                return;
+            }
+            
+            var identifier = this._getReferenceId(model, property);
+            var local = localStorage.getItem(identifier);
+            if (!local) {
+                return;
+            }
+            collection.add(JSON.parse(local));
         },
         
         _restoreLocal: function(model) {
+            // Remove unsaved collection members
+            _.each(model.attributes, function(attributeValue, property) {
+                if (attributeValue instanceof VIE.RDFEntityCollection) {
+                    attributeValue.forEach(function(model) {
+                        if (typeof model.id === 'object') {
+                            attributeValue.remove(model);
+                        }
+                    });
+                }
+            });
+            
+            // Restore original object properties
             if (jQuery.isEmptyObject(model.changedAttributes())) {
                 if (model.originalAttributes) {
                     model.set(model.originalAttributes);
