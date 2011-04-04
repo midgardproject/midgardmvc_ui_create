@@ -47,7 +47,7 @@
                 jQuery('#midgardcreate-save').button({disabled: true});
             });
             
-            widget.element.bind('editabledisable', function(event, options) {
+            widget.element.bind('editableenable', function(event, options) {
                 widget._readLocal(options.instance);
                 _.each(options.instance.attributes, function(attributeValue, property) {
                     if (attributeValue instanceof VIE.RDFEntityCollection) {
