@@ -159,6 +159,19 @@
                 return false;
             });
         },
+        
+        // ### VIE.EntityManager.getPredicate
+        //
+        // Get requested predicate from all loaded entities.
+        getPredicate: function(predicate) {
+            var predicates = [];
+            _.forEach(VIE.EntityManager.entities.pluck('dcterms:hasPart'), function(property) {
+                if (property) {
+                    predicates.push(property);
+                }
+            });
+            return predicates;
+        },
 
         // ### VIE.EntityManager.getByJSONLD
         //
@@ -193,7 +206,7 @@
             }
             
             if (entityInstance) {
-                properties = VIE.EntityManager._JSONtoProperties(jsonld, entityInstance.attributes);
+                properties = VIE.EntityManager._JSONtoProperties(jsonld, entityInstance.attributes, entityInstance.id);
                 entityInstance.set(properties, options);
                 
                 if (!entityInstance.type &&
@@ -204,7 +217,7 @@
                 return entityInstance;
             }
 
-            properties = VIE.EntityManager._JSONtoProperties(jsonld, {});
+            properties = VIE.EntityManager._JSONtoProperties(jsonld, {}, VIE.EntityManager._normalizeSubject(jsonld['@']));
             entityInstance = new VIE.RDFEntity(properties);
 
             // Namespace prefixes are handled by the `#` property of JSON-LD.
@@ -219,29 +232,35 @@
             if (typeof jsonld.a !== 'undefined') {
                 entityInstance.type = VIE.RDFa._fromReference(jsonld.a);
             }
-
-            // Subjects are handled by the `@` property of JSON-LD. We map this
-            // to the `id` property of our `VIE.RDFEntity` instance.
-            if (typeof jsonld['@'] === 'string') {
-                if (!VIE.RDFa._isReference(jsonld['@'])) {
-                    jsonld['@'] = VIE.RDFa._toReference(jsonld['@']);
-                }
-                entityInstance.id = VIE.RDFa._fromReference(jsonld['@']);
-                VIE.EntityManager.entities.add(entityInstance);
-            }
             
-            // When handling anonymous entities coming from RDFa, we keep their
-            // containing element as the ID so they can be matched
-            if (typeof jsonld['@'] === 'object') {
-                entityInstance.id = jsonld['@'];
-                VIE.EntityManager.entities.add(entityInstance);
-            }
-
+            // Normalize the subject, handling both proper JSON-LD and JSON-LD
+            // anonymous entities extracted from RDFa
+            entityInstance.id = VIE.EntityManager._normalizeSubject(jsonld['@']);
+            
             // All new entities must be added to the `entities` collection.
             if (VIE.EntityManager.entities.indexOf(entityInstance) === -1) {
                 VIE.EntityManager.entities.add(entityInstance);
             }
             return entityInstance;
+        },
+        
+        _normalizeSubject: function(subject) {
+            // Subjects are handled by the `@` property of JSON-LD. We map this
+            // to the `id` property of our `VIE.RDFEntity` instance.
+            if (typeof subject === 'string') {
+                if (VIE.RDFa._isReference(subject)) {
+                    subject = VIE.RDFa._fromReference(subject);
+                }
+                return subject;
+            }
+            
+            // When handling anonymous entities coming from RDFa, we keep their
+            // containing element as the ID so they can be matched
+            if (typeof subject === 'object') {
+                return subject;
+            }
+            
+            return undefined;
         },
         
         // Create a list of Models for referenced properties
@@ -261,7 +280,7 @@
 
         // Helper for cleaning up JSON-LD so that it can be used as properties
         // of a Backbone Model.
-        _JSONtoProperties: function(jsonld, instanceProperties) {
+        _JSONtoProperties: function(jsonld, instanceProperties, instanceId) {
             var properties;
             var references;
             var property;
@@ -289,6 +308,10 @@
                     }
                     else {
                         properties[property] = new VIE.RDFEntityCollection(references);
+                        if (instanceId) {
+                            properties[property].subject = VIE.EntityManager._normalizeSubject(instanceId);
+                            properties[property].predicate = property;
+                        }
                     }
                 }
             });
@@ -355,16 +378,6 @@
             var instance = this;
             var instanceLD = {};
             var property;
-            
-            instanceLD['@'] = instance.getSubject();
-
-            if (instance.namespaces.length > 0) {
-                instanceLD['#'] = instance.namespaces;
-            }
-
-            if (instance.type) {
-                instanceLD.a = VIE.RDFa._toReference(instance.type);
-            }
 
             _.each(instance.attributes, function(attributeValue, property) {
                 if (attributeValue instanceof VIE.RDFEntityCollection) {
@@ -379,6 +392,17 @@
                     instanceLD[property] = attributeValue;
                 }
             });
+            
+            instanceLD['@'] = instance.getSubject();
+
+            if (instance.namespaces.length > 0) {
+                instanceLD['#'] = instance.namespaces;
+            }
+
+            if (instance.type) {
+                instanceLD.a = VIE.RDFa._toReference(instance.type);
+            }
+            
             return instanceLD;
         }
     });
@@ -398,7 +422,7 @@
                 return;
             }
             if (VIE.EntityManager.entities.indexOf(entityInstance) === -1) {
-                VIE.EntityManager.entities.add(entityInstance, {silent: true});
+                VIE.EntityManager.entities.add(entityInstance);
             }
         }
     });
@@ -590,12 +614,14 @@
     VIE.RDFaCollectionView = Backbone.View.extend({
     
         elementTemplate: null,
+        itemViews: {},
 
         // Ensure the collection view gets updated when items get added or removed
         initialize: function() {
             this.elementTemplate = this.options.elementTemplate;
             _.bindAll(this, 'addItem', 'removeItem', 'refreshItems');
             this.collection.bind('add', this.addItem);
+            this.collection.bind('remove', this.removeItem);
             this.collection.bind('refresh', this.refreshItems);
         },
         
@@ -611,15 +637,21 @@
 
         // When adding new items we create a new element of the child type
         // and append it to the list.
-        addItem: function(itemInstance) {
+        addItem: function(itemInstance, collection) {
+            if (collection !== this.collection) {
+                return;
+            }
             if (!this.elementTemplate ||
                 this.elementTemplate.length === 0) {
                 return;
             }
             var itemView = VIE.RDFaEntities._registerView(itemInstance, VIE.RDFa._cloneElement(this.elementTemplate));
             var itemViewElement = itemView.render().el;
-            if (itemInstance.id) {
+            if (itemInstance.id &&
+                typeof itemInstance.id === 'string') {
                 VIE.RDFa.setSubject(itemViewElement, itemInstance.id);
+            } else {
+                itemInstance.id = itemViewElement.get(0);
             }
                     
             // Figure out where to place the element based on its order
@@ -636,6 +668,8 @@
                     }
                 });
             }
+
+            this.trigger('add', itemView);
             itemViewElement.show();
             
             // If the new instance doesn't yet have an identifier, bind it to
@@ -654,14 +688,17 @@
                 properties[predicate] = VIE.RDFa.getSubject(this);
                 VIE.EntityManager.getByJSONLD(properties);
             });
+            
+            this.itemViews[itemInstance] = itemView;
         },
 
         // When removing items from Collection we remove their views from the DOM.
         removeItem: function(itemInstance) {
-            if (typeof itemInstance.view === 'undefined') {
+            if (typeof this.itemViews[itemInstance] === 'undefined') {
                 return;
             }
-            itemInstance.view.el.remove();
+            this.trigger('remove', this.itemViews[itemInstance]);
+            this.itemViews[itemInstance].remove();
         }
     });
 
@@ -689,7 +726,7 @@
         // For more specialized scenarios this can be overridden:
         //
         //     VIE.RDFa.predicateSelector = '[property]';
-        predicateSelector: '[property],[rel],[rev]',
+        predicateSelector: '[property],[rel]',
 
         // ### VIE.RDFa.getSubject
         //
@@ -879,11 +916,11 @@
                 var propertyName = propertyElement.attr('property');
 
                 if (typeof jsonld[propertyName] === 'undefined') {
-                    return true;
+                    jsonld[propertyName] = propertyName;
                 }
 
                 // Before writing to DOM we check that the value has actually changed.
-                if (VIE.RDFa._readPropertyValue(propertyElement) !== jsonld[propertyName]) {
+                if (VIE.RDFa._readPropertyValue(propertyName, propertyElement) !== jsonld[propertyName]) {
                     VIE.RDFa._writePropertyValue(propertyElement, jsonld[propertyName]);
                 }
             });
@@ -949,7 +986,7 @@
         },
 
         // Get value of a DOM element defining a RDFa predicate.
-        _readPropertyValue: function(element) {
+        _readPropertyValue: function(propertyName, element) {
 
             // The `content` attribute can be used for providing machine-readable
             // values for elements where the HTML presentation differs from the
@@ -968,7 +1005,8 @@
             
             // `href` attribute also links to another RDF resource.
             var href = element.attr('href');
-            if (href) {
+            if (href &&
+                element.attr('rel') === propertyName) {
                 return VIE.RDFa._toReference(href);
             }
 
@@ -1069,7 +1107,7 @@
                 var objectProperty = jQuery(this);
                 propertyName = VIE.RDFa.getPredicate(this); 
                 
-                propertyValue = VIE.RDFa._readPropertyValue(objectProperty);
+                propertyValue = VIE.RDFa._readPropertyValue(propertyName, objectProperty);
                 if (propertyValue === null &&
                     !emptyValues) {
                     return;
@@ -1116,8 +1154,6 @@
         // Create an anonymized clone of an element
         _cloneElement: function(element) {
             element = jQuery(element).clone(false);
-            
-            var subject = VIE.RDFa.getSubject(element);
 
             if (typeof element.attr('about') !== 'undefined')
             {
@@ -1125,8 +1161,10 @@
                 element.attr('about', '');
             }
             element.find('[about]').attr('about', '');
-            
-            VIE.RDFa.findPredicateElements(subject, element, false).html('');
+            var subject = VIE.RDFa.getSubject(element);
+            VIE.RDFa.findPredicateElements(subject, element, false).each(function() {
+                jQuery(this).html('');
+            });
 
             return element;
         },
