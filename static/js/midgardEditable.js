@@ -20,6 +20,7 @@ midgardCreate.require([
             editor: 'aloha',
             addButton: null,
             enable: function() {},
+            enableproperty: function() {},
             disable: function() {},
             activated: function() {},
             deactivated: function() {},
@@ -47,33 +48,13 @@ midgardCreate.require([
             });
             
             _.forEach(VIE.RDFaEntities.CollectionViews, function(view) {
-                if (VIE.RDFa.getSubject(view.el) !== VIE.RDFa._toReference(widget.options.model.id)) {
-                    return;
-                }
-
-                if (widget.options.addButton) {
-                    return;
-                }
-                
-                view.bind('add', function(itemView) {
-                    //itemView.el.effect('slide');
-                    itemView.model.primaryCollection = view.collection;
-                    itemView.el.editable({disabled: widget.options.disabled, model: itemView.model});
-                });
-                
-                view.bind('remove', function(itemView) {
-                    itemView.el.hide('drop');
-                });
-                
-                widget.options.addButton = jQuery('<button>Add</button>').button();
-                widget.options.addButton.click(function() {
-                    view.collection.add({});
-                });
-                
-                view.el.after(widget.options.addButton); 
+                widget._enableCollection(view.collection, view.element);
             });
             
-            this.options.model.trigger('edit', this.options.model);
+            this._trigger('enable', null, {
+                instance: this.options.model,
+                entityElement: this.element
+            });
         },
         
         disable: function() {
@@ -98,7 +79,6 @@ midgardCreate.require([
                 instance: this.options.model,
                 entityElement: this.element
             });
-            this.options.model.trigger('browse', this.options.model);
         },
         
         _enableProperty: function(element) {
@@ -140,7 +120,7 @@ midgardCreate.require([
                 widget._checkModified(propertyName, editable);
             }, 2000);
 
-            this._trigger('enable', null, {
+            this._trigger('enableproperty', null, {
                 editable: editable,
                 property: propertyName,
                 instance: this.options.model,
@@ -151,6 +131,35 @@ midgardCreate.require([
             this.options.editables.push(editable);
         },
         
+        _enableCollection: function(collection, element) {
+            var widget = this;
+
+            if (VIE.RDFa.getSubject(element) !== VIE.RDFa._toReference(widget.options.model.id)) {
+                return;
+            }
+
+            if (widget.options.addButton) {
+                return;
+            }
+            
+            view.bind('add', function(itemView) {
+                //itemView.el.effect('slide');
+                itemView.model.primaryCollection = collection;
+                itemView.el.editable({disabled: widget.options.disabled, model: itemView.model});
+            });
+            
+            view.bind('remove', function(itemView) {
+                itemView.el.hide('drop');
+            });
+            
+            widget.options.addButton = jQuery('<button>Add</button>').button();
+            widget.options.addButton.click(function() {
+                collection.add({});
+            });
+            
+            element.after(widget.options.addButton);
+        },
+        
         _checkModified: function(propertyName, editable) {
             if (!editable.isModified()) {
                 return true;
@@ -159,7 +168,6 @@ midgardCreate.require([
             changedProperties[propertyName] = editable.getContents();
             editable.setUnmodified();
             this.options.model.set(changedProperties, {silent: true});
-            this.options.model.trigger('edit:edited', this.options.model);
             
             this._trigger('changed', null, {
                 editable: editable,

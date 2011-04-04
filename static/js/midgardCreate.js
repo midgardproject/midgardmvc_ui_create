@@ -96,9 +96,9 @@
                     options.element.effect('highlight', {color: widget.options.highlightColor}, 3000);
                 };
                 
-                jQuery(this).bind('editableenable', highlightEditable);
+                jQuery(this).bind('editableenableproperty', highlightEditable);
                 jQuery(this).bind('editabledisable', function() {
-                    jQuery(this).unbind('editableenable', highlightEditable);
+                    jQuery(this).unbind('editableenableproperty', highlightEditable);
                 });
 
                 jQuery(this).editable({disabled: false});

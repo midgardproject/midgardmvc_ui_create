@@ -27,6 +27,34 @@
                     }
                 });
             });
+            
+            widget._bindEditables();
+        },
+        
+        _bindEditables: function() {
+            var widget = this;
+
+            widget.element.bind('editablechanged', function(event, options) {
+                if (_.indexOf(widget.options.changedModels, options.instance) === -1) {
+                    widget.options.changedModels.push(options.instance);
+                }
+                widget._saveLocal(options.instance);
+                jQuery('#midgardcreate-save').button({disabled: false});
+            });
+            
+            widget.element.bind('editabledisable', function(event, options) {
+                widget._restoreLocal(options.instance);
+                jQuery('#midgardcreate-save').button({disabled: true});
+            });
+            
+            widget.element.bind('editabledisable', function(event, options) {
+                widget._readLocal(options.instance);
+                _.each(options.instance.attributes, function(attributeValue, property) {
+                    if (attributeValue instanceof VIE.RDFEntityCollection) {
+                        //widget._readLocalReferences(options.instance, property, attributeValue);
+                    }
+                });
+            });
         },
         
         _prepareEntity: function(model) {
@@ -42,31 +70,6 @@
                     widget.options.changedModels.push(model);
                 }
                 jQuery('#midgardcreate-save').button({disabled: false});
-            });
-            
-            // Special edited event coming from midgardEditable
-            model.bind('edit:edited', function(model) {
-                if (_.indexOf(widget.options.changedModels, model) === -1) {
-                    widget.options.changedModels.push(model);
-                }
-                widget._saveLocal(model);
-                jQuery('#midgardcreate-save').button({disabled: false});
-            });
-            
-            // When entering edit state with an entity
-            model.bind('edit', function(model) {
-                widget._readLocal(model);
-                _.each(model.attributes, function(attributeValue, property) {
-                    if (attributeValue instanceof VIE.RDFEntityCollection) {
-                        //widget._readLocalReferences(model, property, attributeValue);
-                    }
-                });
-            });
-            
-            // When leaving edit state with an entity
-            model.bind('browse', function(model) {
-                widget._restoreLocal(model);
-                jQuery('#midgardcreate-save').button({disabled: true});
             });
         },
         
