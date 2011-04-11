@@ -15,6 +15,9 @@ class midgardmvc_ui_create_injector
 {
     public function inject_process(midgardmvc_core_request $request)
     {
+        // Ensure authorization service is loaded
+        midgardmvc_core::get_instance()->authorization;
+
         // Register URL handlers
         $request->add_component_to_chain(midgardmvc_core::get_instance()->component->get('midgardmvc_ui_create'));
         if (midgardmvc_core::get_instance()->context->get_current_context() != 0)
