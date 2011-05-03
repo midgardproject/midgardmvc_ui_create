@@ -116,6 +116,7 @@ midgardCreate.require([
             });
 
             // Register a timer to copy any modified contents
+            // TODO: Replace with smartContentChange when Aloha .10 is out
             editable.changeTimer = window.setInterval(function() {
                 widget._checkModified(propertyName, editable);
             }, 2000);
