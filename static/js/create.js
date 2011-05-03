@@ -43,45 +43,4 @@ document.write('<link rel="stylesheet" href="/midgardmvc-static/midgardmvc_ui_cr
 // Initialize Midgard Create
 jQuery(document).ready(function() {
     jQuery('body').midgardCreate();
-
-    /*
-    midgardCreate.objectManager.init();
-    midgardCreate.Collections.init();
-    midgardCreate.Image.init();
-    midgardCreate.ImagePlaceholders.init();
-    midgardCreate.Editable.init();
-        midgardCreate.checkCapability = function(capability) {
-        if (capability === 'contentEditable') {
-            if (navigator.userAgent.match(/iPhone/i)) {
-                return false;
-            }
-            if (navigator.userAgent.match(/iPod/i)) {
-                return false;
-            }
-            if (navigator.userAgent.match(/iPad/i)) {
-                return false;
-            }
-            return true;
-        }
-        if (capability === 'fileUploads') {
-            if (navigator.userAgent.match(/iPhone/i)) {
-                return false;
-            }
-            if (navigator.userAgent.match(/iPod/i)) {
-                return false;
-            }
-            if (navigator.userAgent.match(/iPad/i)) {
-                return false;
-            }
-            if (typeof FileReader === 'undefined') {
-                return false;
-            }
-            if (typeof FormData === 'undefined') {
-                return false;
-            }
-            return Modernizr.draganddrop;
-        }
-        return Modernizr[capability];
-    };
-    */
 });
