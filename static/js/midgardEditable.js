@@ -48,7 +48,7 @@ midgardCreate.require([
             });
             
             _.forEach(VIE.RDFaEntities.CollectionViews, function(view) {
-                widget._enableCollection(view.collection, view.element);
+                widget._enableCollection(view);
             });
             
             this._trigger('enable', null, {
@@ -132,33 +132,33 @@ midgardCreate.require([
             this.options.editables.push(editable);
         },
         
-        _enableCollection: function(collection, element) {
+        _enableCollection: function(collectionView) {
             var widget = this;
 
-            if (VIE.RDFa.getSubject(element) !== VIE.RDFa._toReference(widget.options.model.id)) {
+            if (VIE.RDFa.getSubject(collectionView.el) !== VIE.RDFa._toReference(widget.options.model.id)) {
                 return;
             }
 
             if (widget.options.addButton) {
                 return;
             }
-            
-            view.bind('add', function(itemView) {
+
+            collectionView.bind('add', function(itemView) {
                 //itemView.el.effect('slide');
-                itemView.model.primaryCollection = collection;
+                itemView.model.primaryCollection = collectionView.collection;
                 itemView.el.editable({disabled: widget.options.disabled, model: itemView.model});
             });
             
-            view.bind('remove', function(itemView) {
+            collectionView.bind('remove', function(itemView) {
                 itemView.el.hide('drop');
             });
             
             widget.options.addButton = jQuery('<button>Add</button>').button();
             widget.options.addButton.click(function() {
-                collection.add({});
+                collectionView.collection.add({});
             });
             
-            element.after(widget.options.addButton);
+            collectionView.el.after(widget.options.addButton);
         },
         
         _checkModified: function(propertyName, editable) {
