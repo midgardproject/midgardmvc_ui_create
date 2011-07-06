@@ -17,7 +17,9 @@
             
             // TODO: This won't be necessary when we have our own Backbone.sync
             VIE.EntityManager.entities.bind('add', function(model) {
-                widget._prepareEntity(model);
+                // Add the Midgard-specific save URL used by Backbone.sync
+                model.url = '/mgd:create/object/';
+                model.toJSON = model.toJSONLD;
             });
             
             jQuery('#midgardcreate-save').click(function() {
@@ -65,14 +67,6 @@
                 }
                 jQuery('#midgardcreate-save').button({disabled: false});
             });
-        },
-        
-        _prepareEntity: function(model) {
-            var widget = this;
-            
-            // Add the Midgard-specific save URL used by Backbone.sync
-            model.url = '/mgd:create/object/';
-            model.toJSON = model.toJSONLD;
         },
         
         _saveRemote: function(options) {
