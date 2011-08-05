@@ -688,17 +688,17 @@
                 properties[predicate] = VIE.RDFa.getSubject(this);
                 VIE.EntityManager.getByJSONLD(properties);
             });
-            
-            this.itemViews[itemInstance] = itemView;
+
+            this.itemViews[itemInstance.cid] = itemView;
         },
 
         // When removing items from Collection we remove their views from the DOM.
         removeItem: function(itemInstance) {
-            if (typeof this.itemViews[itemInstance] === 'undefined') {
+            if (typeof this.itemViews[itemInstance.cid] === 'undefined') {
                 return;
             }
-            this.trigger('remove', this.itemViews[itemInstance]);
-            this.itemViews[itemInstance].remove();
+            this.trigger('remove', this.itemViews[itemInstance.cid]);
+            this.itemViews[itemInstance.cid].remove();
         }
     });
 
