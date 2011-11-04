@@ -10,6 +10,9 @@ requires:
         - {type: github, user: bergie, repository: midgardmvc_helper_workflow, branch: master}
     midgardmvc_helper_attachmentserver:
         - {type: github, user: bergie, repository: midgardmvc_helper_attachmentserver, branch: master}
+    create:
+        - {type: github, user: bergie, repository: create, branch: master}
+
 routes:
     midgardmvc_create_object:
         controller: midgardmvc_ui_create_controllers_backbone
@@ -17,7 +20,7 @@ routes:
         path: '/mgd:create/object'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
     midgardmvc_create_state_new:
         controller: midgardmvc_ui_create_controllers_aloha
@@ -25,7 +28,7 @@ routes:
         path: '/mgd:create/state/{$type}'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
     midgardmvc_create_state:
         controller: midgardmvc_ui_create_controllers_aloha
@@ -33,7 +36,7 @@ routes:
         path: '/mgd:create/state/{$type}/{$identifier}'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
     midgardmvc_create_run:
         controller: midgardmvc_ui_create_controllers_aloha
@@ -41,7 +44,7 @@ routes:
         path: '/mgd:create/run/{$type}/{$identifier}/{$workflow}'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
     midgardmvc_create_image_latest:
         controller: midgardmvc_ui_create_controllers_image
@@ -49,7 +52,7 @@ routes:
         path: '/mgd:create/image/search'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
     midgardmvc_create_image_search:
         controller: midgardmvc_ui_create_controllers_image
@@ -57,7 +60,7 @@ routes:
         path: '/mgd:create/image/search/{$searchterm}'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
     midgardmvc_create_image_upload:
         controller: midgardmvc_ui_create_controllers_image
@@ -65,7 +68,7 @@ routes:
         path: '/mgd:create/image/upload'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
     midgardmvc_create_image_associatelocation:
         controller: midgardmvc_ui_create_controllers_image
@@ -73,5 +76,5 @@ routes:
         path: '/mgd:create/image/associatelocation/{$identifier}'
         root_only: true
         mimetype: application/json
-        template_aliases: 
+        template_aliases:
             root: midgardmvc-show-json
