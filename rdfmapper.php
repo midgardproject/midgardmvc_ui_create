@@ -32,6 +32,9 @@ class midgardmvc_ui_create_rdfmapper
 
     private function map_property($property)
     {
+        $property = trim($property, '<');
+        $property = trim($property, '>');
+
         static $property_map = array();
         if (!isset($property_map[$this->mgdschema]))
         {
@@ -45,7 +48,7 @@ class midgardmvc_ui_create_rdfmapper
 
         $namespaces = self::get_namespace_map($this->mgdschema);
         $namespaced_property = self::expand_prefix($property, $namespaces);
-        
+
         $dummy = new $this->mgdschema();
         $props = get_object_vars($dummy);
         $reflector = new midgard_reflection_property($this->mgdschema);
@@ -67,7 +70,6 @@ class midgardmvc_ui_create_rdfmapper
             $nsprop = self::expand_prefix($rdfprop, $namespaces);
             if ($namespaced_property == $nsprop)
             {
-                
                 $property_map[$this->mgdschema][$property] = $prop;
                 return $property_map[$this->mgdschema][$property];
             }
@@ -99,13 +101,18 @@ class midgardmvc_ui_create_rdfmapper
         }
         return $typeofs[$mgdschema];
     }
-    
+
     private static function from_reference($string)
     {
+/*
         if (   substr($string, 0, 1) == '<'
             && substr($string, -1, 1) == '>') {
             return substr($string, 1, strlen($string) - 2);
         }
+*/
+        $string = trim($string, '<');
+        $string = trim($string, '>');
+
         return $string;
     }
 

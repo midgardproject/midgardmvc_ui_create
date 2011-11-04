@@ -69,6 +69,7 @@ class midgardmvc_ui_create_controllers_backbone
     public function put_object(array $args)
     {
         $data = $this->read_input();
+
         $this->populate_object($data);
 
         $transaction = new midgard_transaction();
@@ -113,19 +114,20 @@ class midgardmvc_ui_create_controllers_backbone
         foreach ($data as $property => $value)
         {
             $mgd_property = $this->rdfmapper->__get($property);
+
             if (   !isset($form->$mgd_property)
                 || !$form->$mgd_property instanceof midgardmvc_helper_forms_field)
             {
                 continue;
             }
-            
-            if (is_array($value)) 
+
+            if (is_array($value))
             {
                 // Object reference
                 $reference = midgardmvc_ui_create_rdfmapper::load_object(null, $value[0]);
                 $value = $reference->id;
             }
-            
+
             $form->$mgd_property->set_value($value);
             $form->$mgd_property->validate();
             $form->$mgd_property->clean();
@@ -171,26 +173,35 @@ class midgardmvc_ui_create_controllers_backbone
             $data = get_object_vars(json_decode($input));
         }
 
-        if (isset($data['a'])) 
+        if (isset($data['@type']))
         {
-            if (isset($data['@'])) 
+            $data['@type'] = trim($data['@type'], '<');
+            $data['@type'] = trim($data['@type'], '>');
+
+            if (isset($data['@subject']))
             {
-                // Type and identifier known
-                $this->object = midgardmvc_ui_create_rdfmapper::load_object($data['a'], $data['@']);
-                unset($data['@']);
+                $data['@subject'] = trim($data['@subject'], '<');
+                $data['@subject'] = trim($data['@subject'], '>');
+
+               // Type and identifier known
+                $this->object = midgardmvc_ui_create_rdfmapper::load_object($data['@type'], $data['@subject']);
+                unset($data['@subject']);
             }
             else
             {
                 // Only type known, create as new object
-                $this->object = midgardmvc_ui_create_rdfmapper::load_object($data['a'], null);
+                $this->object = midgardmvc_ui_create_rdfmapper::load_object($data['@type'], null);
             }
-            unset($data['a']);
+            unset($data['@type']);
         }
-        elseif (isset($data['@']))
+        elseif (isset($data['@subject']))
         {
             // Load object by identifier only
-            $this->object = midgardmvc_ui_create_rdfmapper::load_object(null, $data['@']);
-            unset($data['@']);
+            $data['@subject'] = trim($data['@subject'], '<');
+            $data['@subject'] = trim($data['@subject'], '>');
+
+            $this->object = midgardmvc_ui_create_rdfmapper::load_object(null, $data['@subject']);
+            unset($data['@subject']);
         }
 
         if (!$this->object) {
@@ -205,8 +216,8 @@ class midgardmvc_ui_create_controllers_backbone
     {
         $this->data = array
         (
-            '@' => $this->rdfmapper->about,
-            'a' => $this->rdfmapper->typeof
+            '@subject' => $this->rdfmapper->about,
+            '@type' => $this->rdfmapper->typeof
         );
         $skip = array
         (
