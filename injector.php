@@ -28,9 +28,40 @@ class midgardmvc_ui_create_injector
         {
             return;
         }
+
         midgardmvc_core::get_instance()->head->enable_jquery();
         midgardmvc_core::get_instance()->head->enable_jquery_ui();
-        midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
+        midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/init.js');
+
+        midgardmvc_core::get_instance()->head->add_link
+        (
+            array
+            (
+                'rel' => 'stylesheet',
+                'type' => 'text/css',
+                'href' => MIDGARDMVC_STATIC_URL . '/create/deps/hallo/vader/jquery-ui-1.8.16.custom.css'
+            )
+        );
+
+        midgardmvc_core::get_instance()->head->add_link
+        (
+            array
+            (
+                'rel' => 'stylesheet',
+                'type' => 'text/css',
+                'href' => MIDGARDMVC_STATIC_URL . '/create/themes/midgard-theme/jquery.ui.all.css'
+            )
+        );
+
+        midgardmvc_core::get_instance()->head->add_link
+        (
+            array
+            (
+                'rel' => 'stylesheet',
+                'type' => 'text/css',
+                'href' => MIDGARDMVC_STATIC_URL . '/create/themes/midgard-toolbar/midgardbar.css'
+            )
+        );
     }
 
     public function can_use()
