@@ -1,0 +1,44 @@
+{
+    "name": "midgard/midgardmvc-ui-create",
+    "type": "library",
+    "description": "Web content editing tool for Midgard MVC",
+    "keywords": ["cms", "midgard", "createjs"],
+    "homepage": "http://new.midgard-project.org/create/",
+    "version": "10.05.1beta1",
+    "license": "LGPL",
+    "authors": [
+        {
+            "name": "Henri Bergius",
+            "email": "henri.bergius@iki.fi",
+            "homepage": "http://bergie.iki.fi/"
+        }
+    ],
+    "repositories": {
+        "phptal": {
+            "package": {
+                "name": "phptal/phptal",
+                "version": "1.2.2",
+                "dist": {
+                    "url": "http://phptal.org/files/PHPTAL-1.2.2.zip",
+                    "type": "zip"
+                }
+            }
+        },
+        "createjs": {
+            "package": {
+                "name": "bergie/createjs",
+                "version": "1.0.0",
+                "dist": {
+                    "url": "https://github.com/bergie/create/zipball/master",
+                    "type": "zip"
+                }
+            }
+        }
+    },
+    "require": {
+        "php": ">=5.2.0",
+        "midgard/midgardmvc-core": ">=10.05.0",
+        "ext-midgard2": ">=10.05.5",
+        "bergie/createjs": "*"
+    }
+}
