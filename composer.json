@@ -3,7 +3,7 @@
     "type": "library",
     "description": "Web content editing tool for Midgard MVC",
     "keywords": ["cms", "midgard", "createjs"],
-    "homepage": "http://new.midgard-project.org/create/",
+    "homepage": "http://createjs.org/",
     "license": "LGPL",
     "minimum-stability": "dev",
     "authors": [
