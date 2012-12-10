@@ -47,8 +47,11 @@ class midgardmvc_ui_create_container extends SplObjectStorage
             }
         }
 
-        // Add RDFmapper to the object
-        $object->rdfmapper = new midgardmvc_ui_create_rdfmapper($object, $identifier);
+        if (!$object instanceof midgardmvc_ui_create_decorator)
+        {
+            // Add RDFmapper to the object
+            $object = new midgardmvc_ui_create_decorator($object, $identifier);
+        }
 
         parent::attach($object, $data);
     }
@@ -69,6 +72,8 @@ class midgardmvc_ui_create_container extends SplObjectStorage
             // Placeholders only matter to Create users
             return;
         }
+
+        $object = new midgardmvc_ui_create_decorator($object);
 
         $object->guid = 'placeholder';
 
