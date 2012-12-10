@@ -1,0 +1,24 @@
+{
+    "name": "midgard/midgardmvc-ui-create",
+    "type": "library",
+    "description": "Web content editing tool for Midgard MVC",
+    "keywords": ["cms", "midgard", "createjs"],
+    "homepage": "http://new.midgard-project.org/create/",
+    "license": "LGPL",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Henri Bergius",
+            "email": "henri.bergius@iki.fi",
+            "homepage": "http://bergie.iki.fi/"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.0",
+        "midgard/midgardmvc-core": ">=10.05.0",
+        "ext-midgard2": ">=10.05.5"
+    },
+    "autoload": {
+      "classmap": ["."]
+    }
+}
