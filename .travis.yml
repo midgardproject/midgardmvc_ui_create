@@ -15,6 +15,3 @@ before_script:
   - php composer.phar install --dev
 
 script: phpunit --coverage-text
-
-notifications:
-    irc: "irc.freenode.org#midgard"
