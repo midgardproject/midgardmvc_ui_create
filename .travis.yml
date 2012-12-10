@@ -9,6 +9,7 @@ env:
 
 before_script:
   - wget https://raw.github.com/midgardproject/midgardmvc_core/master/tests/travis_midgard2.sh
+  - chmod +x travis_midgard2.sh
   - ./travis_midgard2.sh
   - wget http://getcomposer.org/composer.phar
   - php composer.phar install --dev
