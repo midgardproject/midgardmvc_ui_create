@@ -30,7 +30,7 @@ class midgardmvc_ui_create_injector
         midgardmvc_core::get_instance()->head->add_jsfile(MIDGARDMVC_STATIC_URL . '/midgardmvc_ui_create/js/create.js');
     }
 
-    public function can_use()
+    public static function can_use()
     {
         if (!midgardmvc_core::get_instance()->authentication->is_user())
         {

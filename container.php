@@ -30,7 +30,7 @@ class midgardmvc_ui_create_container extends SplObjectStorage
         }
     }
 
-    public function attach(midgard_object $object, $data = null)
+    public function attach($object, $data = null)
     {
         // We're attaching real objects to container, forget about placeholder
         if ($object == $this->placeholder)
