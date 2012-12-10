@@ -2,11 +2,19 @@ language: php
 
 php:
   - 5.3
+  - 5.4
+
+env:
+  - MIDGARD_EXT_VERSION=ratatoskr
 
 before_script:
-  - ./tests/travis.sh
+  - wget https://raw.github.com/midgardproject/midgardmvc_core/master/tests/travis_midgard2.sh
+  - chmod +x travis_midgard2.sh
+  - ./travis_midgard2.sh
+  - wget http://getcomposer.org/composer.phar
+  - php composer.phar install --dev
 
-script: phpunit --bootstrap vendor/midgard/midgardmvc-core/framework.php tests/ 
+script: phpunit --coverage-text
 
 notifications:
-    irc: "irc.freenode.org#midgard"
+  irc: "irc.freenode.org#midgard"
