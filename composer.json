@@ -16,6 +16,9 @@
     "require": {
         "php": ">=5.2.0",
         "midgard/midgardmvc-core": ">=10.05.0",
+        "midgard/midgardmvc-helper-forms": "dev-master",
+        "midgard/midgardmvc-helper-attachmentserver": "dev-master",
+        "midgard/midgardmvc-helper-workflow": "dev-master",
         "ext-midgard2": ">=10.05.5"
     },
     "autoload": {
